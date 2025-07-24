@@ -141,160 +141,249 @@ export const GameBoard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-orange-200 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* 游戏标题和状态 */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">💩 找屎大作战 💩</h1>
-          <div className="bg-white rounded-lg p-4 inline-block shadow-md">
-            <div className="flex items-center gap-4 text-lg">
-              <span>第 {gameState.currentRound} 轮</span>
-              <span className={`px-3 py-1 rounded-full text-white ${
-                gameState.phase === 'day' ? 'bg-yellow-500' : 'bg-blue-500'
+      {/* 游戏标题 */}
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">💩 找屎大作战 💩</h1>
+      </div>
+      
+      <div className="max-w-7xl mx-auto">
+        {/* 游戏状态栏 */}
+        <div className="bg-white/90 backdrop-blur rounded-2xl p-4 mb-4 shadow-lg">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-6">
+              <div className="text-lg font-semibold">
+                第 <span className="text-2xl text-orange-600">{gameState.currentRound}</span> 轮
+              </div>
+              <div className={`px-4 py-2 rounded-full text-white font-bold ${
+                gameState.phase === 'day' ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 'bg-gradient-to-r from-blue-600 to-purple-600'
               }`}>
-                {gameState.phase === 'day' ? '🌅 白天' : '🌙 夜晚'}
-              </span>
+                {gameState.phase === 'day' ? '🌅 白天阶段' : '🌙 夜晚阶段'}
+              </div>
+            </div>
+            {userPlayer && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">你的角色：</span>
+                <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-white ${ROLE_CONFIGS[userPlayer.role].color}`}>
+                  <span className="text-xl">{ROLE_CONFIGS[userPlayer.role].emoji}</span>
+                  <span className="font-bold">{ROLE_CONFIGS[userPlayer.role].name}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左侧 - 游戏主区域 */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* 玩家网格 */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800">游戏参与者</h3>
+                <div className="text-sm text-gray-500">
+                  剩余 {alivePlayers.length} / {gameState.players.length} 人
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {gameState.players.map((player) => (
+                  <PlayerCard 
+                    key={player.id}
+                    player={player}
+                    isSelectable={!!selectedAction && player.isAlive && player.id !== gameState.currentPlayerId}
+                    onSelect={handlePlayerSelect}
+                    showRole={gameState.gameResult !== null || player.id === gameState.currentPlayerId}
+                    isCurrentPlayer={player.id === gameState.currentPlayerId}
+                  />
+                ))}
+              </div>
+              
+              {/* 尿瓶子的人特殊信息 */}
+              {userPlayer?.role === 'peebottler' && pooperPlayer && (
+                <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">🤫</span>
+                    <h4 className="font-bold text-yellow-800">隐藏信息</h4>
+                  </div>
+                  <p className="text-yellow-700">
+                    你知道 <span className="font-bold text-yellow-900">{pooperPlayer.name}</span> 是拉屎的人！
+                    你们是同伙，目标是让所有好人取消参赛资格。
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            {/* 行动区域 */}
+            {!gameState.gameResult && (
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">
+                  {gameState.phase === 'day' ? '🌞 白天行动' : '🌙 夜晚行动'}
+                </h3>
+                
+                {selectedAction && (
+                  <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                    <p className="text-blue-800 font-semibold">
+                      👆 请点击上方玩家头像来{
+                        selectedAction === 'vote' ? '投票' :
+                        selectedAction === 'dogCheck' ? '检查身份' :
+                        selectedAction === 'cleanerProtect' ? '保护' :
+                        '恶心'
+                      }
+                    </p>
+                  </div>
+                )}
+                
+                {gameState.phase === 'day' && (
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => setSelectedAction('vote')}
+                      className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
+                        selectedAction === 'vote' 
+                          ? 'bg-red-600 text-white scale-105 shadow-lg' 
+                          : 'bg-red-500 hover:bg-red-600 text-white hover:scale-105 hover:shadow-lg'
+                      }`}
+                    >
+                      🗳️ 投票取消参赛资格
+                    </button>
+                  </div>
+                )}
+                
+                {gameState.phase === 'night' && (
+                  <div className="space-y-3">
+                    {canUseAbility('dogCheck') && (
+                      <button 
+                        onClick={() => setSelectedAction('dogCheck')}
+                        className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
+                          selectedAction === 'dogCheck'
+                            ? 'bg-blue-600 text-white scale-105 shadow-lg'
+                            : 'bg-blue-500 hover:bg-blue-600 text-white hover:scale-105 hover:shadow-lg'
+                        }`}
+                      >
+                        🐕‍🦺 检查身份
+                      </button>
+                    )}
+                    
+                    {canUseAbility('cleanerProtect') && (
+                      <button 
+                        onClick={() => setSelectedAction('cleanerProtect')}
+                        className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
+                          selectedAction === 'cleanerProtect'
+                            ? 'bg-green-600 text-white scale-105 shadow-lg'
+                            : 'bg-green-500 hover:bg-green-600 text-white hover:scale-105 hover:shadow-lg'
+                        }`}
+                      >
+                        🧹 保护孕妇
+                      </button>
+                    )}
+                    
+                    {canUseAbility('pooperAction') && (
+                      <button 
+                        onClick={() => setSelectedAction('pooperAction')}
+                        className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
+                          selectedAction === 'pooperAction'
+                            ? 'bg-red-600 text-white scale-105 shadow-lg'
+                            : 'bg-red-500 hover:bg-red-600 text-white hover:scale-105 hover:shadow-lg'
+                        }`}
+                      >
+                        💩 恶心孕妇
+                      </button>
+                    )}
+                    
+                    {allNightActionsComplete() && (
+                      <button 
+                        onClick={nextPhase}
+                        className="w-full py-3 px-6 rounded-xl font-bold text-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white transition-all hover:scale-105 hover:shadow-lg"
+                      >
+                        ☀️ 进入白天
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* 右侧 - 信息区域 */}
+          <div className="space-y-6">
+            {/* 角色详情 */}
+            {userPlayer && (
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">角色信息</h3>
+                <div className="text-center">
+                  <div className="text-6xl mb-3">{ROLE_CONFIGS[userPlayer.role].emoji}</div>
+                  <h4 className="text-xl font-bold text-gray-800 mb-2">{ROLE_CONFIGS[userPlayer.role].name}</h4>
+                  <p className="text-sm text-gray-600">{ROLE_CONFIGS[userPlayer.role].description}</p>
+                </div>
+              </div>
+            )}
+
+            
+            {/* 游戏历史 */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">游戏记录</h3>
+              <div className="max-h-96 overflow-y-auto space-y-2 pr-2">
+                {gameState.actionHistory.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">暂无记录</p>
+                ) : (
+                  gameState.actionHistory.map((action, index) => (
+                    <div 
+                      key={index} 
+                      className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm transition-colors"
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-gray-400 text-xs mt-0.5">{index + 1}.</span>
+                        <span className="flex-1">{action}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
-
-        {/* 你的角色信息 */}
-        {userPlayer && (
-          <div className="bg-white rounded-xl p-4 mb-6 shadow-lg">
-            <h3 className="text-lg font-bold mb-2">你的角色</h3>
-            <PlayerCard player={userPlayer} showRole={true} isCurrentPlayer={true} />
-            
-            {/* 尿瓶子的人特殊信息 */}
-            {userPlayer.role === 'peebottler' && pooperPlayer && (
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="font-bold text-yellow-800 mb-2">🤫 隐藏信息</h4>
-                <p className="text-sm text-yellow-700">
-                  你知道 <span className="font-bold">{pooperPlayer.name}</span> 是拉屎的人！
-                                     你们是同伙，目标是让所有好人取消参赛资格。
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 游戏结束 */}
+        
+        {/* 游戏结束弹窗 */}
         {gameState.gameResult && (
-          <div className="bg-white rounded-xl p-6 mb-6 shadow-lg text-center">
-                         <h2 className="text-2xl font-bold mb-4">
-               {gameState.gameResult === 'goodWin' ? '🎉 好人获胜！' : '💩 邪恶阵营获胜！'}
-             </h2>
-                         <p className="text-lg mb-4">
-               {gameState.gameResult === 'goodWin' 
-                 ? '成功找出了拉屎的人！' 
-                 : '邪恶阵营获胜！拉屎的人和尿瓶子的人笑到了最后！'
-               }
-             </p>
-                         <button 
-               onClick={() => initGame(playerCount)}
-               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
-             >
-               重新开始
-             </button>
-          </div>
-        )}
-
-        {/* 玩家区域 */}
-        <div className="bg-white rounded-xl p-6 mb-6 shadow-lg">
-          <h3 className="text-lg font-bold mb-4">所有玩家</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {gameState.players.map((player) => (
-              <PlayerCard 
-                key={player.id}
-                player={player}
-                isSelectable={!!selectedAction}
-                onSelect={handlePlayerSelect}
-                showRole={gameState.gameResult !== null || player.id === gameState.currentPlayerId}
-                isCurrentPlayer={player.id === gameState.currentPlayerId}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* 行动按钮 */}
-        {!gameState.gameResult && (
-          <div className="bg-white rounded-xl p-6 mb-6 shadow-lg">
-            <h3 className="text-lg font-bold mb-4">
-              {gameState.phase === 'day' ? '白天行动' : '夜晚行动'}
-            </h3>
-            
-            {gameState.phase === 'day' && (
-              <div className="flex gap-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-bounce-in">
+              <div className="text-center">
+                <div className="text-6xl mb-4">
+                  {gameState.gameResult === 'goodWin' ? '🎉' : '💩'}
+                </div>
+                <h2 className="text-3xl font-bold mb-4">
+                  {gameState.gameResult === 'goodWin' ? '好人获胜！' : '邪恶阵营获胜！'}
+                </h2>
+                <p className="text-lg text-gray-600 mb-6">
+                  {gameState.gameResult === 'goodWin' 
+                    ? '成功找出了拉屎的人！' 
+                    : '拉屎的人和尿瓶子的人笑到了最后！'
+                  }
+                </p>
+                
+                {/* 显示所有角色 */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold text-gray-600 mb-3">角色揭晓</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {gameState.players.map(player => (
+                      <div key={player.id} className="flex items-center gap-2 text-sm p-2 bg-gray-50 rounded-lg">
+                        <span className="text-lg">{ROLE_CONFIGS[player.role].emoji}</span>
+                        <span className={player.isAlive ? '' : 'line-through text-gray-400'}>
+                          {player.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
                 <button 
-                  onClick={() => setSelectedAction('vote')}
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
-                  disabled={selectedAction === 'vote'}
+                  onClick={() => initGame(playerCount)}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all hover:scale-105 hover:shadow-lg"
                 >
-                                     投票取消参赛资格
+                  🎮 再来一局
                 </button>
               </div>
-            )}
-
-            {gameState.phase === 'night' && (
-              <div className="flex gap-4 flex-wrap">
-                {canUseAbility('dogCheck') && (
-                  <button 
-                    onClick={() => setSelectedAction('dogCheck')}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
-                    disabled={selectedAction === 'dogCheck'}
-                  >
-                    🐕‍🦺 检查身份
-                  </button>
-                )}
-                
-                {canUseAbility('cleanerProtect') && (
-                  <button 
-                    onClick={() => setSelectedAction('cleanerProtect')}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg"
-                    disabled={selectedAction === 'cleanerProtect'}
-                  >
-                    🧹 保护孕妇
-                  </button>
-                )}
-                
-                {canUseAbility('pooperAction') && (
-                  <button 
-                    onClick={() => setSelectedAction('pooperAction')}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
-                    disabled={selectedAction === 'pooperAction'}
-                  >
-                    💩 恶心孕妇
-                  </button>
-                )}
-                
-                {allNightActionsComplete() && (
-                  <button 
-                    onClick={nextPhase}
-                    className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg"
-                  >
-                    进入白天
-                  </button>
-                )}
-              </div>
-            )}
-            
-            {selectedAction && (
-              <p className="mt-4 text-gray-600">
-                请选择一个玩家来执行行动
-              </p>
-            )}
+            </div>
           </div>
         )}
-
-        {/* 游戏历史 */}
-        <div className="bg-white rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-bold mb-4">游戏历史</h3>
-          <div className="max-h-64 overflow-y-auto space-y-2">
-            {gameState.actionHistory.map((action, index) => (
-              <div key={index} className="p-2 bg-gray-50 rounded text-sm">
-                {action}
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
