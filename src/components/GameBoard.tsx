@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { executeAINightActions, executeAIVotes } from '@/utils/aiLogic';
 
 export const GameBoard = () => {
-  const { gameState, initGame, voteOut, dogCheck, cleanerProtect, pooperAction, nextPhase } = useGameLogic();
+  const { gameState, initGame, voteOut, playerVoteWithAI, dogCheck, cleanerProtect, pooperAction, nextPhase } = useGameLogic();
   const [selectedAction, setSelectedAction] = useState<'vote' | 'dogCheck' | 'cleanerProtect' | 'pooperAction' | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(6);
   const [selectedRole, setSelectedRole] = useState<PlayerRole | 'random'>('random');
@@ -24,7 +24,7 @@ export const GameBoard = () => {
     
     switch (selectedAction) {
       case 'vote':
-        voteOut(playerId);
+        playerVoteWithAI(playerId);
         setSelectedAction(null);
         setTimeout(() => setIsProcessing(false), 1000);
         break;
@@ -554,7 +554,7 @@ export const GameBoard = () => {
                     >
                       <div className="flex items-start gap-2">
                         <span className="text-gray-400 text-xs mt-0.5">{index + 1}.</span>
-                        <span className="flex-1">{action}</span>
+                        <span className="flex-1 whitespace-pre-wrap">{action}</span>
                       </div>
                     </div>
                   ))

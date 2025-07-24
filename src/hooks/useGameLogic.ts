@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { GameState, Player, PlayerRole, GamePhase, ROLE_CONFIGS } from '@/types/game';
 import { generateUniqueNames } from '@/utils/nameGenerator';
+import { collectAIVotes } from '@/utils/aiLogic';
 
 export const useGameLogic = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -157,6 +158,94 @@ export const useGameLogic = () => {
     });
   }, []);
 
+  // 玩家投票并收集AI投票
+  const playerVoteWithAI = useCallback((playerId: string) => {
+    setGameState(prev => {
+      // 收集AI投票
+      const voteResult = collectAIVotes(prev);
+      
+      // 将玩家的投票加入统计
+      const playerVote = prev.currentPlayerId;
+      if (playerVote) {
+        voteResult.voteCounts[playerId] = (voteResult.voteCounts[playerId] || 0) + 1;
+      }
+      
+      // 重新计算获胜者
+      let maxVotes = 0;
+      let winner: string | null = null;
+      Object.entries(voteResult.voteCounts).forEach(([targetId, count]) => {
+        if (count > maxVotes) {
+          maxVotes = count;
+          winner = targetId;
+        }
+      });
+      
+      // 生成投票记录
+      const votedPlayer = prev.players.find(p => p.id === playerId);
+      const actionHistory = [...prev.actionHistory];
+      
+      // 记录玩家投票
+      actionHistory.push(`你投票给了${votedPlayer?.name}`);
+      
+      // 如果玩家多，只显示汇总信息
+      if (prev.players.filter(p => p.isAlive).length > 10) {
+        actionHistory.push(`\n📊 投票统计：`);
+        
+        // 按得票数排序显示
+        const sortedVotes = Object.entries(voteResult.voteCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5); // 只显示前5名
+        
+        sortedVotes.forEach(([targetId, count]) => {
+          const target = prev.players.find(p => p.id === targetId);
+          if (target) {
+            actionHistory.push(`  ${target.name}: ${count}票`);
+          }
+        });
+        
+        if (Object.keys(voteResult.voteCounts).length > 5) {
+          actionHistory.push(`  ...还有其他${Object.keys(voteResult.voteCounts).length - 5}人获得票数`);
+        }
+      } else {
+        // 人少时显示详细投票过程
+        actionHistory.push(`\n其他玩家投票：`);
+        
+        Object.entries(voteResult.votes).forEach(([voterId, targetId]) => {
+          const voter = prev.players.find(p => p.id === voterId);
+          const target = prev.players.find(p => p.id === targetId);
+          if (voter && target) {
+            actionHistory.push(`  ${voter.name} → ${target.name}`);
+          }
+        });
+        
+        actionHistory.push(`\n📊 最终统计：`);
+        Object.entries(voteResult.voteCounts).forEach(([targetId, count]) => {
+          const target = prev.players.find(p => p.id === targetId);
+          if (target) {
+            actionHistory.push(`  ${target.name}: ${count}票`);
+          }
+        });
+      }
+      
+      // 执行投票结果
+      const finalWinner = winner || playerId; // 如果没有AI投票，就用玩家的选择
+      const finalTarget = prev.players.find(p => p.id === finalWinner);
+      const newPlayers = prev.players.map(p => 
+        p.id === finalWinner ? { ...p, isAlive: false } : p
+      );
+      
+      actionHistory.push(`\n${finalTarget?.name} 被投票取消参赛资格！`);
+      
+      return {
+        ...prev,
+        players: newPlayers,
+        votedOutPlayer: finalWinner,
+        phase: 'night' as GamePhase,
+        actionHistory
+      };
+    });
+  }, []);
+
   // 警犬检查
   const dogCheck = useCallback((playerId: string) => {
     setGameState(prev => {
@@ -297,6 +386,7 @@ export const useGameLogic = () => {
     gameState,
     initGame,
     voteOut,
+    playerVoteWithAI,
     dogCheck,
     cleanerProtect,
     pooperAction,

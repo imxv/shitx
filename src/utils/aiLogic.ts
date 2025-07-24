@@ -142,44 +142,62 @@ export const executeAINightActions = (
   }
 };
 
+// AI投票结果接口
+export interface VoteResult {
+  votes: { [voterId: string]: string }; // 谁投给了谁
+  voteCounts: { [targetId: string]: number }; // 每个人得了多少票
+  winner: string | null; // 得票最多的人
+}
+
+// 收集所有AI的投票
+export const collectAIVotes = (
+  gameState: GameState
+): VoteResult => {
+  const aliveAIPlayers = gameState.players.filter(p => 
+    p.isAlive && p.id !== gameState.currentPlayerId
+  );
+  
+  const votes: { [voterId: string]: string } = {};
+  const voteCounts: { [targetId: string]: number } = {};
+  
+  // 收集每个AI的投票
+  aliveAIPlayers.forEach(player => {
+    const target = getAIVoteTarget(player, gameState);
+    if (target) {
+      votes[player.id] = target;
+      voteCounts[target] = (voteCounts[target] || 0) + 1;
+    }
+  });
+  
+  // 找出得票最多的玩家
+  let maxVotes = 0;
+  let winner: string | null = null;
+  
+  Object.entries(voteCounts).forEach(([playerId, voteCount]) => {
+    if (voteCount > maxVotes) {
+      maxVotes = voteCount;
+      winner = playerId;
+    }
+  });
+  
+  return { votes, voteCounts, winner };
+};
+
 // 执行所有AI的投票
 export const executeAIVotes = (
   gameState: GameState,
   voteOut: (playerId: string) => void,
   skipVote?: () => void
 ): void => {
-  const aliveAIPlayers = gameState.players.filter(p => 
-    p.isAlive && p.id !== gameState.currentPlayerId
-  );
-  
   const alivePlayer = gameState.players.find(p => p.id === gameState.currentPlayerId && p.isAlive);
 
   // 如果只剩AI玩家（玩家死亡），自动处理投票
-  if (!alivePlayer && aliveAIPlayers.length > 0) {
-    // 收集所有AI的投票
-    const votes: { [key: string]: number } = {};
-    
-    aliveAIPlayers.forEach(player => {
-      const target = getAIVoteTarget(player, gameState);
-      if (target) {
-        votes[target] = (votes[target] || 0) + 1;
-      }
-    });
-
-    // 找出得票最多的玩家
-    let maxVotes = 0;
-    let targetId: string | null = null;
-    
-    Object.entries(votes).forEach(([playerId, voteCount]) => {
-      if (voteCount > maxVotes) {
-        maxVotes = voteCount;
-        targetId = playerId;
-      }
-    });
+  if (!alivePlayer && gameState.players.filter(p => p.isAlive).length > 0) {
+    const voteResult = collectAIVotes(gameState);
 
     // 执行投票
-    if (targetId) {
-      const finalTargetId = targetId; // 保存到const变量中以满足TypeScript
+    if (voteResult.winner) {
+      const finalTargetId = voteResult.winner;
       setTimeout(() => {
         voteOut(finalTargetId);
       }, 2000);
