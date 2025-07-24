@@ -1,7 +1,18 @@
 import { useState, useCallback } from 'react';
 import { GameState, Player, PlayerRole, GamePhase } from '@/types/game';
 
-const PLAYER_NAMES = ['小王', '小李', '小张', '小刘', '小陈', '小赵'];
+const PLAYER_NAMES = [
+  '艾莉娅·星月',
+  '塞琳娜·紫薇', 
+  '露西亚·梦幻',
+  '伊莎贝拉·天使',
+  '薇薇安·玫瑰',
+  '奥菲莉亚·水晶',
+  '安吉丽娜·彩虹',
+  '克莉丝汀·雪花',
+  '莉莉丝·蝴蝶',
+  '黛安娜·月光'
+];
 
 export const useGameLogic = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -19,11 +30,27 @@ export const useGameLogic = () => {
   });
 
   // 初始化游戏
-  const initGame = useCallback(() => {
-    const roles: PlayerRole[] = ['pooper', 'pregnant', 'pregnant', 'dog', 'cleaner', 'pregnant'];
+  const initGame = useCallback((playerCount: number = 6) => {
+    // 根据玩家数量动态分配角色
+    const generateRoles = (count: number): PlayerRole[] => {
+      const roles: PlayerRole[] = ['pooper']; // 至少有一个拉屎的人
+      
+      // 添加功能角色
+      if (count >= 4) roles.push('dog'); // 4人以上有警犬
+      if (count >= 5) roles.push('cleaner'); // 5人以上有保洁员
+      
+      // 剩余位置都是孕妇
+      while (roles.length < count) {
+        roles.push('pregnant');
+      }
+      
+      return roles;
+    };
+    
+    const roles = generateRoles(playerCount);
     const shuffledRoles = [...roles].sort(() => Math.random() - 0.5);
     
-    const players: Player[] = PLAYER_NAMES.slice(0, 6).map((name, index) => ({
+    const players: Player[] = PLAYER_NAMES.slice(0, playerCount).map((name, index) => ({
       id: `player-${index}`,
       name,
       role: shuffledRoles[index],

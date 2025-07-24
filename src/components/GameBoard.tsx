@@ -8,6 +8,7 @@ import { useState } from 'react';
 export const GameBoard = () => {
   const { gameState, initGame, voteOut, dogCheck, cleanerProtect, pooperAction, nextPhase } = useGameLogic();
   const [selectedAction, setSelectedAction] = useState<'vote' | 'dogCheck' | 'cleanerProtect' | 'pooperAction' | null>(null);
+  const [playerCount, setPlayerCount] = useState<number>(6);
   
   const alivePlayers = gameState.players.filter(p => p.isAlive);
   const userPlayer = gameState.players.find(p => p.role !== 'pregnant') || gameState.players[0];
@@ -82,8 +83,41 @@ export const GameBoard = () => {
               ))}
             </div>
           </div>
+          
+          {/* 玩家数量选择 */}
+          <div className="bg-white rounded-xl p-6 shadow-lg mb-8">
+            <h3 className="text-xl font-bold mb-4">游戏设置</h3>
+            <div className="flex items-center gap-4 mb-4">
+              <label className="font-semibold">玩家数量：</label>
+              <select 
+                value={playerCount} 
+                onChange={(e) => setPlayerCount(Number(e.target.value))}
+                className="px-3 py-2 border rounded-lg"
+              >
+                <option value={4}>4人局</option>
+                <option value={5}>5人局</option>
+                <option value={6}>6人局</option>
+                <option value={7}>7人局</option>
+                <option value={8}>8人局</option>
+                <option value={9}>9人局</option>
+                <option value={10}>10人局</option>
+              </select>
+            </div>
+            
+            {/* 角色配置说明 */}
+            <div className="text-sm text-gray-600 mb-4">
+              <p className="mb-2">👥 <strong>角色配置：</strong></p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>💩 拉屎的人：1人</li>
+                {playerCount >= 4 && <li>🐕‍🦺 警犬：1人 (4人以上)</li>}
+                {playerCount >= 5 && <li>🧹 保洁员：1人 (5人以上)</li>}
+                <li>🤰 孕妇：{playerCount - 1 - (playerCount >= 4 ? 1 : 0) - (playerCount >= 5 ? 1 : 0)}人</li>
+              </ul>
+            </div>
+          </div>
+          
           <button 
-            onClick={initGame}
+            onClick={() => initGame(playerCount)}
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-xl"
           >
             开始游戏
@@ -131,12 +165,12 @@ export const GameBoard = () => {
                 : '所有孕妇都被恶心出局了！'
               }
             </p>
-            <button 
-              onClick={initGame}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
-            >
-              重新开始
-            </button>
+                         <button 
+               onClick={() => initGame(playerCount)}
+               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+             >
+               重新开始
+             </button>
           </div>
         )}
 
