@@ -179,8 +179,9 @@ export const executeAIVotes = (
 
     // 执行投票
     if (targetId) {
+      const finalTargetId = targetId; // 保存到const变量中以满足TypeScript
       setTimeout(() => {
-        voteOut(targetId);
+        voteOut(finalTargetId);
       }, 2000);
     } else if (skipVote) {
       // 如果没有有效投票目标，跳过投票阶段
