@@ -340,7 +340,7 @@ export const GameBoard = () => {
                   <PlayerCard 
                     key={player.id}
                     player={player}
-                    isSelectable={!!selectedAction && player.isAlive && player.id !== gameState.currentPlayerId && !isProcessing}
+                    isSelectable={!!selectedAction && player.isAlive && player.id !== gameState.currentPlayerId}
                     onSelect={handlePlayerSelect}
                     showRole={gameState.gameResult !== null || player.id === gameState.currentPlayerId}
                     isCurrentPlayer={player.id === gameState.currentPlayerId}
