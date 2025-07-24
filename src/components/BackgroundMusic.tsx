@@ -15,7 +15,7 @@ export default function BackgroundMusic() {
           audioRef.current.volume = 0.3
           await audioRef.current.play()
           setIsPlaying(true)
-        } catch (error) {
+        } catch {
           // 自动播放被阻止，等待用户交互
           console.log('自动播放被阻止，需要用户交互')
         }

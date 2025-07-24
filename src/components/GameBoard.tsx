@@ -2,18 +2,19 @@
 
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { PlayerCard } from './PlayerCard';
-import { ROLE_CONFIGS } from '@/types/game';
-import { useState } from 'react';
+import { ROLE_CONFIGS, PlayerRole } from '@/types/game';
+import { useState, useEffect } from 'react';
+import { executeAINightActions, executeAIVotes } from '@/utils/aiLogic';
 
 export const GameBoard = () => {
   const { gameState, initGame, voteOut, dogCheck, cleanerProtect, pooperAction, nextPhase } = useGameLogic();
   const [selectedAction, setSelectedAction] = useState<'vote' | 'dogCheck' | 'cleanerProtect' | 'pooperAction' | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(6);
+  const [selectedRole, setSelectedRole] = useState<PlayerRole | 'random'>('random');
   
   const alivePlayers = gameState.players.filter(p => p.isAlive);
   const userPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
   const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
-  const peebottlerPlayer = gameState.players.find(p => p.role === 'peebottler');
   
   const handlePlayerSelect = (playerId: string) => {
     switch (selectedAction) {
@@ -24,14 +25,26 @@ export const GameBoard = () => {
       case 'dogCheck':
         dogCheck(playerId);
         setSelectedAction(null);
+        // 玩家行动后，触发AI行动
+        setTimeout(() => {
+          executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+        }, 1000);
         break;
       case 'cleanerProtect':
         cleanerProtect(playerId);
         setSelectedAction(null);
+        // 玩家行动后，触发AI行动
+        setTimeout(() => {
+          executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+        }, 1000);
         break;
       case 'pooperAction':
         pooperAction(playerId);
         setSelectedAction(null);
+        // 玩家行动后，触发AI行动
+        setTimeout(() => {
+          executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+        }, 1000);
         break;
     }
   };
@@ -52,19 +65,47 @@ export const GameBoard = () => {
   };
 
   const allNightActionsComplete = () => {
-    if (!userPlayer || !userPlayer.isAlive) return true;
+    // 检查所有活着的特殊角色是否都完成了行动
+    const aliveSpecialPlayers = gameState.players.filter(p => 
+      p.isAlive && (p.role === 'dog' || p.role === 'cleaner' || p.role === 'pooper')
+    );
     
-    switch (userPlayer.role) {
-      case 'dog':
-        return !!gameState.nightActions.dogCheck;
-      case 'cleaner':
-        return !!gameState.nightActions.cleanerProtect;
-      case 'pooper':
-        return !!gameState.nightActions.pooperTarget;
-      default:
-        return true; // 孕妇夜晚不需要行动
+    for (const player of aliveSpecialPlayers) {
+      switch (player.role) {
+        case 'dog':
+          if (!gameState.nightActions.dogCheck) return false;
+          break;
+        case 'cleaner':
+          if (!gameState.nightActions.cleanerProtect) return false;
+          break;
+        case 'pooper':
+          if (!gameState.nightActions.pooperTarget) return false;
+          break;
+      }
     }
+    
+    return true;
   };
+
+  // 触发AI夜晚行动
+  useEffect(() => {
+    if (gameState.phase === 'night' && gameState.players.length > 0 && userPlayer) {
+      // 如果玩家角色不能在夜晚行动，立即执行AI行动
+      if (userPlayer.role === 'pregnant' || userPlayer.role === 'peebottler' || !userPlayer.isAlive) {
+        executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+      }
+    }
+  }, [gameState.phase, gameState.currentRound, gameState, dogCheck, cleanerProtect, pooperAction, userPlayer]);
+
+  // 触发AI投票
+  useEffect(() => {
+    if (gameState.phase === 'day' && gameState.players.length > 0 && userPlayer) {
+      // 给一点延迟，让玩家先看到白天开始
+      setTimeout(() => {
+        executeAIVotes(gameState, voteOut);
+      }, 1500);
+    }
+  }, [gameState.phase, gameState.currentRound, gameState, userPlayer, voteOut]);
 
   if (gameState.players.length === 0) {
     return (
@@ -86,9 +127,11 @@ export const GameBoard = () => {
             </div>
           </div>
           
-          {/* 玩家数量选择 */}
+          {/* 游戏设置 */}
           <div className="bg-white rounded-xl p-6 shadow-lg mb-8">
             <h3 className="text-xl font-bold mb-4">游戏设置</h3>
+            
+            {/* 玩家数量选择 */}
             <div className="flex items-center gap-4 mb-4">
               <label className="font-semibold">玩家数量：</label>
               <select 
@@ -104,6 +147,90 @@ export const GameBoard = () => {
                 <option value={9}>9人局</option>
                 <option value={10}>10人局</option>
               </select>
+            </div>
+            
+            {/* 角色选择 */}
+            <div className="mb-4">
+              <label className="font-semibold block mb-2">选择你的角色：</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <button
+                  onClick={() => setSelectedRole('random')}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedRole === 'random' 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">🎲</div>
+                  <div className="text-sm font-semibold">随机分配</div>
+                </button>
+                
+                <button
+                  onClick={() => setSelectedRole('pooper')}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedRole === 'pooper' 
+                      ? 'border-red-500 bg-red-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">💩</div>
+                  <div className="text-sm font-semibold">拉屎的人</div>
+                </button>
+                
+                {playerCount >= 6 && (
+                  <button
+                    onClick={() => setSelectedRole('peebottler')}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      selectedRole === 'peebottler' 
+                        ? 'border-yellow-500 bg-yellow-50' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">🍯</div>
+                    <div className="text-sm font-semibold">尿瓶子的人</div>
+                  </button>
+                )}
+                
+                {playerCount >= 4 && (
+                  <button
+                    onClick={() => setSelectedRole('dog')}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      selectedRole === 'dog' 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">🐕‍🦺</div>
+                    <div className="text-sm font-semibold">警犬</div>
+                  </button>
+                )}
+                
+                {playerCount >= 5 && (
+                  <button
+                    onClick={() => setSelectedRole('cleaner')}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      selectedRole === 'cleaner' 
+                        ? 'border-green-500 bg-green-50' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">🧹</div>
+                    <div className="text-sm font-semibold">保洁员</div>
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => setSelectedRole('pregnant')}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedRole === 'pregnant' 
+                      ? 'border-pink-500 bg-pink-50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">🤰</div>
+                  <div className="text-sm font-semibold">孕妇</div>
+                </button>
+              </div>
             </div>
             
                          {/* 角色配置说明 */}
@@ -129,7 +256,7 @@ export const GameBoard = () => {
           </div>
           
           <button 
-            onClick={() => initGame(playerCount)}
+            onClick={() => initGame(playerCount, selectedRole)}
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-xl"
           >
             开始游戏
