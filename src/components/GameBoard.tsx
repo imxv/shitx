@@ -11,7 +11,7 @@ export const GameBoard = () => {
   const [playerCount, setPlayerCount] = useState<number>(6);
   
   const alivePlayers = gameState.players.filter(p => p.isAlive);
-  const userPlayer = gameState.players.find(p => p.role !== 'pregnant') || gameState.players[0];
+  const userPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
   const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
   const peebottlerPlayer = gameState.players.find(p => p.role === 'peebottler');
   
@@ -161,7 +161,7 @@ export const GameBoard = () => {
         {userPlayer && (
           <div className="bg-white rounded-xl p-4 mb-6 shadow-lg">
             <h3 className="text-lg font-bold mb-2">你的角色</h3>
-            <PlayerCard player={userPlayer} showRole={true} />
+            <PlayerCard player={userPlayer} showRole={true} isCurrentPlayer={true} />
             
             {/* 尿瓶子的人特殊信息 */}
             {userPlayer.role === 'peebottler' && pooperPlayer && (
@@ -207,7 +207,8 @@ export const GameBoard = () => {
                 player={player}
                 isSelectable={!!selectedAction}
                 onSelect={handlePlayerSelect}
-                showRole={gameState.gameResult !== null}
+                showRole={gameState.gameResult !== null || player.id === gameState.currentPlayerId}
+                isCurrentPlayer={player.id === gameState.currentPlayerId}
               />
             ))}
           </div>

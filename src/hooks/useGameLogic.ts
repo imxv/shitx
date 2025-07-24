@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { GameState, Player, PlayerRole, GamePhase } from '@/types/game';
+import { GameState, Player, PlayerRole, GamePhase, ROLE_CONFIGS } from '@/types/game';
 
 const PLAYER_NAMES = [
   '艾莉娅·星月',
@@ -63,10 +63,15 @@ export const useGameLogic = () => {
       wasChecked: false
     }));
 
+    // 随机选择一个玩家作为当前玩家
+    const randomPlayerIndex = Math.floor(Math.random() * players.length);
+    const currentPlayerId = players[randomPlayerIndex].id;
+
     setGameState({
       players,
       phase: 'day',
       currentRound: 1,
+      currentPlayerId,
       votedOutPlayer: null,
       nightActions: {
         dogCheck: null,
@@ -74,7 +79,7 @@ export const useGameLogic = () => {
         pooperTarget: null
       },
       gameResult: null,
-      actionHistory: ['游戏开始！厕所外发现了💩，要找出是谁拉的！']
+      actionHistory: [`游戏开始！厕所外发现了💩，要找出是谁拉的！\n你扮演的是：${players[randomPlayerIndex].name}（${ROLE_CONFIGS[players[randomPlayerIndex].role].name}）`]
     });
   }, []);
 

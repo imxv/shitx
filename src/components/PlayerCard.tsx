@@ -5,6 +5,7 @@ interface PlayerCardProps {
   isSelectable?: boolean;
   onSelect?: (playerId: string) => void;
   showRole?: boolean;
+  isCurrentPlayer?: boolean;
   className?: string;
 }
 
@@ -13,6 +14,7 @@ export const PlayerCard = ({
   isSelectable = false, 
   onSelect, 
   showRole = false,
+  isCurrentPlayer = false,
   className = '' 
 }: PlayerCardProps) => {
   const roleConfig = ROLE_CONFIGS[player.role];
@@ -25,6 +27,7 @@ export const PlayerCard = ({
         ${isSelectable && player.isAlive ? 'cursor-pointer hover:shadow-lg hover:scale-105' : ''}
         ${player.isProtected ? 'ring-2 ring-green-400' : ''}
         ${player.wasChecked ? 'ring-2 ring-blue-400' : ''}
+        ${isCurrentPlayer ? 'border-purple-500 border-4 shadow-lg' : ''}
         ${className}
       `}
       onClick={() => isSelectable && player.isAlive && onSelect?.(player.id)}
@@ -44,6 +47,13 @@ export const PlayerCard = ({
       {/* 被检查标记 */}
       {player.wasChecked && (
         <div className="absolute -top-2 -left-2 text-xl">🔍</div>
+      )}
+      
+      {/* 当前玩家标记 */}
+      {isCurrentPlayer && (
+        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white text-xs px-2 py-1 rounded">
+          你
+        </div>
       )}
       
       <div className="text-center">
