@@ -11,7 +11,10 @@ export const GameBoard = () => {
   const [playerCount, setPlayerCount] = useState<number>(6);
   
   const alivePlayers = gameState.players.filter(p => p.isAlive);
-  const userPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
+  // 选择一个活着的非孕妇玩家作为用户，如果没有则选择第一个活着的玩家
+  const userPlayer = gameState.players.find(p => p.isAlive && p.role !== 'pregnant') || 
+                     gameState.players.find(p => p.isAlive) || 
+                     gameState.players[0];
   const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
   const peebottlerPlayer = gameState.players.find(p => p.role === 'peebottler');
   
@@ -37,7 +40,7 @@ export const GameBoard = () => {
   };
 
   const canUseAbility = (ability: string) => {
-    if (!userPlayer) return false;
+    if (!userPlayer || !userPlayer.isAlive) return false;
     
     switch (ability) {
       case 'dogCheck':
@@ -52,7 +55,24 @@ export const GameBoard = () => {
   };
 
   const allNightActionsComplete = () => {
-    if (!userPlayer) return true;
+    if (!userPlayer || !userPlayer.isAlive) {
+      // 如果当前用户已死，检查是否还有活着的有能力的玩家
+      const aliveSpecialPlayers = alivePlayers.filter(p => 
+        p.role === 'dog' || p.role === 'cleaner' || p.role === 'pooper'
+      );
+      
+      // 如果没有活着的特殊角色，夜晚行动完成
+      if (aliveSpecialPlayers.length === 0) return true;
+      
+      // 检查活着的特殊角色是否都完成了行动
+      const alivedog = aliveSpecialPlayers.find(p => p.role === 'dog');
+      const aliveCleaner = aliveSpecialPlayers.find(p => p.role === 'cleaner');
+      const alivePooper = aliveSpecialPlayers.find(p => p.role === 'pooper');
+      
+      return (!alivedog || !!gameState.nightActions.dogCheck) &&
+             (!aliveCleaner || !!gameState.nightActions.cleanerProtect) &&
+             (!alivePooper || !!gameState.nightActions.pooperTarget);
+    }
     
     switch (userPlayer.role) {
       case 'dog':
@@ -213,7 +233,7 @@ export const GameBoard = () => {
             </div>
             
             {/* 行动区域 */}
-            {!gameState.gameResult && (
+            {!gameState.gameResult && userPlayer?.isAlive && (
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">
                   {gameState.phase === 'day' ? '🌞 白天行动' : '🌙 夜晚行动'}
@@ -312,6 +332,15 @@ export const GameBoard = () => {
                   <div className="text-6xl mb-3">{ROLE_CONFIGS[userPlayer.role].emoji}</div>
                   <h4 className="text-xl font-bold text-gray-800 mb-2">{ROLE_CONFIGS[userPlayer.role].name}</h4>
                   <p className="text-sm text-gray-600">{ROLE_CONFIGS[userPlayer.role].description}</p>
+                  
+                  {/* 死亡状态显示 */}
+                  {!userPlayer.isAlive && (
+                    <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded-xl">
+                      <div className="text-3xl mb-2">💀</div>
+                      <p className="text-gray-700 font-bold">已取消参赛资格</p>
+                      <p className="text-xs text-gray-600 mt-1">请静观其变，等待游戏结束</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
