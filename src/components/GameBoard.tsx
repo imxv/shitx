@@ -11,10 +11,7 @@ export const GameBoard = () => {
   const [playerCount, setPlayerCount] = useState<number>(6);
   
   const alivePlayers = gameState.players.filter(p => p.isAlive);
-  // 选择一个活着的非孕妇玩家作为用户，如果没有则选择第一个活着的玩家
-  const userPlayer = gameState.players.find(p => p.isAlive && p.role !== 'pregnant') || 
-                     gameState.players.find(p => p.isAlive) || 
-                     gameState.players[0];
+  const userPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
   const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
   const peebottlerPlayer = gameState.players.find(p => p.role === 'peebottler');
   
@@ -55,24 +52,7 @@ export const GameBoard = () => {
   };
 
   const allNightActionsComplete = () => {
-    if (!userPlayer || !userPlayer.isAlive) {
-      // 如果当前用户已死，检查是否还有活着的有能力的玩家
-      const aliveSpecialPlayers = alivePlayers.filter(p => 
-        p.role === 'dog' || p.role === 'cleaner' || p.role === 'pooper'
-      );
-      
-      // 如果没有活着的特殊角色，夜晚行动完成
-      if (aliveSpecialPlayers.length === 0) return true;
-      
-      // 检查活着的特殊角色是否都完成了行动
-      const alivedog = aliveSpecialPlayers.find(p => p.role === 'dog');
-      const aliveCleaner = aliveSpecialPlayers.find(p => p.role === 'cleaner');
-      const alivePooper = aliveSpecialPlayers.find(p => p.role === 'pooper');
-      
-      return (!alivedog || !!gameState.nightActions.dogCheck) &&
-             (!aliveCleaner || !!gameState.nightActions.cleanerProtect) &&
-             (!alivePooper || !!gameState.nightActions.pooperTarget);
-    }
+    if (!userPlayer || !userPlayer.isAlive) return true;
     
     switch (userPlayer.role) {
       case 'dog':
@@ -404,7 +384,10 @@ export const GameBoard = () => {
                 </div>
                 
                 <button 
-                  onClick={() => initGame(playerCount)}
+                  onClick={() => {
+                    setSelectedAction(null);
+                    initGame(playerCount);
+                  }}
                   className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold py-3 px-8 rounded-xl text-lg transition-all hover:scale-105 hover:shadow-lg"
                 >
                   🎮 再来一局
