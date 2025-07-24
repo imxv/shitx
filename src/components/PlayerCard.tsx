@@ -32,10 +32,10 @@ export const PlayerCard = ({
       `}
       onClick={() => isSelectable && player.isAlive && onSelect?.(player.id)}
     >
-      {/* 死亡标记 */}
+      {/* 取消参赛资格标记 */}
       {!player.isAlive && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-          <span className="text-4xl">💀</span>
+          <span className="text-4xl">❌</span>
         </div>
       )}
       
