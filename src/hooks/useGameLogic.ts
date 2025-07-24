@@ -153,10 +153,11 @@ export const useGameLogic = () => {
     setGameState(prev => {
       const target = prev.players.find(p => p.id === playerId);
       const checkResult = target?.role === 'pooper' ? '是拉屎的人！' : '不是拉屎的人';
-      const checker = prev.players.find(p => p.id === prev.nightActions.dogCheck);
+      // 判断是玩家警犬还是AI警犬
+      const isPlayerDog = prev.currentPlayerId === 'player-0' && prev.players[0].role === 'dog';
       
       // 如果是AI警犬检查，模糊化信息
-      const publicMessage = checker?.id !== 'player-0' 
+      const publicMessage = !isPlayerDog 
         ? `警犬检查了${target?.name}`
         : `警犬检查了${target?.name}：${checkResult}`;
       
