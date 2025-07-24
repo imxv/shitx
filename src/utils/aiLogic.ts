@@ -145,40 +145,48 @@ export const executeAINightActions = (
 // 执行所有AI的投票
 export const executeAIVotes = (
   gameState: GameState,
-  voteOut: (playerId: string) => void
+  voteOut: (playerId: string) => void,
+  skipVote?: () => void
 ): void => {
   const aliveAIPlayers = gameState.players.filter(p => 
     p.isAlive && p.id !== gameState.currentPlayerId
   );
-
-  // 收集所有AI的投票
-  const votes: { [key: string]: number } = {};
   
-  aliveAIPlayers.forEach(player => {
-    const target = getAIVoteTarget(player, gameState);
-    if (target) {
-      votes[target] = (votes[target] || 0) + 1;
-    }
-  });
+  const alivePlayer = gameState.players.find(p => p.id === gameState.currentPlayerId && p.isAlive);
 
-  // 找出得票最多的玩家
-  let maxVotes = 0;
-  let targetId: string | null = null;
-  
-  Object.entries(votes).forEach(([playerId, voteCount]) => {
-    if (voteCount > maxVotes) {
-      maxVotes = voteCount;
-      targetId = playerId;
-    }
-  });
-
-  // 如果有人得到超过半数票，执行投票
-  if (targetId && maxVotes >= Math.ceil(aliveAIPlayers.length / 2)) {
-    setTimeout(() => {
-      const target = gameState.players.find(p => p.id === targetId);
-      if (target && targetId) {
-        voteOut(targetId);
+  // 如果只剩AI玩家（玩家死亡），自动处理投票
+  if (!alivePlayer && aliveAIPlayers.length > 0) {
+    // 收集所有AI的投票
+    const votes: { [key: string]: number } = {};
+    
+    aliveAIPlayers.forEach(player => {
+      const target = getAIVoteTarget(player, gameState);
+      if (target) {
+        votes[target] = (votes[target] || 0) + 1;
       }
-    }, 2000);
+    });
+
+    // 找出得票最多的玩家
+    let maxVotes = 0;
+    let targetId: string | null = null;
+    
+    Object.entries(votes).forEach(([playerId, voteCount]) => {
+      if (voteCount > maxVotes) {
+        maxVotes = voteCount;
+        targetId = playerId;
+      }
+    });
+
+    // 执行投票
+    if (targetId) {
+      setTimeout(() => {
+        voteOut(targetId);
+      }, 2000);
+    } else if (skipVote) {
+      // 如果没有有效投票目标，跳过投票阶段
+      setTimeout(() => {
+        skipVote();
+      }, 1000);
+    }
   }
 };

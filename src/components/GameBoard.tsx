@@ -11,16 +11,22 @@ export const GameBoard = () => {
   const [selectedAction, setSelectedAction] = useState<'vote' | 'dogCheck' | 'cleanerProtect' | 'pooperAction' | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(6);
   const [selectedRole, setSelectedRole] = useState<PlayerRole | 'random'>('random');
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const alivePlayers = gameState.players.filter(p => p.isAlive);
   const userPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
   const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
   
   const handlePlayerSelect = (playerId: string) => {
+    if (isProcessing) return; // 防止重复点击
+    
+    setIsProcessing(true);
+    
     switch (selectedAction) {
       case 'vote':
         voteOut(playerId);
         setSelectedAction(null);
+        setTimeout(() => setIsProcessing(false), 1000);
         break;
       case 'dogCheck':
         dogCheck(playerId);
@@ -28,6 +34,7 @@ export const GameBoard = () => {
         // 玩家行动后，触发AI行动
         setTimeout(() => {
           executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+          setIsProcessing(false);
         }, 1000);
         break;
       case 'cleanerProtect':
@@ -36,6 +43,7 @@ export const GameBoard = () => {
         // 玩家行动后，触发AI行动
         setTimeout(() => {
           executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+          setIsProcessing(false);
         }, 1000);
         break;
       case 'pooperAction':
@@ -44,6 +52,7 @@ export const GameBoard = () => {
         // 玩家行动后，触发AI行动
         setTimeout(() => {
           executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+          setIsProcessing(false);
         }, 1000);
         break;
     }
@@ -89,23 +98,38 @@ export const GameBoard = () => {
 
   // 触发AI夜晚行动
   useEffect(() => {
-    if (gameState.phase === 'night' && gameState.players.length > 0 && userPlayer) {
-      // 如果玩家角色不能在夜晚行动，立即执行AI行动
-      if (userPlayer.role === 'pregnant' || userPlayer.role === 'peebottler' || !userPlayer.isAlive) {
-        executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+    if (gameState.phase === 'night' && gameState.players.length > 0) {
+      // 如果玩家不需要在夜晚行动，立即执行AI
+      if (!userPlayer || !userPlayer.isAlive || 
+          (userPlayer.role !== 'dog' && userPlayer.role !== 'cleaner' && userPlayer.role !== 'pooper')) {
+        setIsProcessing(true);
+        setTimeout(() => {
+          executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
+          setTimeout(() => setIsProcessing(false), 3000); // AI行动需要更长时间
+        }, 1000);
       }
     }
-  }, [gameState.phase, gameState.currentRound, gameState, dogCheck, cleanerProtect, pooperAction, userPlayer]);
+  }, [gameState.phase, gameState.currentRound]);
 
   // 触发AI投票
   useEffect(() => {
-    if (gameState.phase === 'day' && gameState.players.length > 0 && userPlayer) {
+    if (gameState.phase === 'day' && gameState.players.length > 0) {
       // 给一点延迟，让玩家先看到白天开始
       setTimeout(() => {
-        executeAIVotes(gameState, voteOut);
+        executeAIVotes(gameState, voteOut, nextPhase);
       }, 1500);
     }
-  }, [gameState.phase, gameState.currentRound, gameState, userPlayer, voteOut]);
+  }, [gameState.phase, gameState.currentRound]);
+
+  // 自动进入下一阶段
+  useEffect(() => {
+    if (gameState.phase === 'night' && allNightActionsComplete() && gameState.players.length > 0) {
+      // 所有夜晚行动完成，自动进入白天
+      setTimeout(() => {
+        nextPhase();
+      }, 2000);
+    }
+  }, [gameState.nightActions, gameState.phase]);
 
   if (gameState.players.length === 0) {
     return (
@@ -316,7 +340,7 @@ export const GameBoard = () => {
                   <PlayerCard 
                     key={player.id}
                     player={player}
-                    isSelectable={!!selectedAction && player.isAlive && player.id !== gameState.currentPlayerId}
+                    isSelectable={!!selectedAction && player.isAlive && player.id !== gameState.currentPlayerId && !isProcessing}
                     onSelect={handlePlayerSelect}
                     showRole={gameState.gameResult !== null || player.id === gameState.currentPlayerId}
                     isCurrentPlayer={player.id === gameState.currentPlayerId}
@@ -340,13 +364,24 @@ export const GameBoard = () => {
             </div>
             
             {/* 行动区域 */}
-            {!gameState.gameResult && userPlayer?.isAlive && (
+            {!gameState.gameResult && (
               <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">
-                  {gameState.phase === 'day' ? '🌞 白天行动' : '🌙 夜晚行动'}
-                </h3>
+                {userPlayer?.isAlive ? (
+                  <>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">
+                      {gameState.phase === 'day' ? '🌞 白天行动' : '🌙 夜晚行动'}
+                    </h3>
                 
-                {selectedAction && (
+                {isProcessing && (
+                  <div className="mb-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                    <p className="text-yellow-800 font-semibold flex items-center gap-2">
+                      <span className="animate-spin">⏳</span>
+                      其他玩家正在行动中...
+                    </p>
+                  </div>
+                )}
+                
+                {selectedAction && !isProcessing && (
                   <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
                     <p className="text-blue-800 font-semibold">
                       👆 请点击上方玩家头像来{
@@ -362,14 +397,17 @@ export const GameBoard = () => {
                 {gameState.phase === 'day' && (
                   <div className="space-y-3">
                     <button 
-                      onClick={() => setSelectedAction('vote')}
+                      onClick={() => !isProcessing && setSelectedAction('vote')}
+                      disabled={isProcessing}
                       className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
-                        selectedAction === 'vote' 
-                          ? 'bg-red-600 text-white scale-105 shadow-lg' 
-                          : 'bg-red-500 hover:bg-red-600 text-white hover:scale-105 hover:shadow-lg'
+                        isProcessing 
+                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                          : selectedAction === 'vote' 
+                            ? 'bg-red-600 text-white scale-105 shadow-lg' 
+                            : 'bg-red-500 hover:bg-red-600 text-white hover:scale-105 hover:shadow-lg'
                       }`}
                     >
-                      🗳️ 投票取消参赛资格
+                      {isProcessing ? '⏳ 处理中...' : '🗳️ 投票取消参赛资格'}
                     </button>
                   </div>
                 )}
@@ -378,40 +416,49 @@ export const GameBoard = () => {
                   <div className="space-y-3">
                     {canUseAbility('dogCheck') && (
                       <button 
-                        onClick={() => setSelectedAction('dogCheck')}
+                        onClick={() => !isProcessing && setSelectedAction('dogCheck')}
+                        disabled={isProcessing}
                         className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
-                          selectedAction === 'dogCheck'
-                            ? 'bg-blue-600 text-white scale-105 shadow-lg'
-                            : 'bg-blue-500 hover:bg-blue-600 text-white hover:scale-105 hover:shadow-lg'
+                          isProcessing 
+                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                            : selectedAction === 'dogCheck'
+                              ? 'bg-blue-600 text-white scale-105 shadow-lg'
+                              : 'bg-blue-500 hover:bg-blue-600 text-white hover:scale-105 hover:shadow-lg'
                         }`}
                       >
-                        🐕‍🦺 检查身份
+                        {isProcessing ? '⏳ 处理中...' : '🐕‍🦺 检查身份'}
                       </button>
                     )}
                     
                     {canUseAbility('cleanerProtect') && (
                       <button 
-                        onClick={() => setSelectedAction('cleanerProtect')}
+                        onClick={() => !isProcessing && setSelectedAction('cleanerProtect')}
+                        disabled={isProcessing}
                         className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
-                          selectedAction === 'cleanerProtect'
-                            ? 'bg-green-600 text-white scale-105 shadow-lg'
-                            : 'bg-green-500 hover:bg-green-600 text-white hover:scale-105 hover:shadow-lg'
+                          isProcessing 
+                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                            : selectedAction === 'cleanerProtect'
+                              ? 'bg-green-600 text-white scale-105 shadow-lg'
+                              : 'bg-green-500 hover:bg-green-600 text-white hover:scale-105 hover:shadow-lg'
                         }`}
                       >
-                        🧹 保护孕妇
+                        {isProcessing ? '⏳ 处理中...' : '🧹 保护孕妇'}
                       </button>
                     )}
                     
                     {canUseAbility('pooperAction') && (
                       <button 
-                        onClick={() => setSelectedAction('pooperAction')}
+                        onClick={() => !isProcessing && setSelectedAction('pooperAction')}
+                        disabled={isProcessing}
                         className={`w-full py-3 px-6 rounded-xl font-bold text-lg transition-all ${
-                          selectedAction === 'pooperAction'
-                            ? 'bg-red-600 text-white scale-105 shadow-lg'
-                            : 'bg-red-500 hover:bg-red-600 text-white hover:scale-105 hover:shadow-lg'
+                          isProcessing 
+                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                            : selectedAction === 'pooperAction'
+                              ? 'bg-red-600 text-white scale-105 shadow-lg'
+                              : 'bg-red-500 hover:bg-red-600 text-white hover:scale-105 hover:shadow-lg'
                         }`}
                       >
-                        💩 恶心孕妇
+                        {isProcessing ? '⏳ 处理中...' : '💩 恶心孕妇'}
                       </button>
                     )}
                     
@@ -423,6 +470,20 @@ export const GameBoard = () => {
                         ☀️ 进入白天
                       </button>
                     )}
+                  </div>
+                )}
+                  </>
+                ) : (
+                  // 观战模式
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">👻</div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">观战模式</h3>
+                    <p className="text-gray-600">你已被取消参赛资格，正在观看游戏进行...</p>
+                    <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                      <p className="text-sm text-gray-500">
+                        {gameState.phase === 'day' ? '其他玩家正在投票...' : '夜晚行动进行中...'}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

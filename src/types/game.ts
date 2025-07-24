@@ -16,6 +16,7 @@ export interface GameState {
   phase: GamePhase;
   currentRound: number;
   currentPlayerId: string | null; // 当前玩家的ID
+  currentActingPlayer: string | null; // 当前正在行动的玩家ID
   votedOutPlayer: string | null;
   nightActions: {
     dogCheck: string | null; // 警犬检查的玩家ID

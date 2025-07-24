@@ -20,6 +20,7 @@ export const useGameLogic = () => {
     phase: 'day',
     currentRound: 1,
     currentPlayerId: null,
+    currentActingPlayer: null,
     votedOutPlayer: null,
     nightActions: {
       dogCheck: null,
@@ -113,6 +114,7 @@ export const useGameLogic = () => {
       phase: 'night', // 从夜晚开始
       currentRound: 1,
       currentPlayerId,
+      currentActingPlayer: null,
       votedOutPlayer: null,
       nightActions: {
         dogCheck: null,
