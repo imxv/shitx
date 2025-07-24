@@ -1,37 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ShitX
 
-## Getting Started
+> 创造失眠，重新定义社交推理体验。探索人性深处的奥秘，在优雅的互动中寻找真相。
 
-First, run the development server:
+## 🎭 项目简介
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+ShitX是一款创新性的多人社交推理游戏，融合了心理学、逻辑推理和团队协作等多重元素。通过精心设计的角色扮演机制，为玩家提供沉浸式的智力挑战体验。
+
+## ✨ 核心特性
+
+### 🎪 多元化角色系统
+- **💩 执行者** - 承担核心任务的关键角色
+- **🤰 观察者** - 负责信息收集和分析推理
+- **🐕‍🦺 检验者** - 具备特殊验证能力的专业角色
+- **🧹 守护者** - 提供保护机制的支援角色
+- **🍯 隐匿者** - 神秘的幕后角色（高级模式专属）
+
+### 🎯 智能化游戏配置
+- **灵活人数设置** - 支持4-10人的不同规模体验
+- **动态角色分配** - 根据参与人数智能调整角色构成
+- **渐进式复杂度** - 人数越多，策略层次越丰富
+
+### 🎨 优雅的用户界面
+- **现代化设计** - 简洁直观的交互体验
+- **响应式布局** - 完美适配各种设备尺寸
+- **实时状态反馈** - 清晰的游戏进程显示
+
+## 🚀 技术架构
+
+```
+Frontend: Next.js 14 + TypeScript + Tailwind CSS
+Analytics: Vercel Analytics
+Deployment: Vercel Platform
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📋 游戏规则
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 基础配置
+- **4人局**: 1执行者 + 3观察者
+- **5人局**: 1执行者 + 1检验者 + 3观察者
+- **6人局**: 1执行者 + 1隐匿者 + 1检验者 + 1守护者 + 2观察者
+- **7-10人局**: 在6人基础上增加更多观察者
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 胜利条件
+- **正义阵营**: 通过投票机制识别并淘汰执行者
+- **隐秘阵营**: 执行者与隐匿者协作，使所有正义角色取消参赛资格
 
-## Learn More
+### 特殊机制
+- **隐匿者优势**: 单向信息获取，知晓执行者身份
+- **检验者能力**: 夜间阶段可验证目标角色身份
+- **守护者技能**: 提供保护机制，阻止恶意行为
 
-To learn more about Next.js, take a look at the following resources:
+## 🎮 快速开始
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 环境要求
+```bash
+Node.js 18+
+pnpm (推荐)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 安装依赖
+```bash
+pnpm install
+```
 
-## Deploy on Vercel
+### 启动开发服务器
+```bash
+pnpm dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 构建生产版本
+```bash
+pnpm build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# shitx
+## 🌟 游戏体验亮点
+
+### 🧠 心理博弈
+每个角色都有独特的信息优势和行动策略，玩家需要在有限信息下做出最优决策。
+
+### 🎭 身份隐匿
+隐匿者的存在为游戏增添了额外的不确定性，单向信息机制创造了全新的策略维度。
+
+### 🤝 团队协作
+正义阵营需要通过信息共享和逻辑推理来识别威胁，考验团队合作能力。
+
+### 📊 数据驱动
+集成Vercel Analytics，提供详细的用户行为分析和游戏体验优化指导。
+
+## 🔧 技术特色
+
+- **TypeScript** - 类型安全的开发体验
+- **组件化架构** - 高度可维护的代码结构
+- **状态管理** - 高效的游戏状态同步机制
+- **响应式设计** - 跨平台一致性体验
+
+## 📱 部署方式
+
+### Vercel部署（推荐）
+```bash
+# 连接到Vercel
+vercel
+
+# 部署到生产环境
+vercel --prod
+```
+
+### 其他平台
+支持任何支持Next.js的托管平台，如Netlify、Railway等。
+
+## 🤝 贡献指南
+
+我们欢迎社区贡献，请遵循以下流程：
+
+1. Fork项目仓库
+2. 创建功能分支
+3. 提交代码更改
+4. 发起Pull Request
+
+## 📄 开源协议
+
+本项目采用MIT协议开源，详情请参阅LICENSE文件。
+
+---
+
+**ShitX** - 重新定义社交推理的边界，在游戏中探索人性的深度与广度。
+
+*Built with ❤️ by the ShitX Team* 
