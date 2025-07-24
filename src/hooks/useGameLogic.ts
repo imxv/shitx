@@ -19,6 +19,7 @@ export const useGameLogic = () => {
     players: [],
     phase: 'day',
     currentRound: 1,
+    currentPlayerId: null,
     votedOutPlayer: null,
     nightActions: {
       dogCheck: null,
@@ -77,7 +78,7 @@ export const useGameLogic = () => {
     });
   }, []);
 
-  // 投票出局
+  // 投票取消参赛资格
   const voteOut = useCallback((playerId: string) => {
     setGameState(prev => {
       const newPlayers = prev.players.map(p => 
@@ -90,7 +91,7 @@ export const useGameLogic = () => {
         players: newPlayers,
         votedOutPlayer: playerId,
         phase: 'night' as GamePhase,
-        actionHistory: [...prev.actionHistory, `${votedPlayer?.name} 被投票出局！`]
+        actionHistory: [...prev.actionHistory, `${votedPlayer?.name} 被投票取消参赛资格！`]
       };
     });
   }, []);
@@ -149,7 +150,7 @@ export const useGameLogic = () => {
         newPlayers = prev.players.map(p => 
           p.id === playerId ? { ...p, isAlive: false } : p
         );
-        actionText = `${target?.name} 被恶心得孕吐出局了！`;
+        actionText = `${target?.name} 被恶心得孕吐取消参赛资格了！`;
       }
       
       return {
@@ -175,11 +176,11 @@ export const useGameLogic = () => {
       
       let gameResult: 'pooperWin' | 'goodWin' | null = null;
       
-      // 如果拉屎的人被投票出局，好人获胜
+      // 如果拉屎的人被投票取消参赛资格，好人获胜
       if (!alivePooper) {
         gameResult = 'goodWin';
       } 
-      // 如果所有好人都出局了，拉屎的人和尿瓶子的人获胜
+      // 如果所有好人都取消参赛资格了，拉屎的人和尿瓶子的人获胜
       else if (aliveGoodGuys.length === 0) {
         gameResult = 'pooperWin';
       }

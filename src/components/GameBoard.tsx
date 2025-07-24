@@ -121,7 +121,7 @@ export const GameBoard = () => {
                   <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
                     <p className="text-xs text-yellow-700">
                       <strong>🤫 隐藏要素：</strong>尿瓶子的人知道拉屎的人是谁，但拉屎的人不知道尿瓶子的人的身份。
-                      他们是同伙，目标是让所有好人出局！
+                                             他们是同伙，目标是让所有好人取消参赛资格！
                     </p>
                   </div>
                 )}
@@ -169,7 +169,7 @@ export const GameBoard = () => {
                 <h4 className="font-bold text-yellow-800 mb-2">🤫 隐藏信息</h4>
                 <p className="text-sm text-yellow-700">
                   你知道 <span className="font-bold">{pooperPlayer.name}</span> 是拉屎的人！
-                  你们是同伙，目标是让所有好人出局。
+                                     你们是同伙，目标是让所有好人取消参赛资格。
                 </p>
               </div>
             )}
@@ -227,7 +227,7 @@ export const GameBoard = () => {
                   className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
                   disabled={selectedAction === 'vote'}
                 >
-                  投票出局
+                                     投票取消参赛资格
                 </button>
               </div>
             )}
