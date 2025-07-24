@@ -17,6 +17,15 @@ export const GameBoard = () => {
   const userPlayer = gameState.players.find(p => p.id === gameState.currentPlayerId);
   const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
   
+  // 根据玩家数量动态调整延迟
+  const getDelay = (baseDelay: number) => {
+    const playerCount = gameState.players.length;
+    if (playerCount > 50) return baseDelay * 0.2; // 百人模式：20%延迟
+    if (playerCount > 20) return baseDelay * 0.3; // 大型游戏：30%延迟
+    if (playerCount > 10) return baseDelay * 0.5; // 中型游戏：50%延迟
+    return baseDelay; // 小型游戏：正常延迟
+  };
+  
   const handlePlayerSelect = (playerId: string) => {
     if (isProcessing) return; // 防止重复点击
     
@@ -26,7 +35,7 @@ export const GameBoard = () => {
       case 'vote':
         playerVoteWithAI(playerId);
         setSelectedAction(null);
-        setTimeout(() => setIsProcessing(false), 1000);
+        setTimeout(() => setIsProcessing(false), getDelay(1000));
         break;
       case 'dogCheck':
         dogCheck(playerId);
@@ -35,7 +44,7 @@ export const GameBoard = () => {
         setTimeout(() => {
           executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
           setIsProcessing(false);
-        }, 1000);
+        }, getDelay(500));
         break;
       case 'cleanerProtect':
         cleanerProtect(playerId);
@@ -44,7 +53,7 @@ export const GameBoard = () => {
         setTimeout(() => {
           executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
           setIsProcessing(false);
-        }, 1000);
+        }, getDelay(500));
         break;
       case 'pooperAction':
         pooperAction(playerId);
@@ -53,7 +62,7 @@ export const GameBoard = () => {
         setTimeout(() => {
           executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
           setIsProcessing(false);
-        }, 1000);
+        }, getDelay(500));
         break;
     }
   };
@@ -105,8 +114,8 @@ export const GameBoard = () => {
         setIsProcessing(true);
         setTimeout(() => {
           executeAINightActions(gameState, dogCheck, cleanerProtect, pooperAction);
-          setTimeout(() => setIsProcessing(false), 3000); // AI行动需要更长时间
-        }, 1000);
+          setTimeout(() => setIsProcessing(false), getDelay(1500));
+        }, getDelay(500));
       }
     }
   }, [gameState.phase, gameState.currentRound]);
@@ -117,7 +126,7 @@ export const GameBoard = () => {
       // 给一点延迟，让玩家先看到白天开始
       setTimeout(() => {
         executeAIVotes(gameState, voteOut, nextPhase);
-      }, 1500);
+      }, getDelay(1000));
     }
   }, [gameState.phase, gameState.currentRound]);
 
@@ -127,7 +136,7 @@ export const GameBoard = () => {
       // 所有夜晚行动完成，自动进入白天
       setTimeout(() => {
         nextPhase();
-      }, 2000);
+      }, getDelay(1000));
     }
   }, [gameState.nightActions, gameState.phase]);
 

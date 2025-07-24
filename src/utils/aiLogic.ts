@@ -105,6 +105,14 @@ export const getAINightAction = (
   }
 };
 
+// 根据玩家数量获取动作延迟
+const getActionDelay = (playerCount: number): number => {
+  if (playerCount > 50) return 100; // 百人模式：0.1秒
+  if (playerCount > 20) return 200; // 大型游戏：0.2秒
+  if (playerCount > 10) return 300; // 中型游戏：0.3秒
+  return 500; // 小型游戏：0.5秒
+};
+
 // 执行所有AI的夜晚行动
 export const executeAINightActions = (
   gameState: GameState,
@@ -116,28 +124,62 @@ export const executeAINightActions = (
     p.isAlive && p.id !== gameState.currentPlayerId
   );
 
-  // 按照行动顺序执行：保洁员 -> 警犬 -> 拉屎的人
-  const cleaner = aliveAIPlayers.find(p => p.role === 'cleaner');
-  if (cleaner && !gameState.nightActions.cleanerProtect) {
-    const target = getAINightAction(cleaner, gameState);
-    if (target) {
-      setTimeout(() => cleanerProtect(target), 1000);
-    }
-  }
+  const delay = getActionDelay(gameState.players.length);
+  
+  // 在大型游戏中，同类角色同时行动
+  if (gameState.players.length > 10) {
+    // 所有保洁员同时行动
+    const cleaners = aliveAIPlayers.filter(p => p.role === 'cleaner');
+    cleaners.forEach((cleaner, index) => {
+      const target = getAINightAction(cleaner, gameState);
+      if (target) {
+        setTimeout(() => cleanerProtect(target), index * 50); // 微小延迟避免完全同时
+      }
+    });
 
-  const dog = aliveAIPlayers.find(p => p.role === 'dog');
-  if (dog && !gameState.nightActions.dogCheck) {
-    const target = getAINightAction(dog, gameState);
-    if (target) {
-      setTimeout(() => dogCheck(target), 2000);
-    }
-  }
+    // 所有警犬同时行动
+    const dogs = aliveAIPlayers.filter(p => p.role === 'dog');
+    dogs.forEach((dog, index) => {
+      const target = getAINightAction(dog, gameState);
+      if (target) {
+        setTimeout(() => dogCheck(target), delay + index * 50);
+      }
+    });
 
-  const pooper = aliveAIPlayers.find(p => p.role === 'pooper');
-  if (pooper && !gameState.nightActions.pooperTarget) {
-    const target = getAINightAction(pooper, gameState);
-    if (target) {
-      setTimeout(() => pooperAction(target), 3000);
+    // 所有拉屎的人同时行动
+    const poopers = aliveAIPlayers.filter(p => p.role === 'pooper');
+    poopers.forEach((pooper, index) => {
+      const target = getAINightAction(pooper, gameState);
+      if (target) {
+        setTimeout(() => pooperAction(target), delay * 2 + index * 50);
+      }
+    });
+  } else {
+    // 小型游戏：保持原有逻辑
+    let actionCount = 0;
+    
+    const cleaner = aliveAIPlayers.find(p => p.role === 'cleaner');
+    if (cleaner && !gameState.nightActions.cleanerProtect) {
+      const target = getAINightAction(cleaner, gameState);
+      if (target) {
+        setTimeout(() => cleanerProtect(target), delay * actionCount++);
+      }
+    }
+
+    const dog = aliveAIPlayers.find(p => p.role === 'dog');
+    if (dog && !gameState.nightActions.dogCheck) {
+      const target = getAINightAction(dog, gameState);
+      if (target) {
+        setTimeout(() => dogCheck(target), delay * actionCount++);
+      }
+    }
+
+    const pooper = aliveAIPlayers.find(p => p.role === 'pooper');
+    if (pooper && !gameState.nightActions.pooperTarget) {
+      const target = getAINightAction(pooper, gameState);
+      if (target) {
+        setTimeout(() => pooperAction(target), delay * actionCount++);
+      }
     }
   }
 };
@@ -196,16 +238,17 @@ export const executeAIVotes = (
     const voteResult = collectAIVotes(gameState);
 
     // 执行投票
+    const voteDelay = getActionDelay(gameState.players.length) * 2; // 投票延迟稍长一些
     if (voteResult.winner) {
       const finalTargetId = voteResult.winner;
       setTimeout(() => {
         voteOut(finalTargetId);
-      }, 2000);
+      }, voteDelay);
     } else if (skipVote) {
       // 如果没有有效投票目标，跳过投票阶段
       setTimeout(() => {
         skipVote();
-      }, 1000);
+      }, voteDelay / 2);
     }
   }
 };
