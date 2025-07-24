@@ -7,6 +7,7 @@ interface PlayerCardProps {
   showRole?: boolean;
   isCurrentPlayer?: boolean;
   className?: string;
+  compact?: boolean;
 }
 
 export const PlayerCard = ({ 
@@ -15,9 +16,43 @@ export const PlayerCard = ({
   onSelect, 
   showRole = false,
   isCurrentPlayer = false,
-  className = '' 
+  className = '',
+  compact = false
 }: PlayerCardProps) => {
   const roleConfig = ROLE_CONFIGS[player.role];
+  
+  if (compact) {
+    return (
+      <div 
+        className={`
+          relative p-2 rounded border transition-all duration-200
+          ${player.isAlive ? 'bg-white' : 'bg-gray-200 opacity-60'}
+          ${isSelectable && player.isAlive ? 'cursor-pointer hover:shadow-md hover:scale-105' : ''}
+          ${player.isProtected ? 'ring-1 ring-green-400' : ''}
+          ${player.wasChecked ? 'ring-1 ring-blue-400' : ''}
+          ${isCurrentPlayer ? 'border-purple-500 border-2 shadow' : ''}
+          ${className}
+        `}
+        onClick={() => isSelectable && player.isAlive && onSelect?.(player.id)}
+        title={`${player.name}${showRole ? ` - ${roleConfig.name}` : ''}`}
+      >
+        {!player.isAlive && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded">
+            <span className="text-lg">❌</span>
+          </div>
+        )}
+        
+        <div className="text-center">
+          <div className="text-2xl">
+            {showRole ? roleConfig.emoji : '👤'}
+          </div>
+          <div className="text-xs font-semibold truncate">
+            {player.name}
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div 

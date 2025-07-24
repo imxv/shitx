@@ -170,6 +170,9 @@ export const GameBoard = () => {
                 <option value={8}>8人局</option>
                 <option value={9}>9人局</option>
                 <option value={10}>10人局</option>
+                <option value={20}>20人局</option>
+                <option value={50}>50人局</option>
+                <option value={100}>💩 百人大逃杀 💩</option>
               </select>
             </div>
             
@@ -261,11 +264,23 @@ export const GameBoard = () => {
              <div className="text-sm text-gray-600 mb-4">
                <p className="mb-2">👥 <strong>角色配置：</strong></p>
                               <ul className="list-disc list-inside space-y-1">
-                  <li>💩 拉屎的人：1人</li>
-                  {playerCount >= 6 && <li>🍯 尿瓶子的人：1人 (6人以上，隐藏角色)</li>}
-                  {playerCount >= 4 && <li>🐕‍🦺 警犬：1人 (4人以上)</li>}
-                  {playerCount >= 5 && <li>🧹 保洁员：1人 (5人以上)</li>}
-                  <li>🤰 孕妇：{playerCount - 1 - (playerCount >= 4 ? 1 : 0) - (playerCount >= 5 ? 1 : 0) - (playerCount >= 6 ? 1 : 0)}人</li>
+                  {playerCount <= 10 ? (
+                    <>
+                      <li>💩 拉屎的人：1人</li>
+                      {playerCount >= 6 && <li>🍯 尿瓶子的人：1人 (6人以上，隐藏角色)</li>}
+                      {playerCount >= 4 && <li>🐕‍🦺 警犬：1人 (4人以上)</li>}
+                      {playerCount >= 5 && <li>🧹 保洁员：1人 (5人以上)</li>}
+                      <li>🤰 孕妇：{playerCount - 1 - (playerCount >= 4 ? 1 : 0) - (playerCount >= 5 ? 1 : 0) - (playerCount >= 6 ? 1 : 0)}人</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>💩 拉屎的人：{Math.max(2, Math.floor(playerCount * 0.15))}人 (15%)</li>
+                      <li>🍯 尿瓶子的人：{Math.max(1, Math.floor(playerCount * 0.1))}人 (10%，隐藏角色)</li>
+                      <li>🐕‍🦺 警犬：{Math.max(2, Math.floor(playerCount * 0.1))}人 (10%)</li>
+                      <li>🧹 保洁员：{Math.max(2, Math.floor(playerCount * 0.1))}人 (10%)</li>
+                      <li>🤰 孕妇：约{playerCount - Math.max(2, Math.floor(playerCount * 0.15)) - Math.max(1, Math.floor(playerCount * 0.1)) - Math.max(2, Math.floor(playerCount * 0.1)) - Math.max(2, Math.floor(playerCount * 0.1))}人 (55%)</li>
+                    </>
+                  )}
                 </ul>
                 
                 {playerCount >= 6 && (
@@ -335,17 +350,28 @@ export const GameBoard = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {gameState.players.map((player) => (
-                  <PlayerCard 
-                    key={player.id}
-                    player={player}
-                    isSelectable={!!selectedAction && player.isAlive && player.id !== gameState.currentPlayerId}
-                    onSelect={handlePlayerSelect}
-                    showRole={gameState.gameResult !== null || player.id === gameState.currentPlayerId}
-                    isCurrentPlayer={player.id === gameState.currentPlayerId}
-                  />
-                ))}
+              <div className={`${
+                gameState.players.length > 20 ? 'max-h-96 overflow-y-auto pr-2' : ''
+              }`}>
+                <div className={`grid gap-4 ${
+                  gameState.players.length > 50 
+                    ? 'grid-cols-4 md:grid-cols-6 lg:grid-cols-8' 
+                    : gameState.players.length > 20 
+                    ? 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
+                    : 'grid-cols-2 md:grid-cols-3'
+                }`}>
+                  {gameState.players.map((player) => (
+                    <PlayerCard 
+                      key={player.id}
+                      player={player}
+                      isSelectable={!!selectedAction && player.isAlive && player.id !== gameState.currentPlayerId}
+                      onSelect={handlePlayerSelect}
+                      showRole={gameState.gameResult !== null || player.id === gameState.currentPlayerId}
+                      isCurrentPlayer={player.id === gameState.currentPlayerId}
+                      compact={gameState.players.length > 20}
+                    />
+                  ))}
+                </div>
               </div>
               
               {/* 尿瓶子的人特殊信息 */}

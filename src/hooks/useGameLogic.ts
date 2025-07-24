@@ -1,18 +1,6 @@
 import { useState, useCallback } from 'react';
 import { GameState, Player, PlayerRole, GamePhase, ROLE_CONFIGS } from '@/types/game';
-
-const PLAYER_NAMES = [
-  '艾莉娅·星月',
-  '塞琳娜·紫薇', 
-  '露西亚·梦幻',
-  '伊莎贝拉·天使',
-  '薇薇安·玫瑰',
-  '奥菲莉亚·水晶',
-  '安吉丽娜·彩虹',
-  '克莉丝汀·雪花',
-  '莉莉丝·蝴蝶',
-  '黛安娜·月光'
-];
+import { generateUniqueNames } from '@/utils/nameGenerator';
 
 export const useGameLogic = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -35,18 +23,34 @@ export const useGameLogic = () => {
   const initGame = useCallback((playerCount: number = 6, selectedRole: PlayerRole | 'random' = 'random') => {
     // 根据玩家数量动态分配角色
     const generateRoles = (count: number): PlayerRole[] => {
-      const roles: PlayerRole[] = ['pooper']; // 至少有一个拉屎的人
+      const roles: PlayerRole[] = [];
       
-      // 添加隐藏角色：尿瓶子的人 (6人以上才出现)
-      if (count >= 6) roles.push('peebottler');
-      
-      // 添加功能角色
-      if (count >= 4) roles.push('dog'); // 4人以上有警犬
-      if (count >= 5) roles.push('cleaner'); // 5人以上有保洁员
-      
-      // 剩余位置都是孕妇
-      while (roles.length < count) {
-        roles.push('pregnant');
+      if (count <= 10) {
+        // 小规模游戏：原有逻辑
+        roles.push('pooper');
+        if (count >= 6) roles.push('peebottler');
+        if (count >= 4) roles.push('dog');
+        if (count >= 5) roles.push('cleaner');
+        while (roles.length < count) {
+          roles.push('pregnant');
+        }
+      } else {
+        // 大规模游戏（百人模式）：调整角色分配
+        const pooperCount = Math.max(2, Math.floor(count * 0.15)); // 15%拉屎的人
+        const peebottlerCount = Math.max(1, Math.floor(count * 0.1)); // 10%尿瓶子的人
+        const dogCount = Math.max(2, Math.floor(count * 0.1)); // 10%警犬
+        const cleanerCount = Math.max(2, Math.floor(count * 0.1)); // 10%保洁员
+        
+        // 添加角色
+        for (let i = 0; i < pooperCount; i++) roles.push('pooper');
+        for (let i = 0; i < peebottlerCount; i++) roles.push('peebottler');
+        for (let i = 0; i < dogCount; i++) roles.push('dog');
+        for (let i = 0; i < cleanerCount; i++) roles.push('cleaner');
+        
+        // 剩余都是孕妇
+        while (roles.length < count) {
+          roles.push('pregnant');
+        }
       }
       
       return roles;
@@ -79,6 +83,9 @@ export const useGameLogic = () => {
     remainingRoles.splice(playerRoleIndex, 1);
     const shuffledRemainingRoles = remainingRoles.sort(() => Math.random() - 0.5);
     
+    // 生成唯一的名字（排除第一个玩家）
+    const aiNames = generateUniqueNames(playerCount - 1);
+    
     // 创建玩家列表，第一个是玩家控制的角色
     const players: Player[] = [];
     let remainingRoleIndex = 0;
@@ -98,7 +105,7 @@ export const useGameLogic = () => {
         // AI控制的角色
         players.push({
           id: `player-${i}`,
-          name: PLAYER_NAMES[i-1],
+          name: aiNames[i-1],
           role: shuffledRemainingRoles[remainingRoleIndex++],
           isAlive: true,
           isProtected: false,
