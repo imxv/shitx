@@ -1,4 +1,4 @@
-export type PlayerRole = 'pooper' | 'pregnant' | 'dog' | 'cleaner';
+export type PlayerRole = 'pooper' | 'pregnant' | 'dog' | 'cleaner' | 'peebottler';
 
 export interface Player {
   id: string;
@@ -36,7 +36,7 @@ export const ROLE_CONFIGS: Record<PlayerRole, RoleConfig> = {
   pooper: {
     name: '拉屎的人',
     emoji: '💩',
-    description: '目标：隐藏身份，让所有孕妇出局',
+    description: '目标：隐藏身份，让所有好人出局',
     color: 'bg-red-500'
   },
   pregnant: {
@@ -56,5 +56,11 @@ export const ROLE_CONFIGS: Record<PlayerRole, RoleConfig> = {
     emoji: '🧹',
     description: '每晚可以保护一个孕妇不被恶心',
     color: 'bg-green-500'
+  },
+  peebottler: {
+    name: '尿瓶子的人',
+    emoji: '🍯',
+    description: '隐藏角色：知道拉屎的人是谁，目标与拉屎的人一致',
+    color: 'bg-yellow-600'
   }
 }; 

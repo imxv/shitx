@@ -12,6 +12,8 @@ export const GameBoard = () => {
   
   const alivePlayers = gameState.players.filter(p => p.isAlive);
   const userPlayer = gameState.players.find(p => p.role !== 'pregnant') || gameState.players[0];
+  const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
+  const peebottlerPlayer = gameState.players.find(p => p.role === 'peebottler');
   
   const handlePlayerSelect = (playerId: string) => {
     switch (selectedAction) {
@@ -104,16 +106,26 @@ export const GameBoard = () => {
               </select>
             </div>
             
-            {/* 角色配置说明 */}
-            <div className="text-sm text-gray-600 mb-4">
-              <p className="mb-2">👥 <strong>角色配置：</strong></p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>💩 拉屎的人：1人</li>
-                {playerCount >= 4 && <li>🐕‍🦺 警犬：1人 (4人以上)</li>}
-                {playerCount >= 5 && <li>🧹 保洁员：1人 (5人以上)</li>}
-                <li>🤰 孕妇：{playerCount - 1 - (playerCount >= 4 ? 1 : 0) - (playerCount >= 5 ? 1 : 0)}人</li>
-              </ul>
-            </div>
+                         {/* 角色配置说明 */}
+             <div className="text-sm text-gray-600 mb-4">
+               <p className="mb-2">👥 <strong>角色配置：</strong></p>
+                              <ul className="list-disc list-inside space-y-1">
+                  <li>💩 拉屎的人：1人</li>
+                  {playerCount >= 6 && <li>🍯 尿瓶子的人：1人 (6人以上，隐藏角色)</li>}
+                  {playerCount >= 4 && <li>🐕‍🦺 警犬：1人 (4人以上)</li>}
+                  {playerCount >= 5 && <li>🧹 保洁员：1人 (5人以上)</li>}
+                  <li>🤰 孕妇：{playerCount - 1 - (playerCount >= 4 ? 1 : 0) - (playerCount >= 5 ? 1 : 0) - (playerCount >= 6 ? 1 : 0)}人</li>
+                </ul>
+                
+                {playerCount >= 6 && (
+                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                    <p className="text-xs text-yellow-700">
+                      <strong>🤫 隐藏要素：</strong>尿瓶子的人知道拉屎的人是谁，但拉屎的人不知道尿瓶子的人的身份。
+                      他们是同伙，目标是让所有好人出局！
+                    </p>
+                  </div>
+                )}
+             </div>
           </div>
           
           <button 
@@ -150,21 +162,32 @@ export const GameBoard = () => {
           <div className="bg-white rounded-xl p-4 mb-6 shadow-lg">
             <h3 className="text-lg font-bold mb-2">你的角色</h3>
             <PlayerCard player={userPlayer} showRole={true} />
+            
+            {/* 尿瓶子的人特殊信息 */}
+            {userPlayer.role === 'peebottler' && pooperPlayer && (
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h4 className="font-bold text-yellow-800 mb-2">🤫 隐藏信息</h4>
+                <p className="text-sm text-yellow-700">
+                  你知道 <span className="font-bold">{pooperPlayer.name}</span> 是拉屎的人！
+                  你们是同伙，目标是让所有好人出局。
+                </p>
+              </div>
+            )}
           </div>
         )}
 
         {/* 游戏结束 */}
         {gameState.gameResult && (
           <div className="bg-white rounded-xl p-6 mb-6 shadow-lg text-center">
-            <h2 className="text-2xl font-bold mb-4">
-              {gameState.gameResult === 'goodWin' ? '🎉 好人获胜！' : '💩 拉屎的人获胜！'}
-            </h2>
-            <p className="text-lg mb-4">
-              {gameState.gameResult === 'goodWin' 
-                ? '成功找出了拉屎的人！' 
-                : '所有孕妇都被恶心出局了！'
-              }
-            </p>
+                         <h2 className="text-2xl font-bold mb-4">
+               {gameState.gameResult === 'goodWin' ? '🎉 好人获胜！' : '💩 邪恶阵营获胜！'}
+             </h2>
+                         <p className="text-lg mb-4">
+               {gameState.gameResult === 'goodWin' 
+                 ? '成功找出了拉屎的人！' 
+                 : '邪恶阵营获胜！拉屎的人和尿瓶子的人笑到了最后！'
+               }
+             </p>
                          <button 
                onClick={() => initGame(playerCount)}
                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"

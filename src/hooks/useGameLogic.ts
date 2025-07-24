@@ -35,6 +35,9 @@ export const useGameLogic = () => {
     const generateRoles = (count: number): PlayerRole[] => {
       const roles: PlayerRole[] = ['pooper']; // 至少有一个拉屎的人
       
+      // 添加隐藏角色：尿瓶子的人 (6人以上才出现)
+      if (count >= 6) roles.push('peebottler');
+      
       // 添加功能角色
       if (count >= 4) roles.push('dog'); // 4人以上有警犬
       if (count >= 5) roles.push('cleaner'); // 5人以上有保洁员
@@ -167,13 +170,17 @@ export const useGameLogic = () => {
       // 检查游戏结束条件
       const alivePlayers = prev.players.filter(p => p.isAlive);
       const alivePooper = alivePlayers.find(p => p.role === 'pooper');
-      const alivePregnant = alivePlayers.filter(p => p.role === 'pregnant');
+      const alivePeebottler = alivePlayers.find(p => p.role === 'peebottler');
+      const aliveGoodGuys = alivePlayers.filter(p => p.role === 'pregnant' || p.role === 'dog' || p.role === 'cleaner');
       
       let gameResult: 'pooperWin' | 'goodWin' | null = null;
       
+      // 如果拉屎的人被投票出局，好人获胜
       if (!alivePooper) {
         gameResult = 'goodWin';
-      } else if (alivePregnant.length === 0) {
+      } 
+      // 如果所有好人都出局了，拉屎的人和尿瓶子的人获胜
+      else if (aliveGoodGuys.length === 0) {
         gameResult = 'pooperWin';
       }
       
@@ -182,9 +189,9 @@ export const useGameLogic = () => {
           ...prev,
           phase: 'gameOver' as GamePhase,
           gameResult,
-          actionHistory: [...prev.actionHistory, 
-            gameResult === 'goodWin' ? '好人获胜！拉屎的人被找出来了！' : '拉屎的人获胜！所有孕妇都出局了！'
-          ]
+                  actionHistory: [...prev.actionHistory, 
+          gameResult === 'goodWin' ? '好人获胜！拉屎的人被找出来了！' : '邪恶阵营获胜！拉屎的人和尿瓶子的人笑到了最后！'
+        ]
         };
       }
       
