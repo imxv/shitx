@@ -141,8 +141,8 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
           )}
           
           <div className="bg-white rounded-3xl shadow-2xl p-8">
-            <h1 className="text-5xl font-bold text-center mb-4">💩 找屎游戏 💩</h1>
-            <p className="text-xl text-gray-600 text-center mb-8">百人大逃杀版</p>
+            <h1 className="text-5xl font-bold text-center mb-4">💩 ShitX 💩</h1>
+            <p className="text-xl text-gray-600 text-center mb-8">在那个有味道的夏天</p>
             
             <div className="space-y-6">
               <div>

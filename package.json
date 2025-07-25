@@ -1,6 +1,7 @@
 {
-  "name": "shit-finder-game",
+  "name": "shitx",
   "version": "0.1.0",
+  "description": "创造失眠，在那个有味道的夏天 - 一款充满黑色幽默的多人社交推理游戏",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

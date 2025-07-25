@@ -147,8 +147,8 @@ export default function Home() {
       <div className="max-w-6xl mx-auto">
         {/* 标题 */}
         <div className="text-center py-8">
-          <h1 className="text-6xl font-bold text-gray-800 mb-4">💩 找屎游戏</h1>
-          <p className="text-xl text-gray-600">创造失眠</p>
+          <h1 className="text-6xl font-bold text-gray-800 mb-4">💩 ShitX</h1>
+          <p className="text-xl text-gray-600">创造失眠，在那个有味道的夏天</p>
         </div>
 
         {/* 游戏规则 */}
