@@ -3,6 +3,7 @@
 import { GameBoardV3 } from '@/components/GameBoardV3';
 import { ROLE_CONFIGS, PlayerRole } from '@/types/game';
 import { useState } from 'react';
+import { getRoleDistribution, roleEmojis, roleNames } from '@/utils/gameUtilsV3';
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<'home' | 'config' | 'game'>('home');
@@ -33,7 +34,14 @@ export default function Home() {
             
             {/* 玩家数量选择 */}
             <div className="mb-8">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">玩家数量</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800">玩家数量</h3>
+                {gameConfig.playerCount > 10 && (
+                  <span className="text-sm text-yellow-600 font-medium px-2 py-1 bg-yellow-50 rounded-full">
+                    ⚡ 百人大逃杀模式
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-4">
                 <input
                   type="range"
@@ -52,6 +60,29 @@ export default function Home() {
                 <span>5人</span>
                 <span>50人</span>
                 <span>100人</span>
+              </div>
+              
+              {/* 角色分配实时显示 */}
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {Object.entries(getRoleDistribution(gameConfig.playerCount)).map(([role, count]) => (
+                    <div 
+                      key={role} 
+                      className="flex items-center gap-1 bg-white px-3 py-1 rounded-full text-sm shadow-sm"
+                    >
+                      <span className="text-lg">{roleEmojis[role as PlayerRole]}</span>
+                      <span className="font-medium text-gray-700">{roleNames[role as PlayerRole]}</span>
+                      <span className="font-bold text-gray-900">{count}</span>
+                    </div>
+                  ))}
+                </div>
+                {gameConfig.playerCount > 10 && (
+                  <div className="mt-3 text-center text-sm">
+                    <span className="text-red-600 font-medium">邪恶阵营 {Math.floor(gameConfig.playerCount * 0.15)}人</span>
+                    <span className="mx-2 text-gray-400">vs</span>
+                    <span className="text-blue-600 font-medium">好人阵营 {gameConfig.playerCount - Math.floor(gameConfig.playerCount * 0.15)}人</span>
+                  </div>
+                )}
               </div>
             </div>
 

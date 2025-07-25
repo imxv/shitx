@@ -3,7 +3,8 @@
 import { useGameV3 } from '@/hooks/useGameV3';
 import { PlayerCardV3 } from './PlayerCardV3';
 import { ROLE_CONFIGS, PlayerRole } from '@/types/game';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getRoleDistribution, roleEmojis, roleNames } from '@/utils/gameUtilsV3';
 
 interface GameBoardV3Props {
   onReturnHome?: () => void;
@@ -66,6 +67,17 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
     return phaseDescriptions[gameState.currentPhase] || gameState.currentPhase;
   };
   
+  // 获取背景样式（根据游戏阶段）
+  const getBackgroundStyle = () => {
+    const isNightPhase = ['nightBegin', 'nightAction', 'nightSettlement'].includes(gameState.currentPhase);
+    
+    if (isNightPhase) {
+      return 'bg-gradient-to-b from-gray-800 to-gray-900'; // 夜晚：深色背景
+    } else {
+      return 'bg-gradient-to-b from-yellow-50 to-yellow-100'; // 白天：亮色背景
+    }
+  };
+
   // 获取行动按钮配置
   const getActionButtons = () => {
     if (!humanPlayer?.isAlive || !canAct) return [];
@@ -106,9 +118,15 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
     return [];
   };
   
-  // 游戏未开始的界面
-  if (gameState.currentPhase === 'gameStart') {
-    const actualPlayerCount = gameConfig?.playerCount || playerCount;
+  // 如果有游戏配置，直接开始游戏
+  useEffect(() => {
+    if (gameState.currentPhase === 'gameStart' && gameConfig) {
+      startGame(gameConfig.playerCount, gameConfig.selectedRole);
+    }
+  }, [gameState.currentPhase, gameConfig, startGame]);
+  
+  // 游戏未开始的界面（仅在没有配置时显示）
+  if (gameState.currentPhase === 'gameStart' && !gameConfig) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-yellow-100 p-4">
         <div className="max-w-2xl mx-auto">
@@ -128,41 +146,55 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
             
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  玩家数量：{actualPlayerCount}人
-                </label>
-                {!gameConfig && (
-                  <>
-                    <input
-                      type="range"
-                      min="5"
-                      max="100"
-                      value={playerCount}
-                      onChange={(e) => setPlayerCount(Number(e.target.value))}
-                      className="w-full h-2 bg-yellow-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>5人</span>
-                      <span>50人</span>
-                      <span>100人</span>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    玩家数量：{playerCount}人
+                  </label>
+                  {playerCount > 10 && (
+                    <span className="text-xs text-yellow-600 font-medium">
+                      ⚡ 百人大逃杀模式
+                    </span>
+                  )}
+                </div>
+                
+                <input
+                  type="range"
+                  min="5"
+                  max="100"
+                  value={playerCount}
+                  onChange={(e) => setPlayerCount(Number(e.target.value))}
+                  className="w-full h-2 bg-yellow-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>5人</span>
+                  <span>50人</span>
+                  <span>100人</span>
+                </div>
+                
+                {/* 角色分配实时显示 */}
+                <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                  {Object.entries(getRoleDistribution(playerCount)).map(([role, count]) => (
+                    <div 
+                      key={role} 
+                      className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full text-xs"
+                    >
+                      <span>{roleEmojis[role as PlayerRole]}</span>
+                      <span className="font-medium">{count}</span>
                     </div>
-                  </>
+                  ))}
+                </div>
+                
+                {playerCount > 10 && (
+                  <div className="mt-2 text-center text-xs text-gray-500">
+                    <span className="text-red-600">邪恶 {Math.floor(playerCount * 0.15)}人</span>
+                    <span className="mx-2">vs</span>
+                    <span className="text-blue-600">好人 {playerCount - Math.floor(playerCount * 0.15)}人</span>
+                  </div>
                 )}
               </div>
               
-              {/* 显示选中的角色 */}
-              {gameConfig?.selectedRole && gameConfig.selectedRole !== 'random' && (
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">你选择的角色：</p>
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-2xl">{ROLE_CONFIGS[gameConfig.selectedRole].emoji}</span>
-                    <span className="font-bold">{ROLE_CONFIGS[gameConfig.selectedRole].name}</span>
-                  </div>
-                </div>
-              )}
-              
               <button
-                onClick={() => startGame(actualPlayerCount, gameConfig?.selectedRole)}
+                onClick={() => startGame(playerCount)}
                 className="w-full py-4 px-6 bg-yellow-500 hover:bg-yellow-600 text-white text-xl font-bold rounded-2xl transform hover:scale-105 transition-all shadow-lg"
               >
                 开始游戏
@@ -175,29 +207,44 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
   }
   
   // 游戏进行中的界面
+  const isNightPhase = ['nightBegin', 'nightAction', 'nightSettlement'].includes(gameState.currentPhase);
+  
   return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-yellow-100 p-4">
+    <div className={`min-h-screen ${getBackgroundStyle()} p-4 transition-all duration-1000`}>
       <div className="max-w-7xl mx-auto">
         {/* 返回按钮 */}
         {onReturnHome && (
           <button
             onClick={onReturnHome}
-            className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+            className={`mb-4 px-4 py-2 rounded-lg transition-colors ${
+              isNightPhase 
+                ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+            }`}
           >
             ← 返回主页
           </button>
         )}
         
         {/* 顶部状态栏 */}
-        <div className="bg-white rounded-2xl p-4 mb-6 shadow-lg">
+        <div className={`rounded-2xl p-4 mb-6 shadow-lg transition-all duration-1000 ${
+          isNightPhase ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold">第 {currentDay} 天</h2>
-              <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{isNightPhase ? '🌙' : '☀️'}</span>
+                <h2 className="text-2xl font-bold">第 {currentDay} 天</h2>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                isNightPhase 
+                  ? 'bg-purple-900 text-purple-200' 
+                  : 'bg-blue-100 text-blue-700'
+              }`}>
                 {getPhaseDescription()}
               </div>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className={`text-sm ${isNightPhase ? 'text-gray-300' : 'text-gray-500'}`}>
               剩余 {alivePlayers.length} / {gameState.players.length} 人
             </div>
           </div>
@@ -205,11 +252,15 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
           {/* 进度条 */}
           {voteProgress && (
             <div className="mt-3">
-              <div className="flex justify-between text-xs text-gray-500 mb-1">
+              <div className={`flex justify-between text-xs mb-1 ${
+                isNightPhase ? 'text-gray-300' : 'text-gray-500'
+              }`}>
                 <span>投票进度</span>
                 <span>{voteProgress.submitted}/{voteProgress.total}</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className={`w-full rounded-full h-2 ${
+                isNightPhase ? 'bg-gray-600' : 'bg-gray-200'
+              }`}>
                 <div 
                   className="bg-blue-500 h-2 rounded-full transition-all"
                   style={{ width: `${(voteProgress.submitted / voteProgress.total) * 100}%` }}
@@ -220,11 +271,15 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
           
           {nightActionProgress && (
             <div className="mt-3">
-              <div className="flex justify-between text-xs text-gray-500 mb-1">
+              <div className={`flex justify-between text-xs mb-1 ${
+                isNightPhase ? 'text-gray-300' : 'text-gray-500'
+              }`}>
                 <span>夜晚行动进度</span>
                 <span>{nightActionProgress.submitted}/{nightActionProgress.total}</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className={`w-full rounded-full h-2 ${
+                isNightPhase ? 'bg-gray-600' : 'bg-gray-200'
+              }`}>
                 <div 
                   className="bg-purple-500 h-2 rounded-full transition-all"
                   style={{ width: `${(nightActionProgress.submitted / nightActionProgress.total) * 100}%` }}
@@ -238,8 +293,12 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
           {/* 左侧 - 游戏主区域 */}
           <div className="lg:col-span-2 space-y-6">
             {/* 玩家网格 */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">游戏参与者</h3>
+            <div className={`rounded-2xl p-6 shadow-lg transition-all duration-1000 ${
+              isNightPhase ? 'bg-gray-700' : 'bg-white'
+            }`}>
+              <h3 className={`text-xl font-bold mb-4 ${
+                isNightPhase ? 'text-gray-200' : 'text-gray-800'
+              }`}>游戏参与者</h3>
               
               <div className={`${
                 gameState.players.length > 20 ? 'max-h-96 overflow-y-auto pr-2' : ''
@@ -267,13 +326,21 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
               
               {/* 尿在瓶子的人特殊信息 */}
               {humanPlayer?.role === 'peebottler' && pooperPlayer && (
-                <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                <div className={`mt-4 p-4 border-2 rounded-xl ${
+                  isNightPhase 
+                    ? 'bg-yellow-900/20 border-yellow-700' 
+                    : 'bg-yellow-50 border-yellow-200'
+                }`}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">🤫</span>
-                    <h4 className="font-bold text-yellow-800">隐藏信息</h4>
+                    <h4 className={`font-bold ${
+                      isNightPhase ? 'text-yellow-300' : 'text-yellow-800'
+                    }`}>隐藏信息</h4>
                   </div>
-                  <p className="text-yellow-700">
-                    你知道 <span className="font-bold text-yellow-900">{pooperPlayer.name}</span> 是拉屎的人！
+                  <p className={isNightPhase ? 'text-yellow-200' : 'text-yellow-700'}>
+                    你知道 <span className={`font-bold ${
+                      isNightPhase ? 'text-yellow-100' : 'text-yellow-900'
+                    }`}>{pooperPlayer.name}</span> 是拉屎的人！
                     你们是同伙，目标是让所有好人取消参赛资格。
                   </p>
                 </div>
@@ -281,8 +348,12 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
             </div>
             
             {/* 行动区域 */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">行动面板</h3>
+            <div className={`rounded-2xl p-6 shadow-lg transition-all duration-1000 ${
+              isNightPhase ? 'bg-gray-700' : 'bg-white'
+            }`}>
+              <h3 className={`text-xl font-bold mb-4 ${
+                isNightPhase ? 'text-gray-200' : 'text-gray-800'
+              }`}>行动面板</h3>
               
               {/* 行动按钮 */}
               <div className="space-y-3">
@@ -306,9 +377,13 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
               
               {/* 等待其他玩家 */}
               {!canAct && humanPlayer?.isAlive && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-xl text-center">
+                <div className={`mt-4 p-4 rounded-xl text-center ${
+                  isNightPhase ? 'bg-gray-600' : 'bg-gray-50'
+                }`}>
                   <div className="text-3xl mb-2">⏳</div>
-                  <p className="text-gray-600">等待其他玩家行动...</p>
+                  <p className={isNightPhase ? 'text-gray-300' : 'text-gray-600'}>
+                    等待其他玩家行动...
+                  </p>
                 </div>
               )}
               
@@ -316,8 +391,12 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
               {!humanPlayer?.isAlive && !isGameOver && (
                 <div className="text-center">
                   <div className="text-6xl mb-4">👻</div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">观战模式</h3>
-                  <p className="text-gray-600">你已被取消参赛资格，正在观看游戏进行...</p>
+                  <h3 className={`text-xl font-bold mb-2 ${
+                    isNightPhase ? 'text-gray-200' : 'text-gray-800'
+                  }`}>观战模式</h3>
+                  <p className={isNightPhase ? 'text-gray-300' : 'text-gray-600'}>
+                    你已被取消参赛资格，正在观看游戏进行...
+                  </p>
                 </div>
               )}
             </div>
@@ -327,12 +406,20 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
           <div className="space-y-6">
             {/* 角色信息 */}
             {humanPlayer && (
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">你的角色</h3>
+              <div className={`rounded-2xl p-6 shadow-lg transition-all duration-1000 ${
+                isNightPhase ? 'bg-gray-700' : 'bg-white'
+              }`}>
+                <h3 className={`text-lg font-bold mb-4 ${
+                  isNightPhase ? 'text-gray-200' : 'text-gray-800'
+                }`}>你的角色</h3>
                 <div className="text-center">
                   <div className="text-6xl mb-3">{ROLE_CONFIGS[humanPlayer.role].emoji}</div>
-                  <h4 className="text-xl font-bold text-gray-800 mb-2">{ROLE_CONFIGS[humanPlayer.role].name}</h4>
-                  <p className="text-sm text-gray-600">{ROLE_CONFIGS[humanPlayer.role].description}</p>
+                  <h4 className={`text-xl font-bold mb-2 ${
+                    isNightPhase ? 'text-gray-200' : 'text-gray-800'
+                  }`}>{ROLE_CONFIGS[humanPlayer.role].name}</h4>
+                  <p className={`text-sm ${
+                    isNightPhase ? 'text-gray-300' : 'text-gray-600'
+                  }`}>{ROLE_CONFIGS[humanPlayer.role].description}</p>
                   
                   {!humanPlayer.isAlive && (
                     <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded-xl">
@@ -346,10 +433,16 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
             
             {/* 阵亡名单 */}
             {gameState.players.filter(p => !p.isAlive).length > 0 && (
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <div className={`rounded-2xl p-6 shadow-lg transition-all duration-1000 ${
+                isNightPhase ? 'bg-gray-700' : 'bg-white'
+              }`}>
+                <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${
+                  isNightPhase ? 'text-gray-200' : 'text-gray-800'
+                }`}>
                   <span>💀 阵亡名单</span>
-                  <span className="text-sm text-gray-500">({gameState.players.filter(p => !p.isAlive).length}人)</span>
+                  <span className={`text-sm ${
+                    isNightPhase ? 'text-gray-400' : 'text-gray-500'
+                  }`}>({gameState.players.filter(p => !p.isAlive).length}人)</span>
                 </h3>
                 <div className="max-h-48 overflow-y-auto pr-2 space-y-2">
                   {gameState.players
@@ -365,13 +458,21 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
                       return (
                         <div 
                           key={player.id} 
-                          className="flex items-center justify-between p-2 bg-gray-100 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                          className={`flex items-center justify-between p-2 rounded-lg text-sm transition-colors ${
+                            isNightPhase 
+                              ? 'bg-gray-600 hover:bg-gray-500' 
+                              : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
                         >
                           <div className="flex items-center gap-2">
                             <span className="opacity-50">{ROLE_CONFIGS[player.role].emoji}</span>
-                            <span className="text-gray-600 line-through">{player.name}</span>
+                            <span className={`line-through ${
+                              isNightPhase ? 'text-gray-300' : 'text-gray-600'
+                            }`}>{player.name}</span>
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className={`text-xs ${
+                            isNightPhase ? 'text-gray-400' : 'text-gray-500'
+                          }`}>
                             <span>第{player.deathDay}天</span>
                             <span className="mx-1">·</span>
                             <span>{deathCauseText[player.deathCause || 'voted']}</span>
@@ -384,19 +485,31 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
             )}
             
             {/* 游戏历史 */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">游戏记录</h3>
+            <div className={`rounded-2xl p-6 shadow-lg transition-all duration-1000 ${
+              isNightPhase ? 'bg-gray-700' : 'bg-white'
+            }`}>
+              <h3 className={`text-lg font-bold mb-4 ${
+                isNightPhase ? 'text-gray-200' : 'text-gray-800'
+              }`}>游戏记录</h3>
               <div className="max-h-96 overflow-y-auto space-y-2 pr-2">
                 {gameState.actionHistory.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">暂无记录</p>
+                  <p className={`text-center py-8 ${
+                    isNightPhase ? 'text-gray-400' : 'text-gray-500'
+                  }`}>暂无记录</p>
                 ) : (
                   gameState.actionHistory.map((action, index) => (
                     <div 
                       key={index} 
-                      className="p-3 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm transition-colors"
+                      className={`p-3 rounded-lg text-sm transition-colors ${
+                        isNightPhase 
+                          ? 'bg-gray-600 hover:bg-gray-500 text-gray-200' 
+                          : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
+                      }`}
                     >
                       <div className="flex items-start gap-2">
-                        <span className="text-gray-400 text-xs mt-0.5">{index + 1}.</span>
+                        <span className={`text-xs mt-0.5 ${
+                          isNightPhase ? 'text-gray-500' : 'text-gray-400'
+                        }`}>{index + 1}.</span>
                         <span className="flex-1 whitespace-pre-wrap">{action}</span>
                       </div>
                     </div>

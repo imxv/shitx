@@ -12,7 +12,7 @@ const ROLE_DISTRIBUTION: Record<number, Record<PlayerRole, number>> = {
 };
 
 // 获取角色分配
-function getRoleDistribution(playerCount: number): Record<PlayerRole, number> {
+export function getRoleDistribution(playerCount: number): Record<PlayerRole, number> {
   if (playerCount <= 10) {
     return ROLE_DISTRIBUTION[playerCount] || ROLE_DISTRIBUTION[10];
   }
