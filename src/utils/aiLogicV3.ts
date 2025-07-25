@@ -1,4 +1,4 @@
-import { Player, GameStateV3, PlayerAction } from '../types/gameV3';
+import { Player, GameStateV3 } from '../types/gameV3';
 
 // AI 投票逻辑
 export function getAIVoteTargetV3(voter: Player, gameState: GameStateV3): string | null {

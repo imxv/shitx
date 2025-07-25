@@ -166,7 +166,6 @@ function gameReducer(state: GameStateV3, event: GameEventV3): GameStateV3 {
       };
       
       // 根据行动类型记录
-      const actor = state.players.find(p => p.id === action.actorId);
       switch (action.actionType) {
         case 'protect':
           newActions.protectActions.set(action.actorId, action.targetId);
@@ -441,7 +440,7 @@ export function useGameV3() {
         }, 1000 + index * 500);
       });
     }
-  }, [state.currentPhase, state.currentDayVotes, state.currentNightActions, state.players]);
+  }, [state.currentPhase, state.currentDayVotes, state.currentNightActions, state.players, state]);
   
   // 返回接口
   const humanPlayer = state.players.find(p => p.id === state.humanPlayerId);

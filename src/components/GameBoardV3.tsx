@@ -2,7 +2,7 @@
 
 import { useGameV3 } from '@/hooks/useGameV3';
 import { PlayerCardV3 } from './PlayerCardV3';
-import { ROLE_CONFIGS, PlayerRole } from '@/types/game';
+import { ROLE_CONFIGS } from '@/types/game';
 import { useState } from 'react';
 
 export const GameBoardV3 = () => {
@@ -22,7 +22,6 @@ export const GameBoardV3 = () => {
   
   const [selectedAction, setSelectedAction] = useState<'vote' | 'protect' | 'check' | 'disgust' | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(6);
-  const [selectedRole, setSelectedRole] = useState<PlayerRole | 'random'>('random');
   
   const pooperPlayer = gameState.players.find(p => p.role === 'pooper');
   
@@ -246,7 +245,7 @@ export const GameBoardV3 = () => {
                 {getActionButtons().map(button => (
                   <button
                     key={button.id}
-                    onClick={() => setSelectedAction(button.id as any)}
+                    onClick={() => setSelectedAction(button.id as 'vote' | 'protect' | 'check' | 'disgust')}
                     disabled={!button.enabled || selectedAction === button.id}
                     className={`w-full py-3 px-4 rounded-xl font-medium transition-all ${
                       selectedAction === button.id

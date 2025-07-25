@@ -285,7 +285,7 @@ export function settleNightActions(
   });
   
   // 3. 处理恶心（考虑保护）
-  actions.disgustActions.forEach((targetId, pooperId) => {
+  actions.disgustActions.forEach((targetId) => {
     if (!protectedPlayers.has(targetId)) {
       disgustedPlayers.add(targetId);
       actualDeaths.push(targetId);
