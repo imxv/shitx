@@ -58,7 +58,7 @@ export default function BackgroundMusic() {
     <>
       <audio
         ref={audioRef}
-        src="/epic-music.mp3"
+        src="/shit4u.mp3"
         loop
         preload="auto"
       />
