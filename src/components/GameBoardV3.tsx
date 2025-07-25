@@ -118,6 +118,19 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
     return [];
   };
   
+  // 计算每个玩家的得票数
+  const getPlayerVoteCount = (playerId: string): number => {
+    if (!gameState.currentDayVotes) return 0;
+    
+    let count = 0;
+    gameState.currentDayVotes.votes.forEach((targetId) => {
+      if (targetId === playerId) {
+        count++;
+      }
+    });
+    return count;
+  };
+  
   // 如果有游戏配置，直接开始游戏
   useEffect(() => {
     if (gameState.currentPhase === 'gameStart' && gameConfig) {
@@ -306,7 +319,7 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
                 <div className={`grid gap-4 ${
                   gameState.players.length > 50 
                     ? 'grid-cols-4 md:grid-cols-6 lg:grid-cols-8' 
-                    : gameState.players.length > 20 
+                    :  gameState.players.length > 20 
                     ? 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
                     : 'grid-cols-2 md:grid-cols-3'
                 }`}>
@@ -319,6 +332,8 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
                       showRole={isGameOver || player.id === gameState.humanPlayerId}
                       isCurrentPlayer={player.id === gameState.humanPlayerId}
                       compact={gameState.players.length > 20}
+                      voteCount={getPlayerVoteCount(player.id)}
+                      showVoteCount={gameState.currentPhase === 'dayVoting'}
                     />
                   ))}
                 </div>
