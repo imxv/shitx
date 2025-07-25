@@ -8,6 +8,7 @@ interface PlayerCardV3Props {
   showRole?: boolean;
   isCurrentPlayer?: boolean;
   compact?: boolean;
+  isNightPhase?: boolean;
 }
 
 export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
@@ -16,7 +17,8 @@ export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
   onSelect,
   showRole = false,
   isCurrentPlayer = false,
-  compact = false
+  compact = false,
+  isNightPhase = false
 }) => {
   const handleClick = () => {
     if (isSelectable && onSelect) {
@@ -35,7 +37,7 @@ export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
           relative p-2 rounded-lg transition-all duration-200 cursor-pointer
           ${isCurrentPlayer ? 'ring-2 ring-blue-500' : ''}
           ${isSelectable ? 'hover:scale-110 hover:z-10' : ''}
-          ${player.isAlive ? 'bg-white' : 'bg-gray-200 opacity-50'}
+          ${player.isAlive ? (isNightPhase ? 'bg-gray-600' : 'bg-white') : 'bg-gray-200 opacity-50'}
           ${isSelectable && player.isAlive ? 'hover:shadow-lg' : ''}
         `}
       >
@@ -43,7 +45,7 @@ export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
           <div className="text-2xl mb-1">
             {showRole ? roleConfig.emoji : '👤'}
           </div>
-          <div className="text-xs font-medium truncate">
+          <div className={`text-xs font-medium truncate ${isNightPhase ? 'text-gray-100' : 'text-gray-800'}`}>
             {player.name}
           </div>
           {!player.isAlive && (
@@ -61,7 +63,8 @@ export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
     <div
       onClick={handleClick}
       className={`
-        relative p-4 bg-white rounded-xl shadow-md transition-all duration-200
+        relative p-4 rounded-xl shadow-md transition-all duration-200
+        ${isNightPhase ? 'bg-gray-600' : 'bg-white'}
         ${isCurrentPlayer ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
         ${isSelectable ? 'hover:scale-105 hover:shadow-xl cursor-pointer' : ''}
         ${!player.isAlive ? 'opacity-50 grayscale' : ''}
@@ -88,13 +91,13 @@ export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
         </div>
         
         {/* 玩家名称 */}
-        <h3 className="font-bold text-gray-800 truncate">
+        <h3 className={`font-bold truncate ${isNightPhase ? 'text-gray-100' : 'text-gray-800'}`}>
           {player.name}
         </h3>
         
         {/* 角色名称 */}
         {showRole && (
-          <p className="text-xs text-gray-600 mt-1">
+          <p className={`text-xs mt-1 ${isNightPhase ? 'text-gray-300' : 'text-gray-600'}`}>
             {roleConfig.name}
           </p>
         )}

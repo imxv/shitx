@@ -73,16 +73,16 @@ export default function Home() {
                       className="flex items-center gap-1 bg-gray-800 px-3 py-1 rounded-full text-sm shadow-sm border border-gray-700"
                     >
                       <span className="text-lg">{roleEmojis[role as PlayerRole]}</span>
-                      <span className="font-medium text-gray-700">{roleNames[role as PlayerRole]}</span>
-                      <span className="font-bold text-gray-900">{count}</span>
+                      <span className="font-medium text-gray-300">{roleNames[role as PlayerRole]}</span>
+                      <span className="font-bold text-gray-100">{count}</span>
                     </div>
                   ))}
                 </div>
                 {gameConfig.playerCount > 10 && (
                   <div className="mt-3 text-center text-sm">
-                    <span className="text-red-600 font-medium">邪恶阵营 {Math.floor(gameConfig.playerCount * 0.15)}人</span>
-                    <span className="mx-2 text-gray-400">vs</span>
-                    <span className="text-blue-600 font-medium">好人阵营 {gameConfig.playerCount - Math.floor(gameConfig.playerCount * 0.15)}人</span>
+                    <span className="text-red-400 font-medium">邪恶阵营 {Math.floor(gameConfig.playerCount * 0.15)}人</span>
+                    <span className="mx-2 text-gray-500">vs</span>
+                    <span className="text-green-400 font-medium">好人阵营 {gameConfig.playerCount - Math.floor(gameConfig.playerCount * 0.15)}人</span>
                   </div>
                 )}
               </div>

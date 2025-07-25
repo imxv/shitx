@@ -319,6 +319,7 @@ export const GameBoardV3 = ({ onReturnHome, gameConfig }: GameBoardV3Props) => {
                       showRole={isGameOver || player.id === gameState.humanPlayerId}
                       isCurrentPlayer={player.id === gameState.humanPlayerId}
                       compact={gameState.players.length > 20}
+                      isNightPhase={isNightPhase}
                     />
                   ))}
                 </div>
