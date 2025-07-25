@@ -60,7 +60,7 @@ export const ROLE_CONFIGS: Record<PlayerRole, RoleConfig> = {
     color: 'bg-green-500'
   },
   peebottler: {
-    name: '尿瓶子的人',
+    name: '尿在瓶子的人',
     emoji: '🍯',
     description: '隐藏角色：知道拉屎的人是谁，目标与拉屎的人一致',
     color: 'bg-yellow-600'

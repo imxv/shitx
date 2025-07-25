@@ -17,7 +17,7 @@ export type GamePhaseV3 =
 // 角色定义
 export type PlayerRole = 
   | 'pooper'      // 💩 拉屎的人
-  | 'peebottler'  // 🍯 尿瓶子的人
+  | 'peebottler'  // 🍯 尿在瓶子的人
   | 'pregnant'    // 🤰 孕妇
   | 'dog'         // 🐕‍🦺 警犬
   | 'cleaner';    // 🧹 保洁员
@@ -134,6 +134,7 @@ export interface DayLog {
 // 游戏配置
 export interface GameConfig {
   playerCount: number;
+  selectedRole?: string;        // 用户选择的角色
   showDetailedVotes: boolean;
   enableDeathAnimation: boolean;
   actionTimeout: number;        // 行动超时时间

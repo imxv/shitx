@@ -38,7 +38,7 @@ export function getAIVoteTargetV3(voter: Player, gameState: GameStateV3): string
     // 分析投票历史，找出可疑的人
     if (gameState.lastDaySettlement) {
       const lastVotes = gameState.lastDaySettlement.voteCount;
-      // 找出上轮得票最少的人（可能是拉屎的人和尿瓶子的人互相保护）
+      // 找出上轮得票最少的人（可能是拉屎的人和尿在瓶子的人互相保护）
       let minVotes = Infinity;
       let suspiciousPlayers: string[] = [];
       

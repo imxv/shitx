@@ -37,7 +37,7 @@ function gameReducer(state: GameStateV3, event: GameEventV3): GameStateV3 {
   
   switch (event.type) {
     case 'START_GAME': {
-      const players = initializePlayersV3(event.config.playerCount);
+      const players = initializePlayersV3(event.config.playerCount, event.config.selectedRole);
       return {
         ...initialState,
         gameId: `game-${Date.now()}`,
@@ -330,11 +330,12 @@ export function useGameV3() {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   
   // 开始游戏
-  const startGame = useCallback((playerCount: number) => {
+  const startGame = useCallback((playerCount: number, selectedRole?: string) => {
     dispatch({
       type: 'START_GAME',
       config: {
         playerCount,
+        selectedRole,
         showDetailedVotes: true,
         enableDeathAnimation: true,
         actionTimeout: 30000,
