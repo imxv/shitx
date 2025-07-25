@@ -4,6 +4,7 @@ import { GameBoardV3 } from '@/components/GameBoardV3';
 import { ROLE_CONFIGS, PlayerRole } from '@/types/game';
 import { useState } from 'react';
 import { getRoleDistribution, roleEmojis, roleNames } from '@/utils/gameUtilsV3';
+import './hackathon.css';
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<'home' | 'config' | 'game'>('home');
@@ -18,24 +19,25 @@ export default function Home() {
 
   if (currentView === 'config') {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-        <div className="max-w-4xl mx-auto">
+      <main className="min-h-screen cyber-gradient p-4 relative overflow-hidden">
+        <div className="scan-line absolute inset-0"></div>
+        <div className="max-w-4xl mx-auto relative z-10">
           {/* 返回按钮 */}
           <button
             onClick={() => setCurrentView('home')}
-            className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+            className="mb-6 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-green-400 rounded-lg transition-colors border border-gray-700 hover:border-green-500"
           >
             ← 返回
           </button>
 
           {/* 游戏配置 */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">游戏配置</h2>
+          <div className="bg-gray-900 border border-green-500 rounded-2xl p-8 shadow-2xl shadow-green-500/20">
+            <h2 className="text-3xl font-bold text-green-400 mb-8 text-center neon-glow">游戏配置</h2>
             
             {/* 玩家数量选择 */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-800">玩家数量</h3>
+                <h3 className="text-xl font-bold text-green-400">玩家数量</h3>
                 {gameConfig.playerCount > 10 && (
                   <span className="text-sm text-yellow-600 font-medium px-2 py-1 bg-yellow-50 rounded-full">
                     ⚡ 百人大逃杀模式
@@ -49,10 +51,10 @@ export default function Home() {
                   max="100"
                   value={gameConfig.playerCount}
                   onChange={(e) => setGameConfig({...gameConfig, playerCount: parseInt(e.target.value)})}
-                  className="flex-1 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                  className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="min-w-[60px] text-center">
-                  <span className="text-2xl font-bold text-blue-600">{gameConfig.playerCount}</span>
+                  <span className="text-2xl font-bold text-green-400">{gameConfig.playerCount}</span>
                   <div className="text-sm text-gray-500">人</div>
                 </div>
               </div>
@@ -63,12 +65,12 @@ export default function Home() {
               </div>
               
               {/* 角色分配实时显示 */}
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
                 <div className="flex flex-wrap gap-2 justify-center">
                   {Object.entries(getRoleDistribution(gameConfig.playerCount)).map(([role, count]) => (
                     <div 
                       key={role} 
-                      className="flex items-center gap-1 bg-white px-3 py-1 rounded-full text-sm shadow-sm"
+                      className="flex items-center gap-1 bg-gray-800 px-3 py-1 rounded-full text-sm shadow-sm border border-gray-700"
                     >
                       <span className="text-lg">{roleEmojis[role as PlayerRole]}</span>
                       <span className="font-medium text-gray-700">{roleNames[role as PlayerRole]}</span>
@@ -88,21 +90,21 @@ export default function Home() {
 
             {/* 角色选择 */}
             <div className="mb-8">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">选择你的角色</h3>
+              <h3 className="text-xl font-bold text-green-400 mb-4">选择你的角色</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {/* 随机角色选项 */}
                 <div
                   onClick={() => setGameConfig({...gameConfig, selectedRole: 'random'})}
                   className={`p-4 rounded-xl cursor-pointer transition-all ${
                     gameConfig.selectedRole === 'random'
-                      ? 'bg-purple-100 border-2 border-purple-500 scale-105 shadow-lg'
-                      : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                      ? 'bg-green-900 border-2 border-green-400 scale-105 shadow-lg shadow-green-400/20'
+                      : 'bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 hover:border-green-500'
                   }`}
                 >
                   <div className="text-center">
                     <div className="text-4xl mb-2">🎲</div>
-                    <h4 className="font-bold text-gray-800">随机角色</h4>
-                    <p className="text-sm text-gray-600 mt-1">让游戏随机分配</p>
+                    <h4 className="font-bold text-green-400">随机角色</h4>
+                    <p className="text-sm text-gray-400 mt-1">让游戏随机分配</p>
                   </div>
                 </div>
 
@@ -113,14 +115,14 @@ export default function Home() {
                     onClick={() => setGameConfig({...gameConfig, selectedRole: role as PlayerRole})}
                     className={`p-4 rounded-xl cursor-pointer transition-all ${
                       gameConfig.selectedRole === role
-                        ? 'bg-blue-100 border-2 border-blue-500 scale-105 shadow-lg'
-                        : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                        ? 'bg-green-900 border-2 border-green-400 scale-105 shadow-lg shadow-green-400/20'
+                        : 'bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 hover:border-green-500'
                     }`}
                   >
                     <div className="text-center">
                       <div className="text-4xl mb-2">{config.emoji}</div>
-                      <h4 className="font-bold text-gray-800">{config.name}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{config.description.split('：')[0]}</p>
+                      <h4 className="font-bold text-green-400">{config.name}</h4>
+                      <p className="text-sm text-gray-400 mt-1">{config.description.split('：')[0]}</p>
                     </div>
                   </div>
                 ))}
@@ -131,7 +133,7 @@ export default function Home() {
             <div className="text-center">
               <button
                 onClick={() => setCurrentView('game')}
-                className="px-8 py-4 bg-blue-600 text-white text-xl font-bold rounded-xl hover:bg-blue-700 hover:scale-105 transition-all shadow-lg"
+                className="px-8 py-4 bg-gray-900 text-green-400 text-xl font-bold rounded-xl hover:bg-gray-800 hover:scale-105 transition-all shadow-lg border-2 border-green-500 hacker-button"
               >
                 开始游戏
               </button>
@@ -143,18 +145,19 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen cyber-gradient p-4 relative overflow-hidden">
+      <div className="scan-line absolute inset-0"></div>
+      <div className="max-w-6xl mx-auto relative z-10">
         {/* 标题 */}
         <div className="text-center py-8">
-          <h1 className="text-6xl font-bold text-gray-800 mb-4">💩 ShitX</h1>
-          <p className="text-xl text-gray-600">创造失眠，在那个有味道的夏天</p>
+          <img src="/shitx.png" alt="ShitX Logo" className="w-48 h-48 mx-auto mb-4 object-contain hackathon-logo" />
+          <p className="text-xl text-green-400 terminal-cursor">创造失眠，在那个有味道的夏天</p>
         </div>
 
         {/* 游戏规则 */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">游戏规则</h2>
-          <div className="space-y-3 text-gray-600">
+        <div className="bg-gray-900 border border-green-500 rounded-2xl p-8 shadow-2xl shadow-green-500/20 mb-8">
+          <h2 className="text-3xl font-bold text-green-400 mb-4 neon-glow">游戏规则</h2>
+          <div className="space-y-3 text-green-300">
             <p>• 拉屎的人会在夜晚行动，让孕妇们感到恶心</p>
             <p>• 孕妇们需要通过投票找出拉屎的人</p>
             <p>• 警犬可以在夜晚检查其他玩家的身份</p>
@@ -164,15 +167,15 @@ export default function Home() {
         </div>
 
         {/* 角色介绍 */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">角色介绍</h2>
+        <div className="bg-gray-900 border border-green-500 rounded-2xl p-8 shadow-2xl shadow-green-500/20 mb-8">
+          <h2 className="text-3xl font-bold text-green-400 mb-6 neon-glow">角色介绍</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Object.entries(ROLE_CONFIGS).map(([role, config]) => (
-              <div key={role} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+              <div key={role} className="flex items-start gap-4 p-4 bg-gray-800 border border-gray-700 rounded-xl hover:border-green-500 transition-colors">
                 <div className="text-4xl">{config.emoji}</div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-800 mb-1">{config.name}</h3>
-                  <p className="text-gray-600">{config.description}</p>
+                  <h3 className="text-xl font-bold text-green-400 mb-1">{config.name}</h3>
+                  <p className="text-gray-400">{config.description}</p>
                   {role === 'pooper' && (
                     <p className="text-sm text-red-600 mt-1">坏人阵营：需要隐藏身份，每晚可以恶心一个孕妇</p>
                   )}
@@ -198,7 +201,7 @@ export default function Home() {
         <div className="text-center">
           <button
             onClick={() => setCurrentView('config')}
-            className="px-8 py-4 bg-blue-600 text-white text-xl font-bold rounded-xl hover:bg-blue-700 hover:scale-105 transition-all shadow-lg"
+            className="px-8 py-4 bg-gray-900 text-green-400 text-xl font-bold rounded-xl hover:bg-gray-800 hover:scale-105 transition-all shadow-lg border-2 border-green-500 hacker-button"
           >
             开始游戏
           </button>
