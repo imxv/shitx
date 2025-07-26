@@ -67,7 +67,7 @@ export default function CommunityPage() {
                 <div
                   key={partner.id}
                   className="bg-gray-900/70 border-2 border-purple-500/50 rounded-xl p-5 hover:border-purple-400 transition-all cursor-pointer"
-                  onClick={() => router.push(`/partners/${partner.id}`)}
+                  onClick={() => router.push(`/nft-tree/${partner.id}`)}
                 >
                   <div className="flex items-start gap-4">
                     {partner.logo && (
