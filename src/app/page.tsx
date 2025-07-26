@@ -206,7 +206,7 @@ function HomeContent() {
             <button className="relative w-full px-6 sm:px-12 py-6 sm:py-8 bg-gray-900/90 text-yellow-400 text-xl sm:text-2xl font-bold rounded-2xl hover:bg-gray-800/90 transition-all shadow-2xl border-2 border-yellow-500/50 backdrop-blur-sm">
               <div className="flex flex-col items-center gap-2 sm:gap-3">
                 <span className="text-4xl sm:text-6xl">✨</span>
-                <span className="text-xl sm:text-3xl">United Toilet</span>
+                <span className="text-xl sm:text-3xl">United Card</span>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
             </button>

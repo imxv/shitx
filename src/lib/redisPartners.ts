@@ -5,6 +5,11 @@ const PARTNER_PREFIX = 'partner:';
 
 export interface RedisPartner extends Omit<Partner, 'logo'> {
   logoUrl?: string; // Vercel Blob URL instead of filename
+  isUserCreated?: boolean;
+  creatorId?: string;
+  creatorAddress?: string;
+  creatorName?: string;
+  createdAt?: number;
 }
 
 // Lazy load redis to avoid client-side errors
@@ -59,6 +64,11 @@ export async function getPartnersFromRedis(): Promise<RedisPartner[]> {
         contractAddress: partnerData.contractAddress || null,
         totalSupply: parseInt(partnerData.totalSupply || '1000'),
         deployed: partnerData.deployed === 'true',
+        isUserCreated: partnerData.isUserCreated === 'true',
+        creatorId: partnerData.creatorId,
+        creatorAddress: partnerData.creatorAddress,
+        creatorName: partnerData.creatorName,
+        createdAt: partnerData.createdAt ? parseInt(partnerData.createdAt) : undefined,
       });
     }
   }
@@ -89,6 +99,11 @@ export async function getPartnerFromRedis(id: string): Promise<RedisPartner | nu
     contractAddress: partnerData.contractAddress || null,
     totalSupply: parseInt(partnerData.totalSupply || '1000'),
     deployed: partnerData.deployed === 'true',
+    isUserCreated: partnerData.isUserCreated === 'true',
+    creatorId: partnerData.creatorId,
+    creatorAddress: partnerData.creatorAddress,
+    creatorName: partnerData.creatorName,
+    createdAt: partnerData.createdAt ? parseInt(partnerData.createdAt) : undefined,
   };
 }
 

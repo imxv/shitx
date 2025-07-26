@@ -114,12 +114,26 @@ export async function POST(request: NextRequest) {
     const tokenId = (totalClaims + 1).toString();
 
     // 生成 NFT 数据
-    const rarity = Math.random();
-    let rarityTier = 'Common Toilet';
-    if (rarity > 0.95) rarityTier = 'Legendary Golden Throne';
-    else if (rarity > 0.85) rarityTier = 'Epic Diamond Toilet';
-    else if (rarity > 0.70) rarityTier = 'Rare Silver Toilet';
-    else if (rarity > 0.50) rarityTier = 'Uncommon Bronze Toilet';
+    let rarityTier: string;
+    let isAncestor = false;
+    
+    // 检查是否是第一个NFT（始祖NFT）
+    if (tokenId === '1') {
+      isAncestor = true;
+      // 始祖NFT保证高稀有度
+      const rarity = Math.random();
+      if (rarity > 0.3) rarityTier = 'Legendary Ancestor Throne';
+      else if (rarity > 0.1) rarityTier = 'Epic Ancestor Throne';
+      else rarityTier = 'Rare Ancestor Throne';
+    } else {
+      // 普通NFT
+      const rarity = Math.random();
+      if (rarity > 0.95) rarityTier = 'Legendary Golden Throne';
+      else if (rarity > 0.85) rarityTier = 'Epic Diamond Toilet';
+      else if (rarity > 0.70) rarityTier = 'Rare Silver Toilet';
+      else if (rarity > 0.50) rarityTier = 'Uncommon Bronze Toilet';
+      else rarityTier = 'Common Toilet';
+    }
 
     // 模拟 NFT 转移
     const transferResult = await mock.transferNFT(evmAddress, tokenId);
@@ -131,14 +145,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 生成NFT元数据
+    let metadata = await mock.getPartnerNFTMetadata(partnerId, tokenId);
+    
+    // 如果是始祖NFT，添加特殊属性
+    if (isAncestor) {
+      metadata = {
+        ...metadata,
+        name: `${metadata.name} - 始祖 #${tokenId}`,
+        description: `${metadata.description}\n\n🌟 这是 ${partner.displayName} 系列的始祖NFT，拥有特殊的权力和地位。`,
+        attributes: [
+          ...metadata.attributes,
+          {
+            trait_type: 'Type',
+            value: 'Ancestor NFT'
+          },
+          {
+            trait_type: 'Rarity Tier',
+            value: rarityTier
+          },
+          {
+            trait_type: 'Special Power',
+            value: 'Series Creator'
+          }
+        ]
+      };
+    }
+    
     const nft = {
       tokenId,
       owner: evmAddress,
       partnerId,
-      metadata: await mock.getPartnerNFTMetadata(partnerId, tokenId),
+      metadata,
       claimedAt: Date.now(),
       txHash: transferResult.txHash,
       mockData: true,
+      isAncestor,
+      rarityTier
     };
     
     // 记录到 Redis
@@ -184,10 +227,15 @@ export async function POST(request: NextRequest) {
     // 获取最新余额
     const finalBalance = await mock.getBalance(evmAddress);
 
+    // 根据是否是始祖NFT返回不同的消息
+    const message = isAncestor 
+      ? `🎉 恭喜！您获得了 ${partner.displayName} 系列的始祖NFT！作为系列创造者，您拥有至高无上的地位！`
+      : `恭喜获得 ${partner.nftName} - ${rarityTier}！`;
+    
     return NextResponse.json({
       success: true,
       nft,
-      message: `恭喜获得 ${partner.nftName} - ${rarityTier}！`,
+      message,
       txHash: transferResult.txHash,
       mockExplorerUrl: `/api/v1/tx/${transferResult.txHash}`,
       subsidy: subsidyInfo,

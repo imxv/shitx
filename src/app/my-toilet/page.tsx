@@ -6,10 +6,10 @@ import { getUserIdentity, importAccount, updateUsername, UserIdentity } from '@/
 import { generateEVMAddress } from '@/utils/web3Utils';
 import { usePartners } from '@/hooks/usePartners';
 
-interface NFTCollection {
+interface ShitXCardCollection {
   partnerId: string;
   partnerName: string;
-  nftName: string;
+  cardName: string;
   owned: boolean;
   tokenId?: string;
   claimedAt?: number;
@@ -21,7 +21,7 @@ export default function MyToiletPage() {
   const router = useRouter();
   const [userIdentity, setUserIdentity] = useState<UserIdentity | null>(null);
   const [evmAddress, setEvmAddress] = useState<string>('');
-  const [collections, setCollections] = useState<NFTCollection[]>([]);
+  const [collections, setCollections] = useState<ShitXCardCollection[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [transferCode, setTransferCode] = useState<string>('');
@@ -37,6 +37,7 @@ export default function MyToiletPage() {
   const [ancestorSuccess, setAncestorSuccess] = useState<string>('');
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState<string>('');
+  const [userCreatedSeries, setUserCreatedSeries] = useState<any[]>([]);
 
   useEffect(() => {
     const identity = getUserIdentity();
@@ -44,14 +45,29 @@ export default function MyToiletPage() {
     const address = generateEVMAddress(identity.fingerprint);
     setEvmAddress(address);
     
-    // 获取用户的 NFT 收藏状态
+    // 获取用户的 ShitX 卡片收藏状态
     if (partners && partners.length > 0) {
       fetchUserNFTs(address);
     }
     
     // 获取现有的转移码
     fetchTransferCode(identity);
+    
+    // 获取用户创建的系列
+    fetchUserCreatedSeries(address);
   }, [partners]);
+
+  const fetchUserCreatedSeries = async (address: string) => {
+    try {
+      const response = await fetch(`/api/v1/series/create?creator=${address}`);
+      const data = await response.json();
+      if (data.success && data.series) {
+        setUserCreatedSeries(data.series);
+      }
+    } catch (error) {
+      console.error('Error fetching user created series:', error);
+    }
+  };
 
   const fetchUserNFTs = async (address: string) => {
     try {
@@ -60,11 +76,11 @@ export default function MyToiletPage() {
       const mainNFTData = await mainNFTResponse.json();
 
       // 初始化收藏列表
-      const collectionList: NFTCollection[] = [
+      const collectionList: ShitXCardCollection[] = [
         {
           partnerId: 'default',
           partnerName: 'ShitX',
-          nftName: 'Shit NFT',
+          cardName: 'ShitX 极速卡片',
           owned: mainNFTData.hasClaimed || false,
           tokenId: mainNFTData.nft?.tokenId,
           claimedAt: mainNFTData.nft?.claimedAt,
@@ -81,7 +97,7 @@ export default function MyToiletPage() {
         collectionList.push({
           partnerId: partner.id,
           partnerName: partner.displayName,
-          nftName: partner.nftName,
+          cardName: partner.nftName,
           owned: partnerNFTData.hasClaimed || false,
           tokenId: partnerNFTData.nft?.tokenId,
           claimedAt: partnerNFTData.nft?.claimedAt,
@@ -421,9 +437,9 @@ export default function MyToiletPage() {
           
           <div className="space-y-3 sm:space-y-4">
             <div>
-              <p className="text-gray-400 mb-2 text-sm sm:text-base">使用始祖码成为NFT始祖</p>
+              <p className="text-gray-400 mb-2 text-sm sm:text-base">使用始祖码成为ShitX卡片始祖</p>
               <p className="text-xs text-gray-500 mb-3">
-                始祖是某个NFT类型的第一个持有者，拥有该类型NFT的分发权限。始祖码只能使用一次。
+                始祖是某个ShitX卡片类型的第一个持有者，拥有该类型卡片的分发权限。始祖码只能使用一次。
               </p>
               
               <div className="space-y-2">
@@ -452,16 +468,80 @@ export default function MyToiletPage() {
                 </button>
                 
                 <p className="text-xs text-gray-400">
-                  👑 成为始祖后，你将获得该NFT类型的特殊标识和分发权限
+                  👑 成为始祖后，你将获得该ShitX卡片类型的特殊标识和分发权限
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* NFT 收藏 */}
+        {/* 我创建的系列 */}
+        {userCreatedSeries.length > 0 && (
+          <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">🎨 我创建的系列</h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+              {userCreatedSeries.map((series) => (
+                <div
+                  key={series.id}
+                  className="border-2 border-purple-500 bg-purple-500/10 rounded-xl p-3 sm:p-4"
+                >
+                  <div className="flex items-start gap-3">
+                    {series.logo && (
+                      <img 
+                        src={series.logo} 
+                        alt={series.displayName}
+                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-white text-sm sm:text-base">{series.displayName}</h3>
+                      <p className="text-xs sm:text-sm text-gray-400">{series.nftName}</p>
+                      <p className="text-xs text-gray-500 mt-1">{series.description}</p>
+                      
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-xs bg-purple-600/30 px-2 py-1 rounded">
+                          供应量: {series.totalSupply}
+                        </span>
+                        <span className="text-xs bg-yellow-600/30 px-2 py-1 rounded">
+                          👑 始祖系列
+                        </span>
+                      </div>
+                      
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => router.push(`/partners/${series.id}`)}
+                          className="px-3 py-1 bg-purple-600 rounded hover:bg-purple-700 transition-colors text-xs sm:text-sm"
+                        >
+                          查看详情
+                        </button>
+                        <button
+                          onClick={() => router.push(`/admin/partners?partnerId=${series.id}`)}
+                          className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                        >
+                          管理系列
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-4">
+              <button
+                onClick={() => router.push('/create-series')}
+                className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all"
+              >
+                ✨ 创建新系列
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ShitX 极速卡片收藏 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6">
-          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">💩 NFT 收藏</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">💩 ShitX 极速卡片收藏</h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             {collections.map((collection) => (
@@ -476,9 +556,9 @@ export default function MyToiletPage() {
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <h3 className="font-bold text-white text-sm sm:text-base truncate">{collection.nftName}</h3>
+                      <h3 className="font-bold text-white text-sm sm:text-base truncate">{collection.cardName}</h3>
                       {collection.isAncestor && (
-                        <span className="text-yellow-400 text-xs" title="始祖NFT">👑</span>
+                        <span className="text-yellow-400 text-xs" title="始祖卡片">👑</span>
                       )}
                     </div>
                     <p className="text-xs sm:text-sm text-gray-400 truncate">{collection.partnerName}</p>
@@ -496,7 +576,7 @@ export default function MyToiletPage() {
                     </p>
                     {collection.isAncestor && (
                       <p className="text-yellow-400 text-xs font-bold">
-                        👑 始祖NFT - 拥有分发权限
+                        👑 始祖卡片 - 拥有分发权限
                       </p>
                     )}
                     <p className="text-gray-400 text-xs">
@@ -520,11 +600,25 @@ export default function MyToiletPage() {
           {/* 成就提示 */}
           {completionPercentage === 100 && (
             <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-xl text-black text-center">
-              <p className="text-lg sm:text-xl font-bold">🏆 恭喜！你已经集齐所有 NFT！</p>
+              <p className="text-lg sm:text-xl font-bold">🏆 恭喜！你已经集齐所有ShitX极速卡片！</p>
               <p className="text-xs sm:text-sm mt-1">你是真正的ShitX收藏家！</p>
             </div>
           )}
         </div>
+
+        {/* 创建系列入口（如果用户还没有创建过） */}
+        {userCreatedSeries.length === 0 && (
+          <div className="mt-4 sm:mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-4 sm:p-6 text-white text-center">
+            <h3 className="text-lg sm:text-xl font-bold mb-2">🚀 创建极速入口</h3>
+            <p className="text-sm sm:text-base mb-4">ShitX极速卡片是集概括、分发、增长于一体的极速入口系统</p>
+            <button
+              onClick={() => router.push('/create-series')}
+              className="px-6 py-3 bg-white text-purple-600 font-bold rounded-lg hover:bg-gray-100 transition-all"
+            >
+              创建我的第一个极速入口
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

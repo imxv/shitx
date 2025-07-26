@@ -210,7 +210,7 @@ export default function ToiletPage() {
           {/* United Toilet 主界面 */}
           <div className="bg-gray-900 border border-yellow-500 rounded-2xl p-6 shadow-2xl shadow-yellow-500/20">
             <h1 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-4 text-center neon-glow">
-            United Toilet
+            United Card
           </h1>
           
             {/* 当前选中的 NFT 显示和背包按钮 */}
@@ -226,7 +226,7 @@ export default function ToiletPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-all border border-gray-700"
               >
                 <span className="text-xl">🎒</span>
-                <span>NFT 背包</span>
+                <span>极速卡片背包</span>
                 <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full ml-1">
                   {ownedNFTs.length}
                 </span>
@@ -296,7 +296,7 @@ export default function ToiletPage() {
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-yellow-500 rounded-t-2xl animate-slide-up">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-yellow-400">🎒 NFT 背包</h3>
+                <h3 className="text-xl font-bold text-yellow-400">🎒 极速卡片背包</h3>
                 <button
                   onClick={() => setShowBackpack(false)}
                   className="text-gray-400 hover:text-white transition-colors"

@@ -36,19 +36,29 @@ export function TopBar() {
             )}
             
             <Link
+              href="/create-series"
+              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-400 rounded-lg hover:from-purple-600/30 hover:to-indigo-600/30 transition-all border border-purple-500/30"
+            >
+              <span className="text-lg">🚀</span>
+              <span className="font-medium hidden sm:inline">创建卡片</span>
+              <span className="font-medium sm:hidden">创建</span>
+            </Link>
+            
+            <Link
               href="/partners"
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-600/20 text-yellow-400 rounded-lg hover:bg-yellow-600/30 transition-all border border-yellow-500/30"
+              className="flex items-center gap-2 px-3 py-2 bg-yellow-600/20 text-yellow-400 rounded-lg hover:bg-yellow-600/30 transition-all border border-yellow-500/30"
             >
               <span className="text-lg">🤝</span>
-              <span className="font-medium">友情合作</span>
+              <span className="font-medium hidden sm:inline">友情合作</span>
+              <span className="font-medium sm:hidden">合作</span>
             </Link>
             
             <Link
               href="/my-toilet"
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600/20 text-purple-400 rounded-lg hover:bg-purple-600/30 transition-all border border-purple-500/30"
+              className="flex items-center gap-2 px-3 py-2 bg-purple-600/20 text-purple-400 rounded-lg hover:bg-purple-600/30 transition-all border border-purple-500/30"
             >
-              <span className="text-lg">💩</span>
-              <span className="font-medium">My Toilet</span>
+              <span className="font-medium hidden sm:inline">Me</span>
+              <span className="font-medium sm:hidden">我的</span>
             </Link>
           </div>
         </div>

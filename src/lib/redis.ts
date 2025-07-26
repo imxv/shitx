@@ -378,6 +378,29 @@ export const nftRedis = {
     return { success: true, data: updatedData };
   },
 
+  // 记录系列创建
+  async recordSeriesCreation(seriesId: string, creatorAddress: string, ancestorTokenId: string): Promise<void> {
+    if (!redis) return;
+    
+    const creationData = {
+      seriesId,
+      creatorAddress,
+      ancestorTokenId,
+      createdAt: Date.now()
+    };
+    
+    // 记录创建信息
+    await redis.set(
+      `series_creator:${seriesId}`,
+      JSON.stringify(creationData),
+      'EX',
+      60 * 60 * 24 * 365 * 5 // 5年
+    );
+    
+    // 记录创建者的系列列表
+    await redis.sadd(`creator_series:${creatorAddress}`, seriesId);
+  },
+
   // 获取始祖持有者
   async getAncestorHolder(nftType: string): Promise<string | null> {
     if (!redis) return null;
