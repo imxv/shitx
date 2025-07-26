@@ -132,8 +132,8 @@ function HomeContent() {
 
       {/* 底部信息 */}
       <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center px-4">
-        <p className="text-gray-500 text-xs tracking-wider">© 2024 ShitX - 中国有史以来最臭的创新</p>
-        <p className="text-gray-600 text-xs mt-1 opacity-70">献给那个让我们失眠的夏天</p>
+        <p className="text-gray-500 text-xs tracking-wider">© 2024 ShitX - 来自中国有史以来最热爱所构建之物的团队</p>
+        <p className="text-gray-600 text-xs mt-1 opacity-70">不创造失眠，我们建议你多睡</p>
       </div>
 
       {/* 科技感装饰线 */}

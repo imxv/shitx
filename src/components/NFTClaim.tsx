@@ -132,7 +132,19 @@ export function NFTClaim() {
                 partnerId: data.partnerId,
                 partnerName: data.partnerName,
                 nftName: data.nftName,
-                isPartnerNFT: true
+                description: `通过QR码分享的 ${data.nftName}`,
+                image: `https://shitx.top/api/nft-image/${data.partnerId}`,
+                maxSupply: 10000,
+                attributes: [
+                  {
+                    trait_type: 'Collection',
+                    value: `${data.partnerName} Collection`
+                  },
+                  {
+                    trait_type: 'Distribution',
+                    value: 'QR Code Share'
+                  }
+                ]
               };
               setClaimableNFTs(prev => [...prev, partnerNFT]);
               setTimeout(() => {
