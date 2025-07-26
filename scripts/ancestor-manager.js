@@ -44,15 +44,56 @@ if (fs.existsSync(envPath)) {
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 console.log('🔗 连接到 Redis:', REDIS_URL.replace(/:[^:@]+@/, ':****@'));
 
-// 动态导入合作方配置
-const { partners } = require('../src/config/partners');
+// 动态导入合作方配置 - 需要在async函数中使用
+let NFT_TYPES = [];
 
-// NFT 类型配置 - 从partners中动态生成
-const NFT_TYPES = partners.map(partner => ({
-  id: partner.id,
-  name: partner.nftName,
-  displayName: partner.displayName
-}));
+// 初始化NFT类型列表（包括云端合作方）
+async function initNFTTypes() {
+  // 导入本地合作方
+  const { localPartners } = require('../src/config/partners');
+  
+  // 直接从Redis获取云端合作方
+  const redis = new Redis(REDIS_URL);
+  const partnerIds = await redis.smembers('partners:list');
+  
+  const redisPartners = [];
+  for (const id of partnerIds) {
+    const partnerData = await redis.hgetall(`partner:${id}`);
+    if (partnerData && Object.keys(partnerData).length > 0) {
+      redisPartners.push(partnerData);
+    }
+  }
+  
+  await redis.disconnect();
+  
+  // 合并本地和云端合作方
+  const partnerMap = new Map();
+  
+  // 先添加本地合作方
+  localPartners.forEach(partner => {
+    partnerMap.set(partner.id, partner);
+  });
+  
+  // 添加云端合作方
+  redisPartners.forEach(partner => {
+    partnerMap.set(partner.id, partner);
+  });
+  
+  const allPartners = Array.from(partnerMap.values());
+  
+  NFT_TYPES = [
+    {
+      id: 'default',
+      name: 'Shit NFT',
+      displayName: 'ShitX'
+    },
+    ...allPartners.map(partner => ({
+      id: partner.id,
+      name: partner.nftName,
+      displayName: partner.displayName
+    }))
+  ];
+}
 
 class AncestorManager {
   constructor() {
@@ -70,6 +111,11 @@ class AncestorManager {
 
   // 扫描所有NFT类型的持有情况
   async scanNFTTypes() {
+    // 确保NFT类型已初始化
+    if (NFT_TYPES.length === 0) {
+      await initNFTTypes();
+    }
+    
     console.log('🔍 扫描所有NFT类型的持有情况...\n');
     
     const results = [];
@@ -77,9 +123,17 @@ class AncestorManager {
     for (const nftType of NFT_TYPES) {
       const ancestorHolder = await this.redis.get(`ancestor_holder:${nftType.id}`);
       
-      // 合作方NFT类型
-      const totalClaims = await this.redis.get(`partner_nft:${nftType.id}:total_claims`);
-      const holderCount = parseInt(totalClaims || '0', 10);
+      // 根据NFT类型获取持有者数量
+      let holderCount = 0;
+      if (nftType.id === 'default') {
+        // 主NFT
+        const totalClaims = await this.redis.get('nft:total_claims');
+        holderCount = parseInt(totalClaims || '0', 10);
+      } else {
+        // 合作方NFT
+        const totalClaims = await this.redis.get(`partner_nft:${nftType.id}:total_claims`);
+        holderCount = parseInt(totalClaims || '0', 10);
+      }
       
       const result = {
         type: nftType,
@@ -251,6 +305,9 @@ class AncestorManager {
 async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
+  
+  // 初始化NFT类型（包括云端合作方）
+  await initNFTTypes();
   
   const manager = new AncestorManager();
   

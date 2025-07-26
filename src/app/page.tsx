@@ -16,6 +16,7 @@ function HomeContent() {
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [claimScenario, setClaimScenario] = useState<'new_user' | 'old_user_scan' | 'new_user_scan'>('new_user');
   const [partnerNFTData, setPartnerNFTData] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0); // 用于刷新子组件
   
   useEffect(() => {
     // 获取 URL 中的参数
@@ -137,7 +138,11 @@ function HomeContent() {
       {/* NFT 获取模态框 */}
       <NFTClaimModal
         isOpen={showClaimModal}
-        onClose={() => setShowClaimModal(false)}
+        onClose={() => {
+          setShowClaimModal(false);
+          // 刷新状态卡片
+          setRefreshKey(prev => prev + 1);
+        }}
         scenario={claimScenario}
         partnerNFT={partnerNFTData}
       />
@@ -187,8 +192,8 @@ function HomeContent() {
 
         {/* 状态卡片组 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
-          <GrantStatusCard />
-          <NFTCollectionCard />
+          <GrantStatusCard key={`grant-${refreshKey}`} />
+          <NFTCollectionCard key={`collection-${refreshKey}`} />
         </div>
 
         {/* 主要功能按钮 - United Toilet */}
