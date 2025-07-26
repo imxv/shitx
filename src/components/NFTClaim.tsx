@@ -27,6 +27,65 @@ export function NFTClaim() {
   useEffect(() => {
     initializeClaimStatus();
   }, []);
+
+  const initializeClaimStatus = async () => {
+    const identity = getUserIdentity();
+    const address = generateEVMAddress(identity.fingerprint);
+    setEvmAddress(address);
+
+    // 获取可领取的 NFT 列表
+    const claimable = getClaimableNFTs(identity.referralSource);
+    setClaimableNFTs(claimable);
+
+    // 检查每个 NFT 的领取状态
+    const status: ClaimStatus = {};
+    for (const nft of claimable) {
+      // TODO: 实际应该根据不同的 partnerId 检查不同的状态
+      const result = await checkNFTStatus(identity.fingerprint);
+      status[nft.partnerId] = {
+        hasClaimed: result.hasClaimed,
+        nft: result.nft as ShitNFT
+      };
+    }
+    setClaimStatus(status);
+  };
+
+  const handleClaim = useCallback(async (partnerNFT: PartnerNFT) => {
+    setIsLoading(partnerNFT.partnerId);
+    setError('');
+
+    try {
+      const identity = getUserIdentity();
+      const result = await claimShitNFT(identity, partnerNFT.partnerId);
+
+      if (result.success && result.nft) {
+        setClaimStatus(prev => ({
+          ...prev,
+          [partnerNFT.partnerId]: {
+            hasClaimed: true,
+            nft: result.nft
+          }
+        }));
+        setSuccessNFT(result.nft);
+        // 检查是否有补贴信息
+        if (result.subsidy) {
+          setSubsidyInfo(result.subsidy);
+        }
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          setSuccessNFT(null);
+          setSubsidyInfo(null);
+        }, 5000);
+      } else {
+        setError(result.error || '领取失败，请稍后重试');
+      }
+    } catch {
+      setError('网络错误，请稍后重试');
+    } finally {
+      setIsLoading(null);
+    }
+  }, []);
   
   // 处理QR code扫描后的自动领取
   useEffect(() => {
@@ -96,65 +155,6 @@ export function NFTClaim() {
       handleQRScan();
     }
   }, [claimableNFTs, claimStatus, handleClaim]);
-
-  const initializeClaimStatus = async () => {
-    const identity = getUserIdentity();
-    const address = generateEVMAddress(identity.fingerprint);
-    setEvmAddress(address);
-
-    // 获取可领取的 NFT 列表
-    const claimable = getClaimableNFTs(identity.referralSource);
-    setClaimableNFTs(claimable);
-
-    // 检查每个 NFT 的领取状态
-    const status: ClaimStatus = {};
-    for (const nft of claimable) {
-      // TODO: 实际应该根据不同的 partnerId 检查不同的状态
-      const result = await checkNFTStatus(identity.fingerprint);
-      status[nft.partnerId] = {
-        hasClaimed: result.hasClaimed,
-        nft: result.nft as ShitNFT
-      };
-    }
-    setClaimStatus(status);
-  };
-
-  const handleClaim = useCallback(async (partnerNFT: PartnerNFT) => {
-    setIsLoading(partnerNFT.partnerId);
-    setError('');
-
-    try {
-      const identity = getUserIdentity();
-      const result = await claimShitNFT(identity, partnerNFT.partnerId);
-
-      if (result.success && result.nft) {
-        setClaimStatus(prev => ({
-          ...prev,
-          [partnerNFT.partnerId]: {
-            hasClaimed: true,
-            nft: result.nft
-          }
-        }));
-        setSuccessNFT(result.nft);
-        // 检查是否有补贴信息
-        if (result.subsidy) {
-          setSubsidyInfo(result.subsidy);
-        }
-        setShowSuccess(true);
-        setTimeout(() => {
-          setShowSuccess(false);
-          setSuccessNFT(null);
-          setSubsidyInfo(null);
-        }, 5000);
-      } else {
-        setError(result.error || '领取失败，请稍后重试');
-      }
-    } catch {
-      setError('网络错误，请稍后重试');
-    } finally {
-      setIsLoading(null);
-    }
-  }, []);
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
