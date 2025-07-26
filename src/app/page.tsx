@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { UserBadge } from '@/components/UserBadge';
+import { NFTClaim } from '@/components/NFTClaim';
 import './hackathon.css';
 
 export default function Home() {
   return (
     <main className="h-screen cyber-gradient relative overflow-hidden flex items-center justify-center">
       <UserBadge />
+      <NFTClaim />
       <div className="scan-line absolute inset-0"></div>
       
       {/* 背景装饰 */}
