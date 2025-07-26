@@ -73,7 +73,7 @@ export default function AllNFTPage() {
           claimedAt: partnerData.nft?.claimedAt,
           rarity: partnerData.nft?.metadata?.attributes?.find((a: any) => a.trait_type === 'Rarity')?.value,
           isAncestor: partnerData.nft?.isAncestor || false,
-          totalSupply: partner.maxSupply || 10000,
+          totalSupply: partner.totalSupply || 10000,
           currentSupply: partnerData.totalMinted || 0,
           description: partner.description || `${partner.displayName} 合作款 NFT`
         });
@@ -167,9 +167,7 @@ export default function AllNFTPage() {
                   : 'border-gray-600 hover:border-gray-500'
               }`}
               onClick={() => {
-                if (collection.owned) {
-                  router.push(`/nft-tree/${collection.partnerId}`);
-                }
+                router.push(`/nft-tree/${collection.partnerId}`);
               }}
             >
               {/* NFT 图片区域 */}
@@ -249,9 +247,6 @@ export default function AllNFTPage() {
                         获得时间: {new Date(collection.claimedAt).toLocaleDateString('zh-CN')}
                       </p>
                     )}
-                    <button className="mt-2 w-full px-3 py-1 bg-purple-600 rounded hover:bg-purple-700 transition-colors text-sm text-white">
-                      查看分发树 →
-                    </button>
                   </div>
                 )}
 
@@ -265,6 +260,11 @@ export default function AllNFTPage() {
                     </p>
                   </div>
                 )}
+                
+                {/* 查看分发树按钮 - 所有NFT都显示 */}
+                <button className="mt-2 w-full px-3 py-1 bg-purple-600 rounded hover:bg-purple-700 transition-colors text-sm text-white">
+                  查看分发树 →
+                </button>
               </div>
             </div>
           ))}

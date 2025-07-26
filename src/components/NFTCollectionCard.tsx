@@ -125,7 +125,7 @@ export function NFTCollectionCard() {
           </div>
         </div>
         <Link 
-          href="/my-toilet"
+          href="/all-nft"
           className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
         >
           查看收藏 →
