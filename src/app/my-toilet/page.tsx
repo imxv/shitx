@@ -186,33 +186,33 @@ export default function MyToiletPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-3 sm:p-4">
       <div className="max-w-4xl mx-auto">
         {/* 返回按钮 */}
         <button
           onClick={() => router.push('/')}
-          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="mb-4 sm:mb-6 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
         >
           ← 返回首页
         </button>
 
         {/* 用户信息 */}
-        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
-          <h1 className="text-3xl font-bold mb-4">🚽 我的厕所</h1>
+        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">🚽 我的厕所</h1>
           
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <p className="text-gray-400 mb-1">用户名</p>
-              <p className="text-xl font-mono">{userIdentity?.username || '未知用户'}</p>
+              <p className="text-gray-400 mb-1 text-sm sm:text-base">用户名</p>
+              <p className="text-lg sm:text-xl font-mono">{userIdentity?.username || '未知用户'}</p>
             </div>
             
             <div>
-              <p className="text-gray-400 mb-1">EVM 地址</p>
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-mono break-all">{evmAddress}</p>
+              <p className="text-gray-400 mb-1 text-sm sm:text-base">EVM 地址</p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <p className="text-xs sm:text-sm font-mono break-all flex-1">{evmAddress}</p>
                 <button
                   onClick={copyAddress}
-                  className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition-colors text-sm"
+                  className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition-colors text-sm self-start sm:self-auto"
                 >
                   {copied ? '已复制' : '复制'}
                 </button>
@@ -220,31 +220,31 @@ export default function MyToiletPage() {
             </div>
 
             <div>
-              <p className="text-gray-400 mb-1">收集进度</p>
-              <div className="bg-gray-700 rounded-full h-4 overflow-hidden">
+              <p className="text-gray-400 mb-1 text-sm sm:text-base">收集进度</p>
+              <div className="bg-gray-700 rounded-full h-3 sm:h-4 overflow-hidden">
                 <div 
                   className="bg-gradient-to-r from-yellow-400 to-yellow-600 h-full transition-all duration-500"
                   style={{ width: `${completionPercentage}%` }}
                 />
               </div>
-              <p className="text-sm mt-1">{collectedCount} / {totalCount} ({completionPercentage.toFixed(0)}%)</p>
+              <p className="text-xs sm:text-sm mt-1">{collectedCount} / {totalCount} ({completionPercentage.toFixed(0)}%)</p>
             </div>
           </div>
         </div>
 
         {/* 账户管理 */}
-        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
-          <h2 className="text-2xl font-bold mb-4">🔑 账户管理</h2>
+        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">🔑 账户管理</h2>
           
           {/* 转移码管理 */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <p className="text-gray-400 mb-2">转移码（账户私钥）</p>
+              <p className="text-gray-400 mb-2 text-sm sm:text-base">转移码（账户私钥）</p>
               {transferCode ? (
                 <div className="space-y-2">
                   <div className="bg-gray-700/50 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono break-all mr-2">{transferCode}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <span className="text-xs font-mono break-all flex-1">{transferCode}</span>
                       <button
                         onClick={copyTransferCode}
                         className="px-3 py-1 bg-green-600 rounded hover:bg-green-700 transition-colors text-sm whitespace-nowrap"
@@ -281,8 +281,8 @@ export default function MyToiletPage() {
             </div>
 
             {/* 导入其他账户 */}
-            <div className="border-t border-gray-700 pt-4">
-              <p className="text-gray-400 mb-2">导入其他账户</p>
+            <div className="border-t border-gray-700 pt-3 sm:pt-4">
+              <p className="text-gray-400 mb-2 text-sm sm:text-base">导入其他账户</p>
               <div className="space-y-2">
                 <input
                   type="text"
@@ -297,7 +297,7 @@ export default function MyToiletPage() {
                 <button
                   onClick={handleImportAccount}
                   disabled={importing || !importTransferCode.trim()}
-                  className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 transition-colors text-sm disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 transition-colors text-sm disabled:opacity-50"
                 >
                   {importing ? '导入中...' : '导入账户'}
                 </button>
@@ -310,41 +310,41 @@ export default function MyToiletPage() {
         </div>
 
         {/* NFT 收藏 */}
-        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6">
-          <h2 className="text-2xl font-bold mb-4 text-white">💩 NFT 收藏</h2>
+        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">💩 NFT 收藏</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
             {collections.map((collection) => (
               <div
                 key={collection.partnerId}
-                className={`border-2 rounded-xl p-4 transition-all ${
+                className={`border-2 rounded-xl p-3 sm:p-4 transition-all ${
                   collection.owned 
                     ? 'border-yellow-400 bg-yellow-400/10' 
                     : 'border-gray-600 bg-gray-700/30'
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-bold text-white">{collection.nftName}</h3>
-                    <p className="text-sm text-gray-400">{collection.partnerName}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-white text-sm sm:text-base truncate">{collection.nftName}</h3>
+                    <p className="text-xs sm:text-sm text-gray-400 truncate">{collection.partnerName}</p>
                   </div>
                   {collection.owned && (
-                    <span className="text-2xl">✅</span>
+                    <span className="text-xl sm:text-2xl ml-2 flex-shrink-0">✅</span>
                   )}
                 </div>
 
                 {collection.owned && collection.claimedAt ? (
-                  <div className="space-y-1 text-sm">
-                    <p className="text-gray-300">Token ID: #{collection.tokenId}</p>
+                  <div className="space-y-1 text-xs sm:text-sm">
+                    <p className="text-gray-300 break-all">Token ID: #{collection.tokenId}</p>
                     <p className={getRarityColor(collection.rarity as string | undefined)}>
                       稀有度: {collection.rarity}
                     </p>
-                    <p className="text-gray-400">
+                    <p className="text-gray-400 text-xs">
                       获得时间: {new Date(collection.claimedAt!).toLocaleString('zh-CN')}
                     </p>
                   </div>
                 ) : (
-                  <div className="text-gray-500 text-sm">
+                  <div className="text-gray-500 text-xs sm:text-sm">
                     <p>未获得</p>
                     <p className="text-xs mt-1">
                       {collection.partnerId === 'default' 
@@ -359,9 +359,9 @@ export default function MyToiletPage() {
 
           {/* 成就提示 */}
           {completionPercentage === 100 && (
-            <div className="mt-6 p-4 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-xl text-black text-center">
-              <p className="text-xl font-bold">🏆 恭喜！你已经集齐所有 NFT！</p>
-              <p className="text-sm mt-1">你是真正的厕所收藏家！</p>
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-xl text-black text-center">
+              <p className="text-lg sm:text-xl font-bold">🏆 恭喜！你已经集齐所有 NFT！</p>
+              <p className="text-xs sm:text-sm mt-1">你是真正的厕所收藏家！</p>
             </div>
           )}
         </div>

@@ -40,7 +40,7 @@ function HomeContent() {
   }, [searchParams]);
 
   return (
-    <main className="min-h-screen cyber-gradient flex items-center justify-center p-6 pt-20 relative overflow-hidden">
+    <main className="min-h-screen cyber-gradient flex items-center justify-center p-4 sm:p-6 pt-16 sm:pt-20 relative overflow-hidden">
       <TopBar />
       <NFTClaim />
       
@@ -52,14 +52,14 @@ function HomeContent() {
       
       
      <div className="relative max-w-5xl mx-auto w-full">
-        <div className="text-center mb-10 space-y-6">
+        <div className="text-center mb-6 sm:mb-10 space-y-4 sm:space-y-6">
           <div className="relative inline-block">
             <img 
               src="/shitx.png" 
               alt="ShitX Logo" 
-              className="w-32 h-32 mx-auto mb-4 animate-float"
+              className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-3 sm:mb-4 animate-float"
             />
-            <h1 className="text-6xl font-bold terminal-cursor mb-3">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold terminal-cursor mb-2 sm:mb-3">
               <span className="text-yellow-400 neon-glow">Shit</span>
               <span className="text-green-400 neon-glow">X</span>
             </h1>
@@ -88,27 +88,27 @@ function HomeContent() {
 
 
         {/* 状态卡片组 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
           <GrantStatusCard />
           <NFTCollectionCard />
         </div>
         
         {/* 推荐奖励统计 */}
-        <div className="max-w-md mx-auto mb-8">
+        <div className="max-w-md mx-auto mb-6 sm:mb-8">
           <ReferralStats />
         </div>
 
         {/* 主要功能按钮 - United Toilet */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link
             href="/toilet"
-            className="group relative block max-w-md mx-auto"
+            className="group relative block max-w-sm sm:max-w-md mx-auto"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity animate-pulse"></div>
-            <button className="relative w-full px-12 py-8 bg-gray-900/90 text-yellow-400 text-2xl font-bold rounded-2xl hover:bg-gray-800/90 transition-all shadow-2xl border-2 border-yellow-500/50 backdrop-blur-sm">
-              <div className="flex flex-col items-center gap-3">
-                <span className="text-6xl">🚽</span>
-                <span className="text-3xl">United Toilet</span>
+            <button className="relative w-full px-6 sm:px-12 py-6 sm:py-8 bg-gray-900/90 text-yellow-400 text-xl sm:text-2xl font-bold rounded-2xl hover:bg-gray-800/90 transition-all shadow-2xl border-2 border-yellow-500/50 backdrop-blur-sm">
+              <div className="flex flex-col items-center gap-2 sm:gap-3">
+                <span className="text-4xl sm:text-6xl">🚽</span>
+                <span className="text-xl sm:text-3xl">United Toilet</span>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
             </button>
@@ -119,14 +119,14 @@ function HomeContent() {
       </div>
 
       {/* 底部信息 */}
-      <div className="absolute bottom-6 left-0 right-0 text-center">
+      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 text-center px-4">
         <p className="text-gray-500 text-xs tracking-wider">© 2024 ShitX - 中国有史以来最臭的创新</p>
         <p className="text-gray-600 text-xs mt-1 opacity-70">献给那个让我们失眠的夏天</p>
       </div>
 
       {/* 科技感装饰线 */}
-      <div className="absolute top-10 left-10 right-10 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
-      <div className="absolute bottom-10 left-10 right-10 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
+      <div className="absolute top-8 sm:top-10 left-4 sm:left-10 right-4 sm:right-10 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
+      <div className="absolute bottom-8 sm:bottom-10 left-4 sm:left-10 right-4 sm:right-10 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent"></div>
     </main>
   );
 }
