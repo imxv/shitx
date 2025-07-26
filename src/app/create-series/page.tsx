@@ -29,16 +29,13 @@ export default function CreateSeriesPage() {
       try {
         const identity = getUserIdentity();
         const evmAddress = generateEVMAddress(identity.fingerprint);
-        // 使用与首页相同的余额查询方式
-        const response = await fetch(`/api/v1/shit-grant/${evmAddress}`);
+        
+        // 使用与首页完全相同的API端点
+        const response = await fetch(`/api/v1/grant/${evmAddress}`);
         const data = await response.json();
         
-        // 从mock实现获取实际余额
-        const balanceResponse = await fetch(`/api/v1/shit-balance/${evmAddress}`);
-        const balanceData = await balanceResponse.json();
-        
-        // 使用mock系统的余额（与首页保持一致）
-        setUserBalance(balanceData.balance || '0');
+        // 使用与首页相同的余额字段
+        setUserBalance(data.balance || '0');
       } catch (error) {
         console.error('Error fetching balance:', error);
       } finally {
