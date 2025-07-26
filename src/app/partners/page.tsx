@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { TopBar } from '@/components/TopBar';
 import { partners } from '@/config/partners';
 import '../hackathon.css';
 
 export default function PartnersPage() {
   const [hoveredPartner, setHoveredPartner] = useState<string | null>(null);
+  const router = useRouter();
 
   return (
     <main className="min-h-screen cyber-gradient pt-20 p-6 relative overflow-hidden">
@@ -26,32 +28,8 @@ export default function PartnersPage() {
             <span className="text-green-400 neon-glow">合作</span>
           </h1>
           <p className="text-xl text-gray-400">
-            携手共建厕所革命的伟大事业
+            致敬每一个尊重和热爱所构建之物的人，你们都很酷
           </p>
-        </div>
-
-        {/* ShitX 的献身游戏入口 */}
-        <div className="mb-12">
-          <div className="bg-gray-900/70 backdrop-blur-sm rounded-2xl p-8 border border-green-500/30">
-            <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">🎮 ShitX 的献身</h2>
-            <p className="text-gray-300 text-center mb-6">
-              在马桶上拉屎的同时，体验 Web3 游戏的终极形态
-            </p>
-            <Link
-              href="/game"
-              className="block max-w-md mx-auto group"
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-green-500 rounded-xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity animate-pulse"></div>
-                <button className="relative w-full px-10 py-5 bg-gray-900/90 text-green-400 text-xl font-bold rounded-xl hover:bg-gray-800/90 transition-all shadow-2xl border border-green-500/50 backdrop-blur-sm">
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-3xl">🎮</span>
-                    <span>进入游戏</span>
-                  </div>
-                </button>
-              </div>
-            </Link>
-          </div>
         </div>
 
         {/* 合作方列表 */}
@@ -59,20 +37,36 @@ export default function PartnersPage() {
           <h2 className="text-2xl font-bold text-yellow-400 mb-6 text-center">🤝 合作方</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {partners.map((partner) => (
-              <div
-                key={partner.id}
-                className="relative group"
-                onMouseEnter={() => setHoveredPartner(partner.id)}
-                onMouseLeave={() => setHoveredPartner(null)}
-              >
-                <div className={`
-                  bg-gray-800/50 rounded-xl p-6 border transition-all duration-300
-                  ${hoveredPartner === partner.id 
-                    ? 'border-yellow-500 shadow-lg shadow-yellow-500/20 transform -translate-y-1' 
-                    : 'border-gray-700 hover:border-gray-600'
+            {partners.map((partner) => {
+              const handleClick = () => {
+                if (partner.website) {
+                  if (partner.website.startsWith('/')) {
+                    // 内部链接，使用 router.push
+                    router.push(partner.website);
+                  } else {
+                    // 外部链接，使用 window.open
+                    window.open(partner.website, '_blank', 'noopener,noreferrer');
                   }
-                `}>
+                }
+              };
+
+              return (
+                <div
+                  key={partner.id}
+                  className="relative group"
+                  onMouseEnter={() => setHoveredPartner(partner.id)}
+                  onMouseLeave={() => setHoveredPartner(null)}
+                  onClick={handleClick}
+                  style={{ cursor: partner.website ? 'pointer' : 'default' }}
+                >
+                  <div className={`
+                    bg-gray-800/50 rounded-xl p-6 border transition-all duration-300
+                    ${hoveredPartner === partner.id 
+                      ? 'border-yellow-500 shadow-lg shadow-yellow-500/20 transform -translate-y-1' 
+                      : 'border-gray-700 hover:border-gray-600'
+                    }
+                    ${partner.website ? 'hover:border-yellow-400 hover:shadow-lg hover:shadow-yellow-400/10' : ''}
+                  `}>
                   {/* Logo 或 emoji */}
                   <div className="flex items-center justify-center mb-4 h-24">
                     {partner.logo ? (
@@ -103,15 +97,21 @@ export default function PartnersPage() {
                     <p className="text-xs text-gray-500 text-center mt-1">
                       限量: <span className="text-green-400">{partner.totalSupply} 个</span>
                     </p>
+                    {partner.website && (
+                      <p className="text-xs text-blue-400 text-center mt-2">
+                        {partner.website.startsWith('/') ? '🎮 点击进入游戏' : '🌐 点击访问官网'}
+                      </p>
+                    )}
                   </div>
                   
                   {/* 悬浮效果 */}
                   {hoveredPartner === partner.id && (
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-yellow-500/10 to-transparent pointer-events-none"></div>
                   )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             
             {/* 添加更多合作方提示 */}
             <div className="bg-gray-800/30 rounded-xl p-6 border border-gray-700 border-dashed flex items-center justify-center">

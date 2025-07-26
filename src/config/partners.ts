@@ -5,6 +5,7 @@ export interface Partner {
   nftName: string;
   description: string;
   logo?: string; // 合作方 logo 文件名
+  website?: string; // 合作方官网链接
   contractAddress: string | null;
   totalSupply: number;
   deployed: boolean;
@@ -12,7 +13,7 @@ export interface Partner {
 
 // 合作方清单
 export const partners: Partner[] = [
- 
+  
   {
     id: 'djteddy',
     name: 'DJ Teddy',
@@ -24,6 +25,7 @@ export const partners: Partner[] = [
     totalSupply: 2000,
     deployed: false,
   },
+
   {
     id: 'snakemaster',
     name: 'Snake Master',
@@ -44,6 +46,28 @@ export const partners: Partner[] = [
     contractAddress: null,
     totalSupply: 1500,
     deployed: false,
+  },  {
+    id: 'wanderpaw',
+    name: 'WanderPaw',
+    displayName: 'WanderPaw',
+    logo:'wanderpaw.png',
+    nftName: 'Shit X WanderPaw',
+    description: '让灵魂先行，肉身随后跟上',
+    website: 'https://wanderpaw.cn',
+    contractAddress: null,
+    totalSupply: 1000,
+    deployed: false,
+  },
+  {
+    id: 'shitx',
+    name: 'ShitX',
+    displayName: 'ShitX 的献身',
+    nftName: 'ShitX 创世 NFT',
+    description: '所以到底是谁拉的',
+    website: '/game',
+    contractAddress: null,
+    totalSupply: 10000,
+    deployed: true,
   },
 ];
 

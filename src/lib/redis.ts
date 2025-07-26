@@ -32,6 +32,18 @@ export const nftRedis = {
     if (!redis) return [];
     return redis.keys(pattern);
   },
+
+  // List push 方法
+  async lpush(key: string, value: string): Promise<number> {
+    if (!redis) return 0;
+    return redis.lpush(key, value);
+  },
+
+  // 删除键
+  async del(key: string): Promise<number> {
+    if (!redis) return 0;
+    return redis.del(key);
+  },
   // 检查地址是否已经 claim 过
   async hasClaimed(evmAddress: string): Promise<boolean> {
     if (!redis) return false;
@@ -171,7 +183,8 @@ export const nftRedis = {
     amount: number, 
     level: number,
     sourceAddress: string,
-    partnerId?: string
+    partnerId?: string,
+    sourceNFTId?: string
   ): Promise<void> {
     if (!redis) return;
     
@@ -180,7 +193,9 @@ export const nftRedis = {
       level,
       sourceAddress,
       partnerId,
-      timestamp: Date.now()
+      sourceNFTId,
+      timestamp: Date.now(),
+      type: 'referral_reward' as const
     };
     
     // 记录奖励历史
@@ -191,6 +206,40 @@ export const nftRedis = {
     
     // 增加总奖励计数
     await redis.incrby(`nft:referral_rewards_total:${recipientAddress}`, amount);
+  },
+  
+  // 记录直接领取补贴
+  async recordDirectSubsidy(
+    recipientAddress: string,
+    amount: number,
+    partnerId?: string,
+    nftId?: string
+  ): Promise<void> {
+    if (!redis) return;
+    
+    const subsidyData = {
+      amount,
+      partnerId,
+      nftId,
+      timestamp: Date.now(),
+      type: 'direct_subsidy' as const
+    };
+    
+    // 记录到收益历史
+    await redis.lpush(
+      `nft:referral_rewards:${recipientAddress}`,
+      JSON.stringify(subsidyData)
+    );
+    
+    // 不计入referral_rewards_total，因为这是直接补贴
+  },
+  
+  // 获取收益记录历史
+  async getRewardHistory(evmAddress: string, limit: number = 50): Promise<any[]> {
+    if (!redis) return [];
+    
+    const history = await redis.lrange(`nft:referral_rewards:${evmAddress}`, 0, limit - 1);
+    return history.map(item => JSON.parse(item));
   },
 
   // 获取推荐奖励总额

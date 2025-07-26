@@ -19,6 +19,36 @@ interface GrantStats {
   averageAmount: string;
 }
 
+interface RewardRecord {
+  amount: number;
+  type: 'direct_subsidy' | 'referral_reward';
+  level?: number;
+  partnerId?: string;
+  sourceNFTId?: string;
+  timestamp: number;
+  formattedTime: string;
+  typeDisplay: string;
+  partnerInfo?: {
+    id: string;
+    name: string;
+    nftName: string;
+  };
+  sourceInfo?: {
+    address: string;
+    displayAddress: string;
+    username: string;
+  };
+}
+
+interface RewardStats {
+  totalRecords: number;
+  totalDirectSubsidy: number;
+  totalReferralRewards: number;
+  level1Rewards: number;
+  level2Rewards: number;
+  level3Rewards: number;
+}
+
 export default function GrantPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -27,6 +57,9 @@ export default function GrantPage() {
   const [searchAddress, setSearchAddress] = useState('');
   const [searchResult, setSearchResult] = useState<GrantInfo | null>(null);
   const [searching, setSearching] = useState(false);
+  const [rewardHistory, setRewardHistory] = useState<RewardRecord[]>([]);
+  const [rewardStats, setRewardStats] = useState<RewardStats | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     loadGrantInfo();
@@ -49,6 +82,14 @@ export default function GrantPage() {
       const statsResponse = await fetch('/api/v1/grant/stats');
       const statsData = await statsResponse.json();
       setStats(statsData);
+      
+      // 获取收益历史
+      const historyResponse = await fetch(`/api/v1/grant/history/${address}`);
+      const historyData = await historyResponse.json();
+      if (historyData.history) {
+        setRewardHistory(historyData.history);
+        setRewardStats(historyData.stats);
+      }
       
       setLoading(false);
     } catch (error) {
@@ -160,6 +201,83 @@ export default function GrantPage() {
                   </p>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* 收益历史 */}
+          {rewardHistory.length > 0 && (
+            <div className="bg-gray-700/50 rounded-xl p-4 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-semibold">收益详情</h2>
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                >
+                  {showHistory ? '收起' : '展开'} ({rewardHistory.length} 条记录)
+                </button>
+              </div>
+              
+              {rewardStats && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-sm">
+                  <div className="bg-gray-800/50 rounded p-2">
+                    <p className="text-gray-400 text-xs">直接补贴</p>
+                    <p className="font-bold text-green-400">{rewardStats.totalDirectSubsidy}</p>
+                  </div>
+                  <div className="bg-gray-800/50 rounded p-2">
+                    <p className="text-gray-400 text-xs">一级推荐</p>
+                    <p className="font-bold text-yellow-400">{rewardStats.level1Rewards}</p>
+                  </div>
+                  <div className="bg-gray-800/50 rounded p-2">
+                    <p className="text-gray-400 text-xs">二级推荐</p>
+                    <p className="font-bold text-orange-400">{rewardStats.level2Rewards}</p>
+                  </div>
+                  <div className="bg-gray-800/50 rounded p-2">
+                    <p className="text-gray-400 text-xs">三级推荐</p>
+                    <p className="font-bold text-red-400">{rewardStats.level3Rewards}</p>
+                  </div>
+                </div>
+              )}
+              
+              {showHistory && (
+                <div className="max-h-96 overflow-y-auto space-y-2">
+                  {rewardHistory.map((record, index) => (
+                    <div key={index} className="bg-gray-800/50 rounded p-3 text-sm">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`font-bold ${
+                              record.type === 'direct_subsidy' ? 'text-green-400' : 
+                              record.level === 1 ? 'text-yellow-400' :
+                              record.level === 2 ? 'text-orange-400' : 'text-red-400'
+                            }`}>
+                              +{record.amount} SHIT
+                            </span>
+                            <span className="text-xs px-2 py-0.5 bg-gray-700 rounded">
+                              {record.typeDisplay}
+                            </span>
+                          </div>
+                          
+                          {record.partnerInfo && (
+                            <p className="text-xs text-gray-400">
+                              NFT: {record.partnerInfo.nftName}
+                            </p>
+                          )}
+                          
+                          {record.sourceInfo && (
+                            <p className="text-xs text-gray-400">
+                              来自: {record.sourceInfo.username} ({record.sourceInfo.displayAddress})
+                            </p>
+                          )}
+                          
+                          <p className="text-xs text-gray-500 mt-1">
+                            {record.formattedTime}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

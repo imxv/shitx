@@ -51,12 +51,36 @@ export const PARTNER_NFTS: Record<string, PartnerNFT> = {
     ]
   },
   
+  // WanderPaw 合作方
+  wanderpaw: {
+    partnerId: 'wanderpaw',
+    partnerName: 'WanderPaw',
+    nftName: 'Shit X WanderPaw',
+    description: '让灵魂先行，肉身随后跟上',
+    image: 'https://shitx.top/api/nft-image/wanderpaw',
+    maxSupply: 1000,
+    attributes: [
+      {
+        trait_type: 'Collection',
+        value: 'WanderPaw Collection'
+      },
+      {
+        trait_type: 'Partner',
+        value: 'WanderPaw'
+      },
+      {
+        trait_type: 'Special',
+        value: '灵魂旅者'
+      }
+    ]
+  },
+
   // Snake Master 养蛇大师合作方
   snakemaster: {
     partnerId: 'snakemaster',
-    partnerName: '养蛇大师',
+    partnerName: 'SnakeMaster',
     nftName: 'Shit X Snake Master',
-    description: '过去懂蛇才养蛇，有了这个项目，不懂也能养，还安全',
+    description: '过去懂蛇才养蛇，现在不懂也能养，还安全',
     image: 'https://shitx.top/api/nft-image/snakemaster',
     maxSupply: 1500,
     attributes: [
@@ -66,11 +90,35 @@ export const PARTNER_NFTS: Record<string, PartnerNFT> = {
       },
       {
         trait_type: 'Partner',
-        value: '养蛇大师'
+        value: 'SnakeMaster'
       },
       {
         trait_type: 'Special',
         value: '安全养蛇认证'
+      }
+    ]
+  },
+
+  // Twila 合作方
+  twila: {
+    partnerId: 'twila',
+    partnerName: 'Twila',
+    nftName: 'Shit X Twila',
+    description: '我的房里有很多蟑螂，我身边的舟批没有很多',
+    image: 'https://shitx.top/api/nft-image/twila',
+    maxSupply: 1500,
+    attributes: [
+      {
+        trait_type: 'Collection',
+        value: 'Twila Collection'
+      },
+      {
+        trait_type: 'Partner',
+        value: 'Twila'
+      },
+      {
+        trait_type: 'Special',
+        value: '蟑螂房主人'
       }
     ]
   }

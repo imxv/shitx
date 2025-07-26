@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUserIdentity } from '@/utils/userIdentity';
+import { getUserIdentity, importAccount, UserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
 import { partners } from '@/config/partners';
 
@@ -18,11 +18,17 @@ interface NFTCollection {
 
 export default function MyToiletPage() {
   const router = useRouter();
-  const [userIdentity, setUserIdentity] = useState<{ username?: string } | null>(null);
+  const [userIdentity, setUserIdentity] = useState<UserIdentity | null>(null);
   const [evmAddress, setEvmAddress] = useState<string>('');
   const [collections, setCollections] = useState<NFTCollection[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [transferCode, setTransferCode] = useState<string>('');
+  const [showTransferCode, setShowTransferCode] = useState(false);
+  const [importTransferCode, setImportTransferCode] = useState<string>('');
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string>('');
+  const [generateLoading, setGenerateLoading] = useState(false);
 
   useEffect(() => {
     const identity = getUserIdentity();
@@ -32,6 +38,9 @@ export default function MyToiletPage() {
     
     // 获取用户的 NFT 收藏状态
     fetchUserNFTs(address);
+    
+    // 获取现有的转移码
+    fetchTransferCode(identity);
   }, []);
 
   const fetchUserNFTs = async (address: string) => {
@@ -75,6 +84,78 @@ export default function MyToiletPage() {
       console.error('Error fetching NFTs:', error);
       setLoading(false);
     }
+  };
+
+  // 获取转移码
+  const fetchTransferCode = async (identity: any) => {
+    try {
+      const response = await fetch(`/api/v1/account/transfer-code?fingerprint=${identity.fingerprint}&userId=${identity.id}`);
+      const data = await response.json();
+      if (data.hasCode) {
+        setTransferCode(data.transferCode);
+      }
+    } catch (error) {
+      console.error('Error fetching transfer code:', error);
+    }
+  };
+
+  // 生成转移码
+  const generateTransferCode = async () => {
+    if (!userIdentity) return;
+    
+    setGenerateLoading(true);
+    try {
+      const response = await fetch('/api/v1/account/transfer-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fingerprint: userIdentity.fingerprint,
+          userId: userIdentity.id,
+          username: userIdentity.username
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setTransferCode(data.transferCode);
+        setShowTransferCode(true);
+      }
+    } catch (error) {
+      console.error('Error generating transfer code:', error);
+    } finally {
+      setGenerateLoading(false);
+    }
+  };
+
+  // 导入账户
+  const handleImportAccount = async () => {
+    if (!importTransferCode.trim()) return;
+    
+    setImporting(true);
+    setImportError('');
+    
+    try {
+      const result = await importAccount(importTransferCode.trim());
+      if (result.success) {
+        // 刷新页面以使用新账户
+        window.location.reload();
+      } else {
+        setImportError(result.error || '导入失败');
+      }
+    } catch (error) {
+      setImportError('导入失败，请重试');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  // 复制转移码
+  const copyTransferCode = () => {
+    navigator.clipboard.writeText(transferCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const copyAddress = () => {
@@ -147,6 +228,83 @@ export default function MyToiletPage() {
                 />
               </div>
               <p className="text-sm mt-1">{collectedCount} / {totalCount} ({completionPercentage.toFixed(0)}%)</p>
+            </div>
+          </div>
+        </div>
+
+        {/* 账户管理 */}
+        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
+          <h2 className="text-2xl font-bold mb-4">🔑 账户管理</h2>
+          
+          {/* 转移码管理 */}
+          <div className="space-y-4">
+            <div>
+              <p className="text-gray-400 mb-2">转移码（账户私钥）</p>
+              {transferCode ? (
+                <div className="space-y-2">
+                  <div className="bg-gray-700/50 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono break-all mr-2">{transferCode}</span>
+                      <button
+                        onClick={copyTransferCode}
+                        className="px-3 py-1 bg-green-600 rounded hover:bg-green-700 transition-colors text-sm whitespace-nowrap"
+                      >
+                        {copied ? '已复制' : '复制'}
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={generateTransferCode}
+                    disabled={generateLoading}
+                    className="px-4 py-2 bg-yellow-600 rounded hover:bg-yellow-700 transition-colors text-sm disabled:opacity-50"
+                  >
+                    {generateLoading ? '生成中...' : '重新生成'}
+                  </button>
+                  <p className="text-xs text-gray-400">
+                    ⚠️ 重新生成将使旧转移码失效，请妥善保管新转移码
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <button
+                    onClick={generateTransferCode}
+                    disabled={generateLoading}
+                    className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    {generateLoading ? '生成中...' : '生成转移码'}
+                  </button>
+                  <p className="text-xs text-gray-400 mt-1">
+                    转移码可用于在其他设备上导入此账户
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* 导入其他账户 */}
+            <div className="border-t border-gray-700 pt-4">
+              <p className="text-gray-400 mb-2">导入其他账户</p>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={importTransferCode}
+                  onChange={(e) => setImportTransferCode(e.target.value)}
+                  placeholder="输入64位转移码"
+                  className="w-full px-3 py-2 bg-gray-700 rounded text-white placeholder-gray-400 text-sm font-mono"
+                />
+                {importError && (
+                  <p className="text-red-400 text-xs">{importError}</p>
+                )}
+                <button
+                  onClick={handleImportAccount}
+                  disabled={importing || !importTransferCode.trim()}
+                  className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700 transition-colors text-sm disabled:opacity-50"
+                >
+                  {importing ? '导入中...' : '导入账户'}
+                </button>
+                <p className="text-xs text-gray-400">
+                  💡 导入账户后将切换到新账户，当前设备将绑定新账户
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -75,8 +75,60 @@ export interface UserIdentity {
 }
 
 const USER_IDENTITY_KEY = 'shitx_user_identity';
+const MIGRATED_ACCOUNT_KEY = 'shitx_migrated_account';
+
+// 检查是否有迁移的账户
+async function checkMigratedAccount(currentFingerprint: string): Promise<UserIdentity | null> {
+  try {
+    // 检查本地是否已有迁移记录
+    const localMigrated = localStorage.getItem(MIGRATED_ACCOUNT_KEY);
+    if (localMigrated) {
+      const migratedData = JSON.parse(localMigrated);
+      return {
+        id: migratedData.userId,
+        fingerprint: migratedData.fingerprint,
+        username: migratedData.username,
+        createdAt: migratedData.createdAt || Date.now(),
+        lastSeen: Date.now(),
+        toiletVisits: migratedData.toiletVisits || 1
+      };
+    }
+    
+    // 检查服务器是否有迁移记录
+    const response = await fetch(`/api/v1/account/migration-status?fingerprint=${currentFingerprint}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.hasMigration) {
+        // 保存到本地
+        localStorage.setItem(MIGRATED_ACCOUNT_KEY, JSON.stringify(data.account));
+        return {
+          id: data.account.userId,
+          fingerprint: data.account.fingerprint,
+          username: data.account.username,
+          createdAt: data.account.createdAt || Date.now(),
+          lastSeen: Date.now(),
+          toiletVisits: data.account.toiletVisits || 1
+        };
+      }
+    }
+  } catch (error) {
+    console.error('Error checking migrated account:', error);
+  }
+  return null;
+}
 
 export function getUserIdentity(referralSource?: string): UserIdentity {
+  // 生成当前指纹
+  const currentFingerprint = generateUserFingerprint();
+  
+  // 先检查是否有迁移的账户（异步）
+  checkMigratedAccount(currentFingerprint).then(migratedAccount => {
+    if (migratedAccount) {
+      // 更新存储的身份为迁移后的账户
+      localStorage.setItem(USER_IDENTITY_KEY, JSON.stringify(migratedAccount));
+    }
+  });
+  
   // 尝试从 localStorage 读取
   const stored = localStorage.getItem(USER_IDENTITY_KEY);
   
@@ -101,7 +153,7 @@ export function getUserIdentity(referralSource?: string): UserIdentity {
   }
   
   // 创建新用户
-  const fingerprint = generateUserFingerprint();
+  const fingerprint = currentFingerprint;
   const identity: UserIdentity = {
     id: 'toilet_' + fingerprint,
     fingerprint,
@@ -117,6 +169,50 @@ export function getUserIdentity(referralSource?: string): UserIdentity {
   
   localStorage.setItem(USER_IDENTITY_KEY, JSON.stringify(identity));
   return identity;
+}
+
+// 导入账户
+export async function importAccount(transferCode: string): Promise<{success: boolean, error?: string}> {
+  try {
+    const currentFingerprint = generateUserFingerprint();
+    
+    const response = await fetch('/api/v1/account/import', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        transferCode: transferCode.toLowerCase(),
+        currentFingerprint
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      // 保存迁移的账户信息到本地
+      localStorage.setItem(MIGRATED_ACCOUNT_KEY, JSON.stringify(data.account));
+      
+      // 立即更新当前用户身份
+      const migratedIdentity: UserIdentity = {
+        id: data.account.userId,
+        fingerprint: data.account.fingerprint,
+        username: data.account.username,
+        createdAt: data.account.createdAt || Date.now(),
+        lastSeen: Date.now(),
+        toiletVisits: 1
+      };
+      
+      localStorage.setItem(USER_IDENTITY_KEY, JSON.stringify(migratedIdentity));
+      
+      return { success: true };
+    } else {
+      return { success: false, error: data.error || '导入失败' };
+    }
+  } catch (error) {
+    console.error('Error importing account:', error);
+    return { success: false, error: '网络错误' };
+  }
 }
 
 // 获取用户称号

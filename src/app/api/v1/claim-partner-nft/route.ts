@@ -16,7 +16,8 @@ const REFERRAL_REWARDS = {
 async function distributeReferralRewards(
   claimerAddress: string,
   baseAmount: number,
-  partnerId?: string
+  partnerId?: string,
+  nft?: any
 ): Promise<void> {
   try {
     // 获取推荐链
@@ -43,7 +44,8 @@ async function distributeReferralRewards(
           rewardAmount,
           i + 1,
           claimerAddress,
-          partnerId
+          partnerId,
+          nft.tokenId
         );
         
         console.log(`[Referral] Level ${i + 1} reward: ${rewardAmount} SHIT to ${referrerAddress}`);
@@ -166,9 +168,17 @@ export async function POST(request: NextRequest) {
       message: `获得 ${subsidyAmount} SHIT 补贴！`
     };
     
+    // 记录直接补贴
+    await nftRedis.recordDirectSubsidy(
+      evmAddress,
+      subsidyAmount,
+      partnerId,
+      nft.tokenId
+    );
+    
     // 分发推荐奖励
     if (referrerAddress) {
-      await distributeReferralRewards(evmAddress, subsidyAmount, partnerId);
+      await distributeReferralRewards(evmAddress, subsidyAmount, partnerId, nft);
     }
     
     // 获取最新余额
