@@ -76,6 +76,26 @@ export default function GrantPage() {
   useEffect(() => {
     loadGrantInfo();
   }, []);
+  
+  // 在加载grant信息后，如果余额为0，自动尝试修复
+  useEffect(() => {
+    if (userGrant && userGrant.balance === '0') {
+      // 自动尝试修复余额
+      fetch('/api/v1/init-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: userGrant.address })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.newBalance && data.newBalance !== '0') {
+          console.log('余额已自动修复:', data.newBalance);
+          loadGrantInfo(); // 重新加载数据
+        }
+      })
+      .catch(err => console.error('自动修复余额失败:', err));
+    }
+  }, [userGrant?.balance]);
 
   const loadGrantInfo = async () => {
     try {

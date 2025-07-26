@@ -19,20 +19,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid analysis type' }, { status: 400 });
     }
 
+    // Normalize address to lowercase
+    const normalizedAddress = userAddress.toLowerCase();
+    
     // Check if user has enough SHIT (use mock implementation)
-    const userBalance = await mock.getBalance(userAddress);
-    const balance = parseInt(userBalance);
+    const userBalance = await mock.getBalance(normalizedAddress);
+    const balance = parseInt(userBalance) || 0;
+    
+    console.log('[AI Analysis] Balance check:', {
+      originalAddress: userAddress,
+      normalizedAddress,
+      balance: userBalance,
+      parsedBalance: balance
+    });
     
     if (balance < ANALYSIS_COST) {
       return NextResponse.json({ 
         error: 'Insufficient SHIT balance', 
         required: ANALYSIS_COST,
-        current: balance 
+        current: balance,
+        debug: {
+          address: normalizedAddress,
+          rawBalance: userBalance
+        }
       }, { status: 403 });
     }
 
     // Check for cached analysis
-    const cacheKey = `ai-analysis:${type}:${userAddress}`;
+    const cacheKey = `ai-analysis:${type}:${normalizedAddress}`;
     const cachedAnalysis = await redis.get(cacheKey);
     
     if (cachedAnalysis && !forceRefresh) {
@@ -51,11 +65,11 @@ export async function POST(request: Request) {
 
     // Deduct SHIT cost (use mock implementation)
     const newBalance = balance - ANALYSIS_COST;
-    await mock.setBalance(userAddress, newBalance.toString());
+    await mock.setBalance(normalizedAddress, newBalance.toString());
     
     // Record the expense
     await nftRedis.recordExpense(
-      userAddress,
+      normalizedAddress,
       ANALYSIS_COST,
       'ai_analysis',
       `AI ${type === 'grant' ? 'Grant' : 'NFT'} Analysis`,
@@ -68,12 +82,12 @@ export async function POST(request: Request) {
     
     if (type === 'grant') {
       // Get grant distribution data
-      const grantData = await getGrantAnalysisData(userAddress);
+      const grantData = await getGrantAnalysisData(normalizedAddress);
       analysisData = grantData;
       prompt = generateGrantAnalysisPrompt(grantData);
     } else {
       // Get NFT distribution data
-      const nftData = await getNFTAnalysisData(userAddress);
+      const nftData = await getNFTAnalysisData(normalizedAddress);
       analysisData = nftData;
       prompt = generateNFTAnalysisPrompt(nftData);
     }
@@ -99,14 +113,14 @@ export async function POST(request: Request) {
       rawData: analysisData,
       updateTime: new Date().toISOString(),
       cost: ANALYSIS_COST,
-      userAddress
+      userAddress: normalizedAddress
     };
 
     await redis.setex(cacheKey, CACHE_DURATION, JSON.stringify(analysisResult));
 
     // Record analysis transaction
     await redis.zadd(
-      `analysis-history:${userAddress}`,
+      `analysis-history:${normalizedAddress}`,
       Date.now(),
       JSON.stringify({
         type,
