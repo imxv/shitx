@@ -1,17 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { NFTClaim } from '@/components/NFTClaim';
+import { NFTClaimModal } from '@/components/NFTClaimModal';
 import { GrantStatusCard } from '@/components/GrantStatusCard';
 import { NFTCollectionCard } from '@/components/NFTCollectionCard';
 import { TopBar } from '@/components/TopBar';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useState } from 'react';
 import { getUserIdentity } from '@/utils/userIdentity';
+import { generateEVMAddress } from '@/utils/web3Utils';
 import './hackathon.css';
 
 function HomeContent() {
   const searchParams = useSearchParams();
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimScenario, setClaimScenario] = useState<'new_user' | 'old_user_scan' | 'new_user_scan'>('new_user');
+  const [partnerNFTData, setPartnerNFTData] = useState<any>(null);
   
   useEffect(() => {
     // 获取 URL 中的参数
@@ -56,10 +60,87 @@ function HomeContent() {
     }
   }, [searchParams]);
 
+  // 检查并处理NFT获取
+  useEffect(() => {
+    const checkAndClaimNFT = async () => {
+      const identity = getUserIdentity();
+      const evmAddress = generateEVMAddress(identity.fingerprint);
+      
+      // 检查是否已有主NFT
+      const response = await fetch(`/api/v1/nft-status/${evmAddress}`);
+      const mainNFTStatus = await response.json();
+      const hasMainNFT = mainNFTStatus.hasClaimed;
+      
+      // 检查是否是扫码进入
+      const isQRScan = sessionStorage.getItem('isQRScan') === 'true';
+      const qrParamsStr = sessionStorage.getItem('qrParams');
+      
+      if (isQRScan && qrParamsStr) {
+        // 扫码场景
+        try {
+          const qrParams = JSON.parse(qrParamsStr);
+          
+          // 验证QR code
+          const qrResponse = await fetch('/api/v1/qr-claim', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              qrParams,
+              claimerUserId: identity.id,
+              claimerUsername: identity.username,
+              claimerFingerprint: identity.fingerprint,
+              claimerAddress: evmAddress
+            })
+          });
+          
+          const qrData = await qrResponse.json();
+          
+          if (qrData.success && qrData.canClaim) {
+            // 设置合作方NFT数据
+            setPartnerNFTData({
+              partnerId: qrData.partnerId,
+              partnerName: qrData.partnerName,
+              nftName: qrData.nftName
+            });
+            
+            // 判断场景
+            if (!hasMainNFT) {
+              setClaimScenario('new_user_scan');
+            } else {
+              setClaimScenario('old_user_scan');
+            }
+            
+            setShowClaimModal(true);
+          }
+          
+          // 清理sessionStorage
+          sessionStorage.removeItem('isQRScan');
+          sessionStorage.removeItem('qrParams');
+        } catch (error) {
+          console.error('Error processing QR scan:', error);
+        }
+      } else if (!hasMainNFT) {
+        // 新用户直接访问
+        setClaimScenario('new_user');
+        setShowClaimModal(true);
+      }
+    };
+    
+    // 延迟执行，确保页面加载完成
+    setTimeout(checkAndClaimNFT, 1000);
+  }, []);
+
   return (
     <main className="min-h-screen cyber-gradient flex items-center justify-center p-4 sm:p-6 pt-16 sm:pt-20 relative overflow-hidden">
       <TopBar />
-      <NFTClaim />
+      
+      {/* NFT 获取模态框 */}
+      <NFTClaimModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        scenario={claimScenario}
+        partnerNFT={partnerNFTData}
+      />
       
       {/* 科技感背景元素 */}
       <div className="absolute inset-0 pointer-events-none">
