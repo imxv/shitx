@@ -89,8 +89,8 @@ export default function MyToiletPage() {
         }
       ];
 
-      // 检查每个合作方 NFT
-      for (const partner of partners) {
+      // 检查每个合作方 NFT（只包含官方合作方）
+      for (const partner of partners.filter(p => !p.isUserCreated)) {
         const partnerNFTResponse = await fetch(`/api/v1/partner-nft-status/${partner.id}/${address}`);
         const partnerNFTData = await partnerNFTResponse.json();
 

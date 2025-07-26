@@ -39,7 +39,7 @@ export default function PartnersPage() {
           <h2 className="text-2xl font-bold text-yellow-400 mb-6 text-center">🤝 合作方</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {partners.map((partner) => {
+            {partners.filter(p => !p.isUserCreated).map((partner) => {
               const handleClick = () => {
                 if (partner.website) {
                   if (partner.website.startsWith('/')) {
