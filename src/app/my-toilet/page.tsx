@@ -37,7 +37,7 @@ export default function MyToiletPage() {
   const fetchUserNFTs = async (address: string) => {
     try {
       // 获取主 NFT 状态
-      const mainNFTResponse = await fetch(`/api/nft-status/${address}`);
+      const mainNFTResponse = await fetch(`/api/v1/nft-status/${address}`);
       const mainNFTData = await mainNFTResponse.json();
 
       // 初始化收藏列表
@@ -55,7 +55,7 @@ export default function MyToiletPage() {
 
       // 检查每个合作方 NFT
       for (const partner of partners) {
-        const partnerNFTResponse = await fetch(`/api/partner-nft-status/${partner.id}/${address}`);
+        const partnerNFTResponse = await fetch(`/api/v1/partner-nft-status/${partner.id}/${address}`);
         const partnerNFTData = await partnerNFTResponse.json();
 
         collectionList.push({

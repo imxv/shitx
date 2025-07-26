@@ -41,7 +41,7 @@ export default function BigToiletPage() {
         const mainStatus = await queryNFTStatus(MAIN_NFT_CONTRACT, ADMIN_WALLET);
         
         // 获取 claim 统计（从 API）
-        const statsResponse = await fetch('/api/admin/stats');
+        const statsResponse = await fetch('/api/v1/stats');
         const stats = await statsResponse.json();
 
         statuses.push({

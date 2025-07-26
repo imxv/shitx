@@ -33,7 +33,7 @@ export default function ToiletPage() {
       
       try {
         // 检查主 NFT
-        const mainNFTResponse = await fetch(`/api/nft-status/${evmAddress}`);
+        const mainNFTResponse = await fetch(`/api/v1/nft-status/${evmAddress}`);
         const mainNFTData = await mainNFTResponse.json();
         
         const owned: OwnedNFT[] = [];
@@ -50,7 +50,7 @@ export default function ToiletPage() {
         
         // 检查合作方 NFT
         for (const partner of partners) {
-          const partnerNFTResponse = await fetch(`/api/partner-nft-status/${partner.id}/${evmAddress}`);
+          const partnerNFTResponse = await fetch(`/api/v1/partner-nft-status/${partner.id}/${evmAddress}`);
           const partnerNFTData = await partnerNFTResponse.json();
           
           if (partnerNFTData.hasClaimed) {

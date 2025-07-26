@@ -19,7 +19,7 @@ interface TreeStats {
   averageReferrals: number;
 }
 
-export default function SubsidyPage() {
+export default function ShitTreePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [treeData, setTreeData] = useState<TreeNode | null>(null);
@@ -41,7 +41,7 @@ export default function SubsidyPage() {
   const loadDistributionTree = async (address?: string) => {
     try {
       setLoading(true);
-      const url = address ? `/api/subsidy?address=${address}` : '/api/subsidy';
+      const url = address ? `/api/v1/shit-tree?address=${address}` : '/api/v1/shit-tree';
       const response = await fetch(url);
       const data = await response.json();
       
@@ -161,7 +161,7 @@ export default function SubsidyPage() {
 
         {/* 标题 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
-          <h1 className="text-3xl font-bold mb-4">💰 ShitX 补贴查询</h1>
+          <h1 className="text-3xl font-bold mb-4">💩 Shit NFT 分发树</h1>
           
           {/* 搜索框 */}
           <div className="flex gap-2 mb-4">
@@ -246,8 +246,8 @@ export default function SubsidyPage() {
         <div className="mt-6 bg-gray-800/50 backdrop-blur-md rounded-xl p-4 text-gray-400 text-sm">
           <p>💡 说明：</p>
           <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>分发树显示了 NFT 通过二维码分享的传播路径</li>
-            <li>根节点是管理员钱包，所有 NFT 最初都从这里分发</li>
+            <li>分发树显示了 Shit NFT 通过二维码分享的传播路径</li>
+            <li>根节点是管理员钱包，所有 Shit NFT 最初都从这里分发</li>
             <li>点击节点可以展开/收起下级</li>
             <li>黄色边框表示你的地址</li>
           </ul>

@@ -11,6 +11,27 @@ export const redis = redisUrl ? new Redis(redisUrl) : null;
 
 // NFT claim 相关的 Redis 操作
 export const nftRedis = {
+  // 通用 get 方法
+  async get(key: string): Promise<string | null> {
+    if (!redis) return null;
+    return redis.get(key);
+  },
+
+  // 通用 set 方法
+  async set(key: string, value: string, expirySeconds?: number): Promise<void> {
+    if (!redis) return;
+    if (expirySeconds) {
+      await redis.set(key, value, 'EX', expirySeconds);
+    } else {
+      await redis.set(key, value);
+    }
+  },
+
+  // 获取所有匹配的键
+  async keys(pattern: string): Promise<string[]> {
+    if (!redis) return [];
+    return redis.keys(pattern);
+  },
   // 检查地址是否已经 claim 过
   async hasClaimed(evmAddress: string): Promise<boolean> {
     if (!redis) return false;

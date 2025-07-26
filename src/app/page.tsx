@@ -66,13 +66,12 @@ function HomeContent() {
             <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 shadow-xl">
               <h2 className="text-2xl font-bold text-yellow-400 mb-3">黑客松有史以来最大的💩</h2>
               <p className="text-gray-300 leading-relaxed">
-                在那个难忘的夏天，当所有人都在追求 Adventure 的时候，
-                我们选择了更真实的道路——拥抱生活的本质。
+                在那个难忘的夏天，当所有人都在追求创造的时候，
+                我们选择了更优雅的道路——变废为宝
               </p>
               <div className="mt-4 pt-4 border-t border-gray-700">
                 <p className="text-sm text-gray-400 italic">
-                  真正的创新不需要 X，只需要 Shit。
-                  因为生活的本质，就是一场充满味道的冒险。
+                  其实创新不需要 X，只需要 Shit
                 </p>
               </div>
             </div>
@@ -124,14 +123,22 @@ function HomeContent() {
           </Link>
         </div>
 
-        {/* 补贴查询按钮 */}
-        <div className="mt-8 text-center">
+        {/* 功能按钮组 */}
+        <div className="mt-8 flex gap-4 justify-center flex-wrap">
           <Link
-            href="/subsidy"
+            href="/shit-tree"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800/70 text-gray-300 rounded-lg hover:bg-gray-700/70 transition-all border border-gray-700"
+          >
+            <span className="text-xl">💩</span>
+            <span>Shit NFT 分发树</span>
+          </Link>
+          
+          <Link
+            href="/grant"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800/70 text-gray-300 rounded-lg hover:bg-gray-700/70 transition-all border border-gray-700"
           >
             <span className="text-xl">💰</span>
-            <span>ShitX 补贴查询</span>
+            <span>SHITX Grant 查询</span>
           </Link>
         </div>
       </div>
