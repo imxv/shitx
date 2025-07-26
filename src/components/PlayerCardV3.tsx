@@ -8,6 +8,8 @@ interface PlayerCardV3Props {
   showRole?: boolean;
   isCurrentPlayer?: boolean;
   compact?: boolean;
+  voteCount?: number; // 新增：当前收到的投票数
+  showVoteCount?: boolean; // 新增：是否显示投票数
   isNightPhase?: boolean;
 }
 
@@ -18,6 +20,8 @@ export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
   showRole = false,
   isCurrentPlayer = false,
   compact = false,
+  voteCount = 0,
+  showVoteCount = false,
   isNightPhase = false
 }) => {
   const handleClick = () => {
@@ -74,6 +78,13 @@ export const PlayerCardV3: React.FC<PlayerCardV3Props> = ({
       {isCurrentPlayer && (
         <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
           你
+        </div>
+      )}
+      
+      {/* 投票数显示 */}
+      {showVoteCount && voteCount > 0 && !isCurrentPlayer && (
+        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+          {voteCount}票
         </div>
       )}
       
