@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
@@ -8,6 +8,9 @@ import { generateEVMAddress } from '@/utils/web3Utils';
 export default function CreateSeriesPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [userBalance, setUserBalance] = useState<string>('0');
+  const [balanceLoading, setBalanceLoading] = useState(true);
+  const CREATION_COST = 10000;
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -19,6 +22,25 @@ export default function CreateSeriesPage() {
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
+
+  // 获取用户余额
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const identity = getUserIdentity();
+        const evmAddress = generateEVMAddress(identity.fingerprint);
+        const response = await fetch(`/api/v1/shit-balance/${evmAddress}`);
+        const data = await response.json();
+        setUserBalance(data.balance || '0');
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      } finally {
+        setBalanceLoading(false);
+      }
+    };
+
+    fetchBalance();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -92,7 +114,7 @@ export default function CreateSeriesPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert(`恭喜！您已成功创建 "${formData.displayName}" 系列，并获得了始祖NFT！`);
+        alert(data.message || `恭喜！您已成功创建 "${formData.displayName}" 系列，并获得了始祖卡片！`);
         router.push('/my-toilet');
       } else {
         alert('创建失败：' + (data.error || '未知错误'));
@@ -120,6 +142,29 @@ export default function CreateSeriesPage() {
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white text-center">
           <h1 className="text-3xl font-bold mb-2">🎨 创建您的ShitX极速卡片</h1>
           <p className="text-gray-300">ShitX极速卡片是集概括、分发、增长于一体的极速卡片系统</p>
+        </div>
+
+        {/* 余额和费用信息 */}
+        <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-xl p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-yellow-300 font-semibold">💰 创建费用</p>
+              <p className="text-2xl font-bold text-white">{CREATION_COST.toLocaleString()} SHIT</p>
+            </div>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm">您的余额</p>
+              {balanceLoading ? (
+                <p className="text-xl text-gray-300">加载中...</p>
+              ) : (
+                <p className={`text-xl font-bold ${parseInt(userBalance) >= CREATION_COST ? 'text-green-400' : 'text-red-400'}`}>
+                  {parseInt(userBalance).toLocaleString()} SHIT
+                </p>
+              )}
+            </div>
+          </div>
+          {!balanceLoading && parseInt(userBalance) < CREATION_COST && (
+            <p className="text-red-400 text-sm mt-2">⚠️ 余额不足，无法创建系列</p>
+          )}
         </div>
 
         {/* 创建表单 */}
@@ -276,7 +321,7 @@ export default function CreateSeriesPage() {
             <div className="pt-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || balanceLoading || parseInt(userBalance) < CREATION_COST}
                 className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { nftRedis } from '@/lib/redis';
 import { createPartner } from '@/lib/partnersService';
+import * as mock from '@/lib/mockImplementation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +26,18 @@ export async function POST(request: NextRequest) {
     if (!name || !displayName || !nftName || !description || !creatorId || !creatorAddress) {
       return NextResponse.json(
         { error: '缺少必填字段' },
+        { status: 400 }
+      );
+    }
+    
+    // 检查用户余额
+    const currentBalance = await mock.getBalance(creatorAddress);
+    const balanceAmount = parseInt(currentBalance);
+    const CREATION_COST = 10000; // 创建系列需要 10000 SHIT
+    
+    if (balanceAmount < CREATION_COST) {
+      return NextResponse.json(
+        { error: `余额不足，创建系列需要 ${CREATION_COST} SHIT，您当前余额为 ${balanceAmount} SHIT` },
         { status: 400 }
       );
     }
@@ -120,11 +133,16 @@ export async function POST(request: NextRequest) {
       // 记录创建者获得始祖NFT
       await nftRedis.recordSeriesCreation(seriesId, creatorAddress, claimResult.nft?.tokenId || '1');
       
+      // 扣除创建费用
+      await mock.subtractBalance(creatorAddress, CREATION_COST);
+      const newBalance = await mock.getBalance(creatorAddress);
+      
       return NextResponse.json({
         success: true,
         series: partnerData,
         ancestorNFT: claimResult.nft,
-        message: `成功创建系列 "${displayName}"，您已获得始祖NFT！`
+        newBalance: newBalance,
+        message: `成功创建系列 "${displayName}"，您已获得始祖NFT！已扣除 ${CREATION_COST} SHIT，当前余额: ${newBalance} SHIT`
       });
       
     } catch (error) {
