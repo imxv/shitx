@@ -95,6 +95,11 @@ export function NFTClaim() {
   const claimedCount = Object.values(claimStatus).filter(s => s.hasClaimed).length;
   const totalCount = claimableNFTs.length;
 
+  // 如果所有 NFT 都已领取，不显示弹窗
+  if (totalCount > 0 && claimedCount === totalCount) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-4 left-4 z-50">
       <div className="bg-gray-900/90 backdrop-blur-sm border border-yellow-500/50 rounded-xl p-4 shadow-lg max-w-sm">

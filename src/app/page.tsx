@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { UserBadge } from '@/components/UserBadge';
 import { NFTClaim } from '@/components/NFTClaim';
-import { ShitXBalance } from '@/components/ShitXBalance';
+import { GrantStatusCard } from '@/components/GrantStatusCard';
+import { NFTCollectionCard } from '@/components/NFTCollectionCard';
+import { TopBar } from '@/components/TopBar';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { getUserIdentity } from '@/utils/userIdentity';
@@ -32,19 +33,18 @@ function HomeContent() {
   }, [searchParams]);
 
   return (
-    <main className="min-h-screen cyber-gradient flex items-center justify-center p-6 relative overflow-hidden">
-      <UserBadge />
+    <main className="min-h-screen cyber-gradient flex items-center justify-center p-6 pt-20 relative overflow-hidden">
+      <TopBar />
       <NFTClaim />
-      <ShitXBalance />
       
       {/* 科技感背景元素 */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('/grid.svg')] opacity-10"></div>
       </div>
       
-      {/* 主要内容区域 */}
-      <div className="relative max-w-5xl mx-auto w-full">
-        {/* ShitX 标题和描述 */}
+      
+      
+     <div className="relative max-w-5xl mx-auto w-full">
         <div className="text-center mb-10 space-y-6">
           <div className="relative inline-block">
             <img 
@@ -56,12 +56,11 @@ function HomeContent() {
               <span className="text-yellow-400 neon-glow">Shit</span>
               <span className="text-green-400 neon-glow">X</span>
             </h1>
-            <p className="text-xl text-gray-400 font-light tracking-wider">
+            {/* <p className="text-xl text-gray-400 font-light tracking-wider">
               创造失眠，在那个有味道的夏天
-            </p>
+            </p> */}
           </div>
-
-          {/* 讽刺性介绍 */}
+{/* 
           <div className="max-w-3xl mx-auto space-y-4">
             <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 shadow-xl">
               <h2 className="text-2xl font-bold text-yellow-400 mb-3">黑客松有史以来最大的💩</h2>
@@ -75,72 +74,51 @@ function HomeContent() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
-        {/* 中央按钮组 */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-6">
-          <Link
-            href="/game"
-            className="group relative"
-          >
-            <div className="absolute inset-0 bg-green-500 rounded-xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity animate-pulse"></div>
-            <button className="relative px-10 py-5 bg-gray-900/90 text-green-400 text-xl font-bold rounded-xl hover:bg-gray-800/90 transition-all shadow-2xl border border-green-500/50 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🎮</span>
-                <span>ShitX 的献身</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-50"></div>
-            </button>
-          </Link>
 
-          <Link
-            href="/my-toilet"
-            className="group relative"
-          >
-            <div className="absolute inset-0 bg-purple-500 rounded-xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity animate-pulse delay-300"></div>
-            <button className="relative px-10 py-5 bg-gray-900/90 text-purple-400 text-xl font-bold rounded-xl hover:bg-gray-800/90 transition-all shadow-2xl border border-purple-500/50 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">💩</span>
-                <span>My Toilet</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-50"></div>
-            </button>
-          </Link>
 
+
+        {/* 状态卡片组 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mb-8">
+          <GrantStatusCard />
+          <NFTCollectionCard />
+        </div>
+
+        {/* 主要功能按钮 - United Toilet */}
+        <div className="mb-8">
           <Link
             href="/toilet"
-            className="group relative"
+            className="group relative block max-w-md mx-auto"
           >
-            <div className="absolute inset-0 bg-yellow-500 rounded-xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity animate-pulse delay-500"></div>
-            <button className="relative px-10 py-5 bg-gray-900/90 text-yellow-400 text-xl font-bold rounded-xl hover:bg-gray-800/90 transition-all shadow-2xl border border-yellow-500/50 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🚽</span>
-                <span>United Toilet</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity animate-pulse"></div>
+            <button className="relative w-full px-12 py-8 bg-gray-900/90 text-yellow-400 text-2xl font-bold rounded-2xl hover:bg-gray-800/90 transition-all shadow-2xl border-2 border-yellow-500/50 backdrop-blur-sm">
+              <div className="flex flex-col items-center gap-3">
+                <span className="text-6xl">🚽</span>
+                <span className="text-3xl">United Toilet</span>
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
             </button>
           </Link>
         </div>
 
-        {/* 功能按钮组 */}
-        <div className="mt-8 flex gap-4 justify-center flex-wrap">
+        {/* 次要功能按钮 */}
+        <div className="flex justify-center">
           <Link
-            href="/shit-tree"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800/70 text-gray-300 rounded-lg hover:bg-gray-700/70 transition-all border border-gray-700"
+            href="/game"
+            className="group relative"
           >
-            <span className="text-xl">💩</span>
-            <span>Shit NFT 分发树</span>
-          </Link>
-          
-          <Link
-            href="/grant"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800/70 text-gray-300 rounded-lg hover:bg-gray-700/70 transition-all border border-gray-700"
-          >
-            <span className="text-xl">💰</span>
-            <span>SHITX Grant 查询</span>
+            <div className="absolute inset-0 bg-green-500 rounded-xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity"></div>
+            <button className="relative px-8 py-4 bg-gray-900/90 text-green-400 text-lg font-bold rounded-xl hover:bg-gray-800/90 transition-all shadow-xl border border-green-500/50 backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🎮</span>
+                <span>ShitX 的献身</span>
+              </div>
+            </button>
           </Link>
         </div>
+
       </div>
 
       {/* 底部信息 */}
