@@ -295,5 +295,130 @@ export const nftRedis = {
     };
     
     return await buildTree(rootAddress, 0);
+  },
+
+  // 始祖码相关操作
+  // 创建始祖码
+  async createAncestorCode(nftType: string, code: string): Promise<void> {
+    if (!redis) return;
+    
+    const ancestorData = {
+      code,
+      nftType,
+      createdAt: Date.now(),
+      isUsed: false
+    };
+    
+    await redis.set(
+      `ancestor_code:${code}`,
+      JSON.stringify(ancestorData),
+      'EX',
+      60 * 60 * 24 * 30 // 30天过期
+    );
+  },
+
+  // 验证始祖码
+  async verifyAncestorCode(code: string): Promise<{ valid: boolean; data?: any; error?: string }> {
+    if (!redis) return { valid: false, error: 'Redis not available' };
+    
+    const data = await redis.get(`ancestor_code:${code}`);
+    if (!data) {
+      return { valid: false, error: '始祖码不存在或已过期' };
+    }
+    
+    const ancestorData = JSON.parse(data);
+    if (ancestorData.isUsed) {
+      return { valid: false, error: '始祖码已被使用' };
+    }
+    
+    return { valid: true, data: ancestorData };
+  },
+
+  // 使用始祖码
+  async useAncestorCode(code: string, userAddress: string): Promise<{ success: boolean; error?: string; data?: any }> {
+    if (!redis) return { success: false, error: 'Redis not available' };
+    
+    // 验证始祖码
+    const verification = await this.verifyAncestorCode(code);
+    if (!verification.valid) {
+      return { success: false, error: verification.error };
+    }
+    
+    const ancestorData = verification.data;
+    
+    // 检查该NFT类型是否已有始祖
+    const existingAncestor = await redis.get(`ancestor_holder:${ancestorData.nftType}`);
+    if (existingAncestor) {
+      return { success: false, error: '该NFT类型已有始祖' };
+    }
+    
+    // 标记始祖码为已使用
+    const updatedData = {
+      ...ancestorData,
+      isUsed: true,
+      usedAt: Date.now(),
+      usedBy: userAddress
+    };
+    
+    await redis.set(
+      `ancestor_code:${code}`,
+      JSON.stringify(updatedData),
+      'EX',
+      60 * 60 * 24 * 365 // 延长到1年保存记录
+    );
+    
+    // 设置始祖持有者
+    await redis.set(
+      `ancestor_holder:${ancestorData.nftType}`,
+      userAddress,
+      'EX',
+      60 * 60 * 24 * 365 // 1年过期
+    );
+    
+    return { success: true, data: updatedData };
+  },
+
+  // 获取始祖持有者
+  async getAncestorHolder(nftType: string): Promise<string | null> {
+    if (!redis) return null;
+    return await redis.get(`ancestor_holder:${nftType}`);
+  },
+
+  // 检查用户是否为某个NFT类型的始祖
+  async isAncestorHolder(userAddress: string, nftType: string): Promise<boolean> {
+    if (!redis) return false;
+    const ancestor = await this.getAncestorHolder(nftType);
+    return ancestor === userAddress;
+  },
+
+  // 删除始祖码（管理员挂失功能）
+  async removeAncestorCode(code: string): Promise<boolean> {
+    if (!redis) return false;
+    const result = await redis.del(`ancestor_code:${code}`);
+    return result > 0;
+  },
+
+  // 删除始祖持有者（管理员挂失功能）
+  async removeAncestorHolder(nftType: string): Promise<boolean> {
+    if (!redis) return false;
+    const result = await redis.del(`ancestor_holder:${nftType}`);
+    return result > 0;
+  },
+
+  // 获取所有始祖码状态
+  async getAllAncestorCodes(): Promise<any[]> {
+    if (!redis) return [];
+    
+    const keys = await redis.keys('ancestor_code:*');
+    const codes = [];
+    
+    for (const key of keys) {
+      const data = await redis.get(key);
+      if (data) {
+        codes.push(JSON.parse(data));
+      }
+    }
+    
+    return codes;
   }
 };

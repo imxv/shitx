@@ -29,6 +29,10 @@ export default function MyToiletPage() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string>('');
   const [generateLoading, setGenerateLoading] = useState(false);
+  const [ancestorCode, setAncestorCode] = useState<string>('');
+  const [ancestorLoading, setAncestorLoading] = useState(false);
+  const [ancestorError, setAncestorError] = useState<string>('');
+  const [ancestorSuccess, setAncestorSuccess] = useState<string>('');
 
   useEffect(() => {
     const identity = getUserIdentity();
@@ -148,6 +152,45 @@ export default function MyToiletPage() {
       setImportError('导入失败，请重试');
     } finally {
       setImporting(false);
+    }
+  };
+
+  // 使用始祖码
+  const handleUseAncestorCode = async () => {
+    if (!ancestorCode.trim() || !userIdentity) return;
+    
+    setAncestorLoading(true);
+    setAncestorError('');
+    setAncestorSuccess('');
+    
+    try {
+      const response = await fetch('/api/v1/ancestor-code/use', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: ancestorCode.trim(),
+          fingerprint: userIdentity.fingerprint,
+          userId: userIdentity.id,
+          username: userIdentity.username
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setAncestorSuccess(data.message);
+        setAncestorCode('');
+        // 刷新NFT列表
+        fetchUserNFTs(evmAddress);
+      } else {
+        setAncestorError(data.error || '使用始祖码失败');
+      }
+    } catch (error) {
+      setAncestorError('使用始祖码失败，请重试');
+    } finally {
+      setAncestorLoading(false);
     }
   };
 

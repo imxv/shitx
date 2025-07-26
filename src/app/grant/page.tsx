@@ -141,7 +141,15 @@ export default function GrantPage() {
 
         {/* 标题 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
-          <h1 className="text-3xl font-bold mb-4">💰 SHITX Grant 查询</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <h1 className="text-3xl font-bold mb-2 sm:mb-0">💰 SHITX Grant 查询</h1>
+            <button
+              onClick={() => router.push('/referral-tree')}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm font-medium"
+            >
+              🌳 查看分级推荐树
+            </button>
+          </div>
           
           {/* 你的 Grant 信息 */}
           {userGrant && (
