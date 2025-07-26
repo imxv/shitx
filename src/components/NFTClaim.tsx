@@ -21,6 +21,7 @@ export function NFTClaim() {
   const [error, setError] = useState<string>('');
   const [claimableNFTs, setClaimableNFTs] = useState<PartnerNFT[]>([]);
   const [showAll, setShowAll] = useState(false);
+  const [subsidyInfo, setSubsidyInfo] = useState<{ amount: string; txHash: string } | null>(null);
 
   useEffect(() => {
     initializeClaimStatus();
@@ -65,10 +66,15 @@ export function NFTClaim() {
           }
         }));
         setSuccessNFT(result.nft);
+        // 检查是否有补贴信息
+        if (result.subsidy) {
+          setSubsidyInfo(result.subsidy);
+        }
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
           setSuccessNFT(null);
+          setSubsidyInfo(null);
         }, 5000);
       } else {
         setError(result.error || '领取失败，请稍后重试');
@@ -173,6 +179,12 @@ export function NFTClaim() {
               <p className="text-yellow-400 text-sm mt-2">
                 {successNFT.metadata.attributes.find((a) => a.trait_type === 'Rarity')?.value}
               </p>
+              {subsidyInfo && (
+                <div className="mt-3 p-2 bg-green-500/20 rounded-lg">
+                  <p className="text-green-400 font-bold">🎉 {subsidyInfo.message}</p>
+                  <p className="text-xs text-gray-400 mt-1">首次领取 NFT 专属福利</p>
+                </div>
+              )}
               {successNFT.txHash && (
                 <a
                   href={`https://testnet.explorer.injective.network/transaction/${successNFT.txHash}`}

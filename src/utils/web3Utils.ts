@@ -36,9 +36,21 @@ export async function claimShitNFT(userIdentity: {
   id: string;
   fingerprint: string;
   username: string;
-}, partnerId: string = 'default'): Promise<{ success: boolean; nft?: ShitNFT; error?: string }> {
+}, partnerId: string = 'default'): Promise<{ 
+  success: boolean; 
+  nft?: ShitNFT; 
+  error?: string;
+  subsidy?: {
+    amount: string;
+    txHash: string;
+    message: string;
+  };
+}> {
   try {
     const evmAddress = generateEVMAddress(userIdentity.fingerprint);
+    
+    // 获取分享者信息
+    const referrerUserId = typeof window !== 'undefined' ? sessionStorage.getItem('referrerUserId') : null;
     
     const response = await fetch(`${API_BASE_URL}/claim-nft`, {
       method: 'POST',
@@ -51,6 +63,7 @@ export async function claimShitNFT(userIdentity: {
         username: userIdentity.username,
         fingerprint: userIdentity.fingerprint,
         partnerId,
+        referrerUserId,
       }),
     });
 
@@ -60,7 +73,11 @@ export async function claimShitNFT(userIdentity: {
       throw new Error(data.error || 'Failed to claim NFT');
     }
 
-    return { success: true, nft: data.nft };
+    return { 
+      success: true, 
+      nft: data.nft,
+      subsidy: data.subsidy 
+    };
   } catch (error) {
     console.error('Error claiming NFT:', error);
     return { 

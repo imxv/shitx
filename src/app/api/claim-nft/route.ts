@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nftRedis } from '@/lib/redis';
 import { transferNFT, getNextAvailableTokenId, getMainWalletAddress } from '@/lib/injectiveNFT';
+import { distributeSubsidy, hasClaimedSubsidy } from '@/lib/shitxCoin';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, evmAddress, username } = body;
+    const { userId, evmAddress, username, referrerUserId } = body;
 
     // 检查是否已经 claim 过
     const hasClaimed = await nftRedis.hasClaimed(evmAddress);
@@ -87,8 +88,41 @@ export async function POST(request: NextRequest) {
       contractAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT,
     };
 
-    // 记录到 Redis
-    await nftRedis.recordClaim(evmAddress, nft);
+    // 获取 referrer 的 EVM 地址（如果有）
+    let referrerAddress: string | undefined;
+    if (referrerUserId) {
+      // 根据 referrerUserId 查找对应的地址
+      const referrerEvmAddress = await nftRedis.getAddressByUserId(referrerUserId);
+      if (referrerEvmAddress) {
+        referrerAddress = referrerEvmAddress.toLowerCase();
+      } else {
+        // 如果找不到，使用管理员地址作为 referrer
+        referrerAddress = getMainWalletAddress().toLowerCase();
+      }
+    }
+    
+    // 记录到 Redis（包含 referral 关系）
+    await nftRedis.recordClaim(evmAddress.toLowerCase(), nft, referrerAddress);
+
+    // 尝试发放 ShitX Coin 补贴
+    let subsidyInfo = null;
+    try {
+      // 检查是否已经领取过补贴
+      const hasClaimed = await hasClaimedSubsidy(evmAddress);
+      if (!hasClaimed) {
+        const subsidyResult = await distributeSubsidy(evmAddress);
+        if (subsidyResult.success) {
+          subsidyInfo = {
+            amount: subsidyResult.amount,
+            txHash: subsidyResult.txHash,
+            message: `获得 ${subsidyResult.amount} SHIT 补贴！`
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Error distributing subsidy:', error);
+      // 补贴分发失败不影响 NFT 领取
+    }
 
     return NextResponse.json({
       success: true,
@@ -96,6 +130,7 @@ export async function POST(request: NextRequest) {
       message: `恭喜获得 ${rarityTier}！`,
       txHash: transferResult.txHash,
       explorerUrl: `https://testnet.explorer.injective.network/transaction/${transferResult.txHash}`,
+      subsidy: subsidyInfo
     });
   } catch (error) {
     console.error('Error in claim-nft:', error);

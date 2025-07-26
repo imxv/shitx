@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { UserBadge } from '@/components/UserBadge';
 import { NFTClaim } from '@/components/NFTClaim';
+import { ShitXBalance } from '@/components/ShitXBalance';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { getUserIdentity } from '@/utils/userIdentity';
@@ -12,14 +13,21 @@ function HomeContent() {
   const searchParams = useSearchParams();
   
   useEffect(() => {
-    // 获取 URL 中的 ref 参数
+    // 获取 URL 中的参数
     const ref = searchParams.get('ref');
+    const referrerUserId = searchParams.get('user');
+    
     if (ref) {
-      // 记录 referral 来源
+      // 记录 referral 来源（合作方）
       getUserIdentity(ref);
     } else {
       // 没有 ref 参数也要调用，确保生成用户身份
       getUserIdentity();
+    }
+    
+    // 保存分享者信息
+    if (referrerUserId) {
+      sessionStorage.setItem('referrerUserId', referrerUserId);
     }
   }, [searchParams]);
 
@@ -27,6 +35,7 @@ function HomeContent() {
     <main className="min-h-screen cyber-gradient flex items-center justify-center p-6 relative overflow-hidden">
       <UserBadge />
       <NFTClaim />
+      <ShitXBalance />
       
       {/* 科技感背景元素 */}
       <div className="absolute inset-0 pointer-events-none">
@@ -112,6 +121,17 @@ function HomeContent() {
               </div>
               <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
             </button>
+          </Link>
+        </div>
+
+        {/* 补贴查询按钮 */}
+        <div className="mt-8 text-center">
+          <Link
+            href="/subsidy"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-800/70 text-gray-300 rounded-lg hover:bg-gray-700/70 transition-all border border-gray-700"
+          >
+            <span className="text-xl">💰</span>
+            <span>ShitX 补贴查询</span>
           </Link>
         </div>
       </div>

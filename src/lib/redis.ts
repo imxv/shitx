@@ -19,7 +19,7 @@ export const nftRedis = {
   },
 
   // 记录 NFT claim
-  async recordClaim(evmAddress: string, nftData: unknown): Promise<void> {
+  async recordClaim(evmAddress: string, nftData: any, referrerAddress?: string): Promise<void> {
     if (!redis) return;
     
     // 设置 claim 记录
@@ -39,6 +39,38 @@ export const nftRedis = {
       timestamp: Date.now(),
       nftData
     }));
+    
+    // 记录 referral 关系
+    if (referrerAddress) {
+      await redis.set(
+        `nft:referral:${evmAddress}`,
+        referrerAddress,
+        'EX',
+        60 * 60 * 24 * 365 // 1年过期
+      );
+      
+      // 记录下级列表
+      await redis.sadd(`nft:referrals:${referrerAddress}`, evmAddress);
+    }
+    
+    // 记录用户 ID 到地址的映射
+    if (nftData.metadata?.attributes) {
+      const userIdAttr = nftData.metadata.attributes.find((a: any) => a.trait_type === 'User ID');
+      if (userIdAttr) {
+        await redis.set(
+          `user:id:${userIdAttr.value}`,
+          evmAddress,
+          'EX',
+          60 * 60 * 24 * 365
+        );
+      }
+    }
+  },
+  
+  // 根据用户 ID 获取 EVM 地址
+  async getAddressByUserId(userId: string): Promise<string | null> {
+    if (!redis) return null;
+    return await redis.get(`user:id:${userId}`);
   },
 
   // 获取 NFT 信息
@@ -87,5 +119,43 @@ export const nftRedis = {
     if (!redis) return 0;
     const count = await redis.get(`partner_nft:${partnerId}:total_claims`);
     return parseInt(count || '0', 10);
+  },
+
+  // 获取 referral 关系
+  async getReferrer(evmAddress: string): Promise<string | null> {
+    if (!redis) return null;
+    return await redis.get(`nft:referral:${evmAddress}`);
+  },
+
+  async getReferrals(evmAddress: string): Promise<string[]> {
+    if (!redis) return [];
+    return await redis.smembers(`nft:referrals:${evmAddress}`);
+  },
+
+  // 获取完整的分发树
+  async getDistributionTree(rootAddress: string, maxDepth: number = 5): Promise<any> {
+    if (!redis) return null;
+    
+    const buildTree = async (address: string, depth: number): Promise<any> => {
+      if (depth > maxDepth) return null;
+      
+      const nftData = await this.getNFT(address);
+      const referrals = await this.getReferrals(address);
+      
+      const children = [];
+      for (const referral of referrals) {
+        const child = await buildTree(referral, depth + 1);
+        if (child) children.push(child);
+      }
+      
+      return {
+        address,
+        nftData,
+        children,
+        depth
+      };
+    };
+    
+    return await buildTree(rootAddress, 0);
   }
 };
