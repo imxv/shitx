@@ -53,5 +53,39 @@ export const nftRedis = {
     if (!redis) return 0;
     const count = await redis.get('nft:total_claims');
     return parseInt(count || '0', 10);
+  },
+
+  // 合作方 NFT 相关操作
+  async hasPartnerClaimed(partnerId: string, evmAddress: string): Promise<boolean> {
+    if (!redis) return false;
+    const result = await redis.get(`partner_nft:${partnerId}:claimed:${evmAddress}`);
+    return !!result;
+  },
+
+  async recordPartnerClaim(partnerId: string, evmAddress: string, nftData: unknown): Promise<void> {
+    if (!redis) return;
+    
+    // 设置 claim 记录
+    await redis.set(
+      `partner_nft:${partnerId}:claimed:${evmAddress}`, 
+      JSON.stringify(nftData),
+      'EX',
+      60 * 60 * 24 * 365 // 1年过期
+    );
+    
+    // 增加合作方 NFT 总 claim 计数
+    await redis.incr(`partner_nft:${partnerId}:total_claims`);
+  },
+
+  async getPartnerNFT(partnerId: string, evmAddress: string): Promise<unknown | null> {
+    if (!redis) return null;
+    const data = await redis.get(`partner_nft:${partnerId}:claimed:${evmAddress}`);
+    return data ? JSON.parse(data) : null;
+  },
+
+  async getPartnerTotalClaims(partnerId: string): Promise<number> {
+    if (!redis) return 0;
+    const count = await redis.get(`partner_nft:${partnerId}:total_claims`);
+    return parseInt(count || '0', 10);
   }
 };

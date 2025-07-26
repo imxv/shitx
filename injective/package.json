@@ -1,0 +1,19 @@
+{
+  "name": "shit-nft-contracts",
+  "version": "1.0.0",
+  "description": "ShitX NFT contracts for Injective",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network injective",
+    "mint-all": "hardhat run scripts/mintAll.js --network injective",
+    "deploy-partners": "hardhat run scripts/deployPartnerNFT.js --network injective",
+    "mint-partner-nfts": "hardhat run scripts/mintPartnerNFTs.js --network injective",
+    "verify": "hardhat verify --network injective"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.0.3",
+    "hardhat": "^2.19.0"
+  }
+}

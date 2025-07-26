@@ -23,6 +23,9 @@ export interface ShitNFT {
     }>;
   };
   claimedAt: number;
+  txHash?: string;
+  chainId?: number;
+  contractAddress?: string;
 }
 
 // API 配置
@@ -33,7 +36,7 @@ export async function claimShitNFT(userIdentity: {
   id: string;
   fingerprint: string;
   username: string;
-}): Promise<{ success: boolean; nft?: ShitNFT; error?: string }> {
+}, partnerId: string = 'default'): Promise<{ success: boolean; nft?: ShitNFT; error?: string }> {
   try {
     const evmAddress = generateEVMAddress(userIdentity.fingerprint);
     
@@ -47,6 +50,7 @@ export async function claimShitNFT(userIdentity: {
         evmAddress,
         username: userIdentity.username,
         fingerprint: userIdentity.fingerprint,
+        partnerId,
       }),
     });
 
@@ -87,17 +91,17 @@ export async function checkNFTStatus(fingerprint: string): Promise<{
   }
 }
 
-// Injective 链配置
-export const INJECTIVE_CONFIG = {
-  chainId: '0x1', // Injective mainnet
-  chainName: 'Injective',
+// Injective 测试网配置
+export const INJECTIVE_TESTNET_CONFIG = {
+  chainId: '0x59f', // 1439 in hex (Injective testnet)
+  chainName: 'Injective Testnet',
   nativeCurrency: {
     name: 'INJ',
     symbol: 'INJ',
     decimals: 18,
   },
-  rpcUrls: ['https://injective-rpc.publicnode.com'],
-  blockExplorerUrls: ['https://explorer.injective.network'],
+  rpcUrls: ['https://k8s.testnet.json-rpc.injective.network/'],
+  blockExplorerUrls: ['https://testnet.explorer.injective.network'],
 };
 
 // NFT 合约地址（需要部署后填入）

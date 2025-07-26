@@ -10,6 +10,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@injectivelabs/sdk-ts": "^1.15.43",
+    "@injectivelabs/wallet-ts": "^1.14.41",
     "@types/qrcode": "^1.5.5",
     "@vercel/analytics": "^1.5.0",
     "ethers": "^6.15.0",

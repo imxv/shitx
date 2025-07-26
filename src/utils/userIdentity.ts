@@ -70,11 +70,13 @@ export interface UserIdentity {
   createdAt: number;
   lastSeen: number;
   toiletVisits: number;
+  referralSource?: string; // 来源合作方
+  referralTimestamp?: number; // 首次访问时间
 }
 
 const USER_IDENTITY_KEY = 'shitx_user_identity';
 
-export function getUserIdentity(): UserIdentity {
+export function getUserIdentity(referralSource?: string): UserIdentity {
   // 尝试从 localStorage 读取
   const stored = localStorage.getItem(USER_IDENTITY_KEY);
   
@@ -84,6 +86,13 @@ export function getUserIdentity(): UserIdentity {
       // 更新最后访问时间
       identity.lastSeen = Date.now();
       identity.toiletVisits = (identity.toiletVisits || 0) + 1;
+      
+      // 如果有新的 referral 但用户还没有记录来源，记录首次来源
+      if (referralSource && !identity.referralSource) {
+        identity.referralSource = referralSource;
+        identity.referralTimestamp = Date.now();
+      }
+      
       localStorage.setItem(USER_IDENTITY_KEY, JSON.stringify(identity));
       return identity;
     } catch (e) {
@@ -99,7 +108,11 @@ export function getUserIdentity(): UserIdentity {
     username: generateUsername(fingerprint),
     createdAt: Date.now(),
     lastSeen: Date.now(),
-    toiletVisits: 1
+    toiletVisits: 1,
+    ...(referralSource && {
+      referralSource,
+      referralTimestamp: Date.now()
+    })
   };
   
   localStorage.setItem(USER_IDENTITY_KEY, JSON.stringify(identity));
