@@ -4,6 +4,7 @@ export interface Partner {
   displayName: string;
   nftName: string;
   description: string;
+  logo?: string; // 合作方 logo 文件名
   contractAddress: string | null;
   totalSupply: number;
   deployed: boolean;
@@ -11,44 +12,16 @@ export interface Partner {
 
 // 合作方清单
 export const partners: Partner[] = [
+ 
   {
-    id: 'adventurex',
-    name: 'AdventureX',
-    displayName: 'AdventureX 黑客松',
-    nftName: 'Shit X AdventureX',
-    description: '见证那个创造失眠的难忘夏天，中国有史以来最大的黑客松',
+    id: 'djteddy',
+    name: 'DJ Teddy',
+    displayName: 'DJ Teddy',
+    nftName: 'Shit X DJ Teddy',
+    description: '你的AI视觉骑士 (Your Personal AI Visual Jockey)',
+    logo: 'teddy.png',
     contractAddress: null,
     totalSupply: 2000,
-    deployed: false,
-  },
-  {
-    id: 'injective',
-    name: 'Injective',
-    displayName: 'Injective',
-    nftName: 'Shit X Injective',
-    description: '在 Injective 上拉屎，Web3 的终极体验',
-    contractAddress: null,
-    totalSupply: 1500,
-    deployed: false,
-  },
-  {
-    id: 'claude',
-    name: 'Claude',
-    displayName: 'Claude AI',
-    nftName: 'Shit X Claude',
-    description: '由 AI 驱动的厕所革命，让拉屎更智能',
-    contractAddress: null,
-    totalSupply: 1000,
-    deployed: false,
-  },
-  {
-    id: 'doge',
-    name: 'Doge',
-    displayName: '狗狗币社区',
-    nftName: 'Shit X Doge',
-    description: 'Much shit, very toilet, wow',
-    contractAddress: null,
-    totalSupply: 3000,
     deployed: false,
   },
 ];

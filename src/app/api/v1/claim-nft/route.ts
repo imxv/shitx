@@ -2,6 +2,53 @@ import { NextRequest, NextResponse } from 'next/server';
 import { nftRedis } from '@/lib/redis';
 import * as mock from '@/lib/mockImplementation';
 
+// 推荐奖励配置
+const REFERRAL_REWARDS = {
+  LEVEL_1_RATE: 0.5,  // 50% 给直接推荐人
+  LEVEL_2_RATE: 0.2,  // 20% 给二级推荐人
+  LEVEL_3_RATE: 0.05, // 5% 给三级推荐人
+};
+
+// 分发推荐奖励
+async function distributeReferralRewards(
+  claimerAddress: string,
+  subsidyAmount: number
+): Promise<void> {
+  try {
+    // 获取推荐链
+    const referralChain = await nftRedis.getReferralChain(claimerAddress, 3);
+    
+    if (referralChain.length === 0) return;
+    
+    // 分发奖励给各级推荐人
+    const rewardRates = [REFERRAL_REWARDS.LEVEL_1_RATE, REFERRAL_REWARDS.LEVEL_2_RATE, REFERRAL_REWARDS.LEVEL_3_RATE];
+    
+    for (let i = 0; i < Math.min(referralChain.length, 3); i++) {
+      const referrerAddress = referralChain[i];
+      const rewardAmount = Math.floor(subsidyAmount * rewardRates[i]);
+      
+      if (rewardAmount > 0) {
+        // 增加推荐人余额
+        const currentBalance = await mock.getBalance(referrerAddress);
+        const newBalance = (parseInt(currentBalance) + rewardAmount).toString();
+        await mock.setBalance(referrerAddress, newBalance);
+        
+        // 记录奖励
+        await nftRedis.recordReferralReward(
+          referrerAddress,
+          rewardAmount,
+          i + 1,
+          claimerAddress
+        );
+        
+        console.log(`[Referral] Level ${i + 1} reward: ${rewardAmount} SHIT to ${referrerAddress}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error distributing referral rewards:', error);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -128,6 +175,11 @@ export async function POST(request: NextRequest) {
             txHash: subsidyResult.txHash,
             message: `获得 ${subsidyResult.amount} SHIT 补贴！`
           };
+          
+          // 分发推荐奖励
+          if (referrerAddress) {
+            await distributeReferralRewards(evmAddress, parseInt(subsidyResult.amount));
+          }
         }
       }
     } catch (error) {

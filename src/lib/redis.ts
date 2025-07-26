@@ -148,6 +148,74 @@ export const nftRedis = {
     return await redis.get(`nft:referral:${evmAddress}`);
   },
 
+  // 获取 referral 链（多级推荐人）
+  async getReferralChain(evmAddress: string, maxDepth: number = 3): Promise<string[]> {
+    if (!redis) return [];
+    
+    const chain: string[] = [];
+    let currentAddress = evmAddress;
+    
+    for (let i = 0; i < maxDepth; i++) {
+      const referrer = await this.getReferrer(currentAddress);
+      if (!referrer) break;
+      chain.push(referrer);
+      currentAddress = referrer;
+    }
+    
+    return chain;
+  },
+
+  // 记录推荐奖励
+  async recordReferralReward(
+    recipientAddress: string, 
+    amount: number, 
+    level: number,
+    sourceAddress: string,
+    partnerId?: string
+  ): Promise<void> {
+    if (!redis) return;
+    
+    const rewardData = {
+      amount,
+      level,
+      sourceAddress,
+      partnerId,
+      timestamp: Date.now()
+    };
+    
+    // 记录奖励历史
+    await redis.lpush(
+      `nft:referral_rewards:${recipientAddress}`,
+      JSON.stringify(rewardData)
+    );
+    
+    // 增加总奖励计数
+    await redis.incrby(`nft:referral_rewards_total:${recipientAddress}`, amount);
+  },
+
+  // 获取推荐奖励总额
+  async getReferralRewardsTotal(evmAddress: string): Promise<number> {
+    if (!redis) return 0;
+    const total = await redis.get(`nft:referral_rewards_total:${evmAddress}`);
+    return parseInt(total || '0', 10);
+  },
+
+  // 记录合作方NFT的推荐关系
+  async recordPartnerReferral(
+    partnerId: string,
+    claimerAddress: string,
+    referrerNFTId: string
+  ): Promise<void> {
+    if (!redis) return;
+    
+    await redis.set(
+      `partner_nft:${partnerId}:referral:${claimerAddress}`,
+      referrerNFTId,
+      'EX',
+      60 * 60 * 24 * 365 // 1年过期
+    );
+  },
+
   async getReferrals(evmAddress: string): Promise<string[]> {
     if (!redis) return [];
     return await redis.smembers(`nft:referrals:${evmAddress}`);

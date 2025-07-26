@@ -1,4 +1,5 @@
 import { nftRedis } from './redis';
+import { getPartnerById } from '@/config/partners';
 
 // 导出 nftRedis 以便其他模块使用
 export { nftRedis };
@@ -131,6 +132,47 @@ export function getNFTMetadata(tokenId: string): any {
   };
 }
 
+export function getPartnerNFTMetadata(partnerId: string, tokenId: string): any {
+  const partner = getPartnerById(partnerId);
+  if (!partner) {
+    return getNFTMetadata(tokenId); // 回退到默认元数据
+  }
+  
+  const id = parseInt(tokenId);
+  let rarity = 'Common Toilet';
+  
+  // 合作方 NFT 稀有度分配可能不同
+  if (id <= 5) rarity = 'Legendary Golden Throne';
+  else if (id <= 25) rarity = 'Epic Diamond Toilet';
+  else if (id <= 75) rarity = 'Rare Silver Toilet';
+  else if (id <= 150) rarity = 'Uncommon Bronze Toilet';
+  
+  return {
+    name: `${partner.nftName} #${tokenId}`,
+    description: partner.description,
+    image: `/api/v1/nft-image/${partnerId}/${tokenId}`,
+    external_url: `https://shitx.top/nft/${partnerId}/${tokenId}`,
+    attributes: [
+      {
+        trait_type: 'Rarity',
+        value: rarity,
+      },
+      {
+        trait_type: 'Partner',
+        value: partner.displayName,
+      },
+      {
+        trait_type: 'Collection',
+        value: partner.nftName,
+      },
+      {
+        trait_type: 'Type',
+        value: 'Partner NFT',
+      }
+    ],
+  };
+}
+
 // ========== Token 功能 ==========
 
 export async function getBalance(address: string): Promise<string> {
@@ -143,7 +185,7 @@ export async function getBalance(address: string): Promise<string> {
   }
 }
 
-async function setBalance(address: string, amount: string): Promise<void> {
+export async function setBalance(address: string, amount: string): Promise<void> {
   await nftRedis.set(`${REDIS_KEYS.BALANCE}${address}`, amount);
 }
 

@@ -51,8 +51,13 @@ export async function claimShitNFT(userIdentity: {
     
     // 获取分享者信息
     const referrerUserId = typeof window !== 'undefined' ? sessionStorage.getItem('referrerUserId') : null;
+    const referrerNFTId = typeof window !== 'undefined' ? sessionStorage.getItem('referrerNFTId') : null;
     
-    const response = await fetch(`${API_BASE_URL}/claim-nft`, {
+    // 判断是否是合作方 NFT
+    const isPartnerNFT = partnerId !== 'default';
+    const endpoint = isPartnerNFT ? `${API_BASE_URL}/claim-partner-nft` : `${API_BASE_URL}/claim-nft`;
+    
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,6 +69,7 @@ export async function claimShitNFT(userIdentity: {
         fingerprint: userIdentity.fingerprint,
         partnerId,
         referrerUserId,
+        referrerNFTId,
       }),
     });
 

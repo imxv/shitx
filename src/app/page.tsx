@@ -5,6 +5,7 @@ import { NFTClaim } from '@/components/NFTClaim';
 import { GrantStatusCard } from '@/components/GrantStatusCard';
 import { NFTCollectionCard } from '@/components/NFTCollectionCard';
 import { TopBar } from '@/components/TopBar';
+import { ReferralStats } from '@/components/ReferralStats';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { getUserIdentity } from '@/utils/userIdentity';
@@ -17,6 +18,7 @@ function HomeContent() {
     // 获取 URL 中的参数
     const ref = searchParams.get('ref');
     const referrerUserId = searchParams.get('user');
+    const referrerNFTId = searchParams.get('nft');
     
     if (ref) {
       // 记录 referral 来源（合作方）
@@ -29,6 +31,11 @@ function HomeContent() {
     // 保存分享者信息
     if (referrerUserId) {
       sessionStorage.setItem('referrerUserId', referrerUserId);
+    }
+    
+    // 保存推荐人NFT ID（用于合作方NFT）
+    if (referrerNFTId) {
+      sessionStorage.setItem('referrerNFTId', referrerNFTId);
     }
   }, [searchParams]);
 
@@ -85,6 +92,11 @@ function HomeContent() {
           <GrantStatusCard />
           <NFTCollectionCard />
         </div>
+        
+        {/* 推荐奖励统计 */}
+        <div className="max-w-md mx-auto mb-8">
+          <ReferralStats />
+        </div>
 
         {/* 主要功能按钮 - United Toilet */}
         <div className="mb-8">
@@ -103,21 +115,6 @@ function HomeContent() {
           </Link>
         </div>
 
-        {/* 次要功能按钮 */}
-        <div className="flex justify-center">
-          <Link
-            href="/game"
-            className="group relative"
-          >
-            <div className="absolute inset-0 bg-green-500 rounded-xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity"></div>
-            <button className="relative px-8 py-4 bg-gray-900/90 text-green-400 text-lg font-bold rounded-xl hover:bg-gray-800/90 transition-all shadow-xl border border-green-500/50 backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🎮</span>
-                <span>ShitX 的献身</span>
-              </div>
-            </button>
-          </Link>
-        </div>
 
       </div>
 
