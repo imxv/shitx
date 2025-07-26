@@ -34,7 +34,7 @@ export default function Home() {
                 <div className="h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent my-4"></div>
                 <p className="text-sm text-gray-300 leading-relaxed">
                   当其他人还在探索星辰大海的冒险时，我们已经深入马桶内部的宇宙。
-                  72小时不眠不休，只为让每一次如厕都成为一次跨维度的体验。
+                  72小时不眠不休，只为让每一次如厕都成为一次体验。
                 </p>
                 <p className="text-sm text-gray-400 italic">
                   真正的创新不需要 X，只需要 Shit。
