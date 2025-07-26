@@ -7,7 +7,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "redis:clear": "node scripts/clear-redis.js",
+    "redis:manage": "node scripts/redis-manager.js"
   },
   "dependencies": {
     "@injectivelabs/sdk-ts": "^1.15.43",
