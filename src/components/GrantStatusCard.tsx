@@ -39,8 +39,17 @@ export function GrantStatusCard() {
       const historyData = await historyResponse.json();
       
       // 计算真实的直接补贴总额
-      const directSubsidyTotal = historyData.stats?.totalDirectSubsidy || 0;
       const referralRewardsTotal = historyData.stats?.totalReferralRewards || 0;
+      
+      // 如果历史记录中没有直接补贴，但用户已经领取过，使用余额减去推荐奖励来计算
+      let directSubsidyTotal = historyData.stats?.totalDirectSubsidy || 0;
+      
+      // 如果用户已经领取补贴但历史记录为0，说明是早期用户，使用余额计算
+      if (data.hasClaimedSubsidy && directSubsidyTotal === 0) {
+        // 余额 - 推荐奖励 = 直接补贴
+        const balance = parseFloat(data.balance || '0');
+        directSubsidyTotal = Math.max(0, balance - referralRewardsTotal);
+      }
       
       setGrantInfo({
         balance: data.balance || '0',
