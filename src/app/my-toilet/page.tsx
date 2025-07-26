@@ -14,6 +14,7 @@ interface NFTCollection {
   tokenId?: string;
   claimedAt?: number;
   rarity?: string;
+  isAncestor?: boolean;
 }
 
 export default function MyToiletPage() {
@@ -63,6 +64,7 @@ export default function MyToiletPage() {
           tokenId: mainNFTData.nft?.tokenId,
           claimedAt: mainNFTData.nft?.claimedAt,
           rarity: mainNFTData.nft?.metadata?.attributes?.find((a: { trait_type: string; value: string | number }) => a.trait_type === 'Rarity')?.value,
+          isAncestor: mainNFTData.nft?.isAncestor || false,
         }
       ];
 
@@ -79,6 +81,7 @@ export default function MyToiletPage() {
           tokenId: partnerNFTData.nft?.tokenId,
           claimedAt: partnerNFTData.nft?.claimedAt,
           rarity: partnerNFTData.nft?.metadata?.attributes?.find((a: { trait_type: string; value: string | number }) => a.trait_type === 'Rarity')?.value,
+          isAncestor: partnerNFTData.nft?.isAncestor || false,
         });
       }
 
@@ -352,6 +355,50 @@ export default function MyToiletPage() {
           </div>
         </div>
 
+        {/* 始祖码 */}
+        <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">👑 始祖码</h2>
+          
+          <div className="space-y-3 sm:space-y-4">
+            <div>
+              <p className="text-gray-400 mb-2 text-sm sm:text-base">使用始祖码成为NFT始祖</p>
+              <p className="text-xs text-gray-500 mb-3">
+                始祖是某个NFT类型的第一个持有者，拥有该类型NFT的分发权限。始祖码只能使用一次。
+              </p>
+              
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={ancestorCode}
+                  onChange={(e) => setAncestorCode(e.target.value)}
+                  placeholder="输入64位始祖码"
+                  className="w-full px-3 py-2 bg-gray-700 rounded text-white placeholder-gray-400 text-sm font-mono"
+                />
+                
+                {ancestorError && (
+                  <p className="text-red-400 text-xs">{ancestorError}</p>
+                )}
+                
+                {ancestorSuccess && (
+                  <p className="text-green-400 text-xs">{ancestorSuccess}</p>
+                )}
+                
+                <button
+                  onClick={handleUseAncestorCode}
+                  disabled={ancestorLoading || !ancestorCode.trim()}
+                  className="w-full sm:w-auto px-4 py-2 bg-yellow-600 rounded hover:bg-yellow-700 transition-colors text-sm disabled:opacity-50"
+                >
+                  {ancestorLoading ? '使用中...' : '使用始祖码'}
+                </button>
+                
+                <p className="text-xs text-gray-400">
+                  👑 成为始祖后，你将获得该NFT类型的特殊标识和分发权限
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* NFT 收藏 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6">
           <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">💩 NFT 收藏</h2>
@@ -368,7 +415,12 @@ export default function MyToiletPage() {
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-white text-sm sm:text-base truncate">{collection.nftName}</h3>
+                    <div className="flex items-center gap-1">
+                      <h3 className="font-bold text-white text-sm sm:text-base truncate">{collection.nftName}</h3>
+                      {collection.isAncestor && (
+                        <span className="text-yellow-400 text-xs" title="始祖NFT">👑</span>
+                      )}
+                    </div>
                     <p className="text-xs sm:text-sm text-gray-400 truncate">{collection.partnerName}</p>
                   </div>
                   {collection.owned && (
@@ -382,6 +434,11 @@ export default function MyToiletPage() {
                     <p className={getRarityColor(collection.rarity as string | undefined)}>
                       稀有度: {collection.rarity}
                     </p>
+                    {collection.isAncestor && (
+                      <p className="text-yellow-400 text-xs font-bold">
+                        👑 始祖NFT - 拥有分发权限
+                      </p>
+                    )}
                     <p className="text-gray-400 text-xs">
                       获得时间: {new Date(collection.claimedAt!).toLocaleString('zh-CN')}
                     </p>

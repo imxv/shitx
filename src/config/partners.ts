@@ -69,6 +69,18 @@ export const partners: Partner[] = [
     totalSupply: 10000,
     deployed: true,
   },
+  {
+    id: 'echoesofus',
+    name: 'Echoes of Us',
+    displayName: 'Echoes of Us',
+    nftName: 'Shit X Echoes of Us',
+    description: '「我们的回响」，让记忆再次发出原本的声音',
+    logo:'echoesofus.png',
+    website: 'https://advx-project.pages.dev',
+    contractAddress: null,
+    totalSupply: 1000,
+    deployed: false,
+  },
 ];
 
 // 获取已部署的合作方

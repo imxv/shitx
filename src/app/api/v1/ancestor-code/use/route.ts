@@ -32,23 +32,19 @@ export async function POST(request: NextRequest) {
     const ancestorData = result.data;
     const nftType = ancestorData.nftType;
     
-    // 获取NFT类型信息
-    let nftTypeInfo;
-    if (nftType === 'default') {
-      nftTypeInfo = {
-        name: 'Shit NFT',
-        displayName: 'ShitX'
-      };
-    } else {
-      const partner = partners.find(p => p.id === nftType);
-      nftTypeInfo = partner ? {
-        name: partner.nftName,
-        displayName: partner.displayName
-      } : {
-        name: `Unknown NFT Type: ${nftType}`,
-        displayName: 'Unknown'
-      };
+    // 获取NFT类型信息 - 只处理合作方NFT
+    const partner = partners.find(p => p.id === nftType);
+    if (!partner) {
+      return NextResponse.json(
+        { error: `无效的NFT类型: ${nftType}` },
+        { status: 400 }
+      );
     }
+    
+    const nftTypeInfo = {
+      name: partner.nftName,
+      displayName: partner.displayName
+    };
     
     // 创建始祖NFT数据
     const ancestorNFT = {
@@ -94,14 +90,8 @@ export async function POST(request: NextRequest) {
       nftType: nftType,
     };
     
-    // 记录始祖NFT到对应的存储
-    if (nftType === 'default') {
-      // 如果是默认类型，存储到主NFT记录
-      await nftRedis.recordClaim(userAddress, ancestorNFT);
-    } else {
-      // 如果是合作方NFT，存储到合作方NFT记录
-      await nftRedis.recordPartnerClaim(nftType, userAddress, ancestorNFT);
-    }
+    // 记录始祖NFT到合作方NFT记录
+    await nftRedis.recordPartnerClaim(nftType, userAddress, ancestorNFT);
     
     return NextResponse.json({
       success: true,
@@ -145,23 +135,19 @@ export async function GET(request: NextRequest) {
     const ancestorData = verification.data;
     const nftType = ancestorData.nftType;
     
-    // 获取NFT类型信息
-    let nftTypeInfo;
-    if (nftType === 'default') {
-      nftTypeInfo = {
-        name: 'Shit NFT',
-        displayName: 'ShitX'
-      };
-    } else {
-      const partner = partners.find(p => p.id === nftType);
-      nftTypeInfo = partner ? {
-        name: partner.nftName,
-        displayName: partner.displayName
-      } : {
-        name: `Unknown NFT Type: ${nftType}`,
-        displayName: 'Unknown'
-      };
+    // 获取NFT类型信息 - 只处理合作方NFT
+    const partner = partners.find(p => p.id === nftType);
+    if (!partner) {
+      return NextResponse.json(
+        { error: `无效的NFT类型: ${nftType}` },
+        { status: 400 }
+      );
     }
+    
+    const nftTypeInfo = {
+      name: partner.nftName,
+      displayName: partner.displayName
+    };
     
     return NextResponse.json({
       valid: true,

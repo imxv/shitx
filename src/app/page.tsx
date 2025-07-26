@@ -5,7 +5,6 @@ import { NFTClaim } from '@/components/NFTClaim';
 import { GrantStatusCard } from '@/components/GrantStatusCard';
 import { NFTCollectionCard } from '@/components/NFTCollectionCard';
 import { TopBar } from '@/components/TopBar';
-import { ReferralStats } from '@/components/ReferralStats';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { getUserIdentity } from '@/utils/userIdentity';
@@ -91,11 +90,6 @@ function HomeContent() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
           <GrantStatusCard />
           <NFTCollectionCard />
-        </div>
-        
-        {/* 推荐奖励统计 */}
-        <div className="max-w-md mx-auto mb-6 sm:mb-8">
-          <ReferralStats />
         </div>
 
         {/* 主要功能按钮 - United Toilet */}

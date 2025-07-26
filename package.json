@@ -18,7 +18,15 @@
     "test:verify": "node src/__tests__/tools/index.js verify-tx",
     "test:balance": "node src/__tests__/tools/index.js check-balance",
     "test:debug": "node src/__tests__/tools/index.js debug-claims",
-    "test:e2e": "jest jest/full-business-flow.test.ts --verbose --runInBand"
+    "test:e2e": "jest jest/full-business-flow.test.ts --verbose --runInBand",
+    "ancestor": "node scripts/ancestor-manager.js",
+    "ancestor:scan": "node scripts/ancestor-manager.js scan",
+    "ancestor:generate": "node scripts/ancestor-manager.js generate",
+    "ancestor:list": "node scripts/ancestor-manager.js list",
+    "ancestor:report-lost": "node scripts/ancestor-manager.js report-lost",
+    "test:referral": "tsx scripts/test-referral-tree.ts",
+    "test:referral:help": "echo '使用方法: npm run test:referral [目标地址]'",
+    "debug:referral": "tsx scripts/debug-referral.ts"
   },
   "dependencies": {
     "@injectivelabs/sdk-ts": "^1.15.43",
@@ -30,7 +38,8 @@
     "next": "15.4.3",
     "qrcode": "^1.5.4",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "tsx": "^4.20.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
