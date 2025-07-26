@@ -18,8 +18,8 @@ export default function Home() {
         {/* Logo 和标语 */}
         <div className="text-center mb-8">
           <img src="/shitx.png" alt="ShitX Logo" className="w-24 h-24 mx-auto mb-4 object-contain hackathon-logo animate-float" />
-          <h1 className="text-5xl font-bold text-green-400 mb-2 neon-glow tracking-wider">ShitX</h1>
-          <p className="text-lg text-green-400 terminal-cursor opacity-80">创造失眠，在那个难忘的夏天</p>
+          {/* <h1 className="text-5xl font-bold text-green-400 mb-2 neon-glow tracking-wider">ShitX</h1>
+          <p className="text-lg text-green-400 terminal-cursor opacity-80">创造失眠，在那个难忘的夏天</p> */}
         </div>
 
         {/* 中央内容区 */}
