@@ -161,7 +161,7 @@ export default function ShitTreePage() {
 
         {/* 标题 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
-          <h1 className="text-3xl font-bold mb-4">💩 Shit NFT 分发树</h1>
+          <h1 className="text-3xl font-bold mb-4">💩 ShitX NFT 分发树</h1>
           
           {/* 搜索框 */}
           <div className="flex gap-2 mb-4">

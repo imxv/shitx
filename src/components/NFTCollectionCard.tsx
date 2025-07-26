@@ -46,7 +46,7 @@ export function NFTCollectionCard() {
         if (mainNFTData.nft?.claimedAt && mainNFTData.nft.claimedAt > latestClaimTime) {
           latestClaimTime = mainNFTData.nft.claimedAt;
           recentNFT = {
-            name: 'Shit NFT',
+            name: 'ShitX NFT',
             rarity: mainNFTData.nft?.metadata?.attributes?.find((a: any) => a.trait_type === 'Rarity')?.value || 'Common',
             claimedAt: mainNFTData.nft.claimedAt
           };
@@ -109,7 +109,7 @@ export function NFTCollectionCard() {
     <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-purple-500/30 shadow-lg">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-sm text-gray-400 mb-1">Shit NFT 收藏进度</h3>
+          <h3 className="text-sm text-gray-400 mb-1">ShitX NFT 收藏进度</h3>
           <div>
             <p className="text-2xl font-bold text-purple-400">
               {status.collectedNFTs} / {status.totalNFTs}

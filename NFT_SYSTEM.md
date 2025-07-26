@@ -59,13 +59,13 @@ export const partners = [
 
 ## 用户功能
 
-### My Toilet (我的厕所)
+### My ShitX (我的ShitX)
 - 显示用户 EVM 地址
 - 展示已拥有的 NFT
 - 显示收集进度
 - NFT 稀有度信息
 
-### United Toilet (联合厕所)
+### ShitX United (ShitX联合)
 - 选择已拥有的 NFT 生成二维码
 - 二维码包含 referral 信息
 - 扫码者可获得相同类型的 NFT

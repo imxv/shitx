@@ -155,7 +155,7 @@ export default function ToiletPage() {
   if (loading) {
     return (
       <main className="min-h-screen cyber-gradient p-4 flex items-center justify-center">
-        <div className="text-green-400 text-2xl animate-pulse">检查厕所使用权...</div>
+        <div className="text-green-400 text-2xl animate-pulse">检查ShitX访问权限...</div>
       </main>
     );
   }
@@ -173,7 +173,7 @@ export default function ToiletPage() {
           </button>
           
           <div className="bg-gray-900 border border-red-500 rounded-2xl p-8 shadow-2xl shadow-red-500/20 text-center">
-            <h1 className="text-3xl font-bold text-red-400 mb-4">无权使用厕所</h1>
+            <h1 className="text-3xl font-bold text-red-400 mb-4">无权访问ShitX</h1>
             <p className="text-gray-400 mb-6">你还没有任何 Shit NFT，请先去首页领取</p>
             <button
               onClick={() => router.push('/')}
@@ -276,7 +276,7 @@ export default function ToiletPage() {
               <span className="text-4xl">🚽</span>
               <div>
                 <h3 className="text-xl font-bold text-red-400">添加失败</h3>
-                <p className="text-gray-400">Toilet 还没有清理干净，请稍后再试</p>
+                <p className="text-gray-400">ShitX系统正在维护中，请稍后再试</p>
               </div>
             </div>
           </div>

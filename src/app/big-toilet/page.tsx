@@ -114,7 +114,7 @@ export default function BigToiletPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
-        <div className="text-white text-2xl animate-pulse">加载厕所数据中...</div>
+        <div className="text-white text-2xl animate-pulse">加载ShitX数据中...</div>
       </div>
     );
   }
@@ -132,7 +132,7 @@ export default function BigToiletPage() {
 
         {/* 标题 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
-          <h1 className="text-3xl font-bold mb-4">🚽 Big Toilet - NFT 分发中心</h1>
+          <h1 className="text-3xl font-bold mb-4">🚽 ShitX Central - NFT 分发中心</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>

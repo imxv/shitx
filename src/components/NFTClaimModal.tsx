@@ -55,7 +55,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
           const result = await claimShitNFT(identity, 'default');
           results.push({
             partnerId: 'default',
-            nftName: 'Shit NFT',
+            nftName: 'ShitX NFT',
             partnerName: 'ShitX',
             success: result.success,
             rarity: result.nft?.metadata?.attributes?.find((a: any) => a.trait_type === 'Rarity')?.value?.toString(),
@@ -66,7 +66,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
           // 不应该发生，因为新用户应该没有NFT
           results.push({
             partnerId: 'default',
-            nftName: 'Shit NFT',
+            nftName: 'ShitX NFT',
             partnerName: 'ShitX',
             success: false,
             alreadyClaimed: true
@@ -113,7 +113,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
           const mainResult = await claimShitNFT(identity, 'default');
           results.push({
             partnerId: 'default',
-            nftName: 'Shit NFT',
+            nftName: 'ShitX NFT',
             partnerName: 'ShitX',
             success: mainResult.success,
             rarity: mainResult.nft?.metadata?.attributes?.find((a: any) => a.trait_type === 'Rarity')?.value?.toString(),
@@ -230,7 +230,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
                           </p>
                           {result.partnerId === 'default' && (
                             <p className="text-xs text-gray-500 mt-1">
-                              首个 ShitX NFT，欢迎加入厕所革命！
+                              首个 ShitX NFT，欢迎加入ShitX革命！
                             </p>
                           )}
                         </>

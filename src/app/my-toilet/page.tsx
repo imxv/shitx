@@ -229,7 +229,7 @@ export default function MyToiletPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
-        <div className="text-white text-2xl animate-pulse">加载厕所数据中...</div>
+        <div className="text-white text-2xl animate-pulse">加载ShitX数据中...</div>
       </div>
     );
   }
@@ -247,7 +247,7 @@ export default function MyToiletPage() {
 
         {/* 用户信息 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">🚽 我的厕所</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">🚽 我的ShitX</h1>
           
           <div className="space-y-3 sm:space-y-4">
             <div>
@@ -464,7 +464,7 @@ export default function MyToiletPage() {
           {completionPercentage === 100 && (
             <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-xl text-black text-center">
               <p className="text-lg sm:text-xl font-bold">🏆 恭喜！你已经集齐所有 NFT！</p>
-              <p className="text-xs sm:text-sm mt-1">你是真正的厕所收藏家！</p>
+              <p className="text-xs sm:text-sm mt-1">你是真正的ShitX收藏家！</p>
             </div>
           )}
         </div>

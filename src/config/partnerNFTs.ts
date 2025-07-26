@@ -19,8 +19,8 @@ export const PARTNER_NFTS: Record<string, PartnerNFT> = {
   default: {
     partnerId: 'default',
     partnerName: 'ShitX',
-    nftName: 'Shit NFT',
-    description: '专属厕所通行证。在那个创造失眠的难忘夏天，见证了中国有史以来最大的厕所革命。',
+    nftName: 'ShitX NFT',
+    description: '专属ShitX通行证。在那个创造失眠的难忘夏天，见证了中国有史以来最大的ShitX革命。',
     image: 'https://shitx.top/api/nft-image/default',
     maxSupply: 8000,
     attributes: [
