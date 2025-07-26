@@ -134,8 +134,17 @@ export async function POST(request: NextRequest) {
       await nftRedis.recordSeriesCreation(seriesId, creatorAddress, claimResult.nft?.tokenId || '1');
       
       // 扣除创建费用
-      await mock.subtractBalance(creatorAddress, CREATION_COST);
-      const newBalance = await mock.getBalance(creatorAddress);
+      const newBalance = (balanceAmount - CREATION_COST).toString();
+      await mock.setBalance(creatorAddress, newBalance);
+      
+      // 记录支出
+      await nftRedis.recordExpense(
+        creatorAddress,
+        CREATION_COST,
+        'series_creation',
+        `创建系列: ${displayName}`,
+        { seriesId, nftName, totalSupply }
+      );
       
       return NextResponse.json({
         success: true,

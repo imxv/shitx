@@ -29,9 +29,16 @@ export default function CreateSeriesPage() {
       try {
         const identity = getUserIdentity();
         const evmAddress = generateEVMAddress(identity.fingerprint);
-        const response = await fetch(`/api/v1/shit-balance/${evmAddress}`);
+        // 使用与首页相同的余额查询方式
+        const response = await fetch(`/api/v1/shit-grant/${evmAddress}`);
         const data = await response.json();
-        setUserBalance(data.balance || '0');
+        
+        // 从mock实现获取实际余额
+        const balanceResponse = await fetch(`/api/v1/shit-balance/${evmAddress}`);
+        const balanceData = await balanceResponse.json();
+        
+        // 使用mock系统的余额（与首页保持一致）
+        setUserBalance(balanceData.balance || '0');
       } catch (error) {
         console.error('Error fetching balance:', error);
       } finally {
@@ -163,7 +170,21 @@ export default function CreateSeriesPage() {
             </div>
           </div>
           {!balanceLoading && parseInt(userBalance) < CREATION_COST && (
-            <p className="text-red-400 text-sm mt-2">⚠️ 余额不足，无法创建系列</p>
+            <div className="mt-2 space-y-1">
+              <p className="text-red-400 text-sm">⚠️ 余额不足，无法创建系列</p>
+              <p className="text-gray-300 text-xs">
+                💡 提示：在首页通过ShitX Grant系统领取补贴和获得推荐奖励来赚取SHIT
+              </p>
+              {/* 临时调试信息 */}
+              <details className="text-xs text-gray-400 mt-2">
+                <summary className="cursor-pointer hover:text-gray-300">查看余额调试信息</summary>
+                <div className="mt-1 p-2 bg-gray-900/50 rounded">
+                  <p>当前余额: {userBalance} SHIT</p>
+                  <p>需要费用: {CREATION_COST} SHIT</p>
+                  <p className="mt-1">如果余额显示有误，请返回首页查看ShitX Grant状态</p>
+                </div>
+              </details>
+            </div>
           )}
         </div>
 

@@ -17,6 +17,15 @@ interface ShitXCardCollection {
   isAncestor?: boolean;
 }
 
+interface AIAnalysis {
+  type: 'grant' | 'nft';
+  analysis: string;
+  updateTime: string;
+  cached?: boolean;
+  ageInHours?: number;
+  nextUpdateCost: number;
+}
+
 export default function MyToiletPage() {
   const router = useRouter();
   const [userIdentity, setUserIdentity] = useState<UserIdentity | null>(null);
@@ -38,6 +47,9 @@ export default function MyToiletPage() {
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState<string>('');
   const [userCreatedSeries, setUserCreatedSeries] = useState<any[]>([]);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [analyzingNFT, setAnalyzingNFT] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   useEffect(() => {
     const identity = getUserIdentity();
@@ -124,6 +136,42 @@ export default function MyToiletPage() {
       }
     } catch (error) {
       console.error('Error fetching transfer code:', error);
+    }
+  };
+
+  const handleAIAnalysis = async (forceRefresh = false) => {
+    try {
+      setAnalyzingNFT(true);
+      const response = await fetch('/api/v1/ai-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'nft',
+          forceRefresh,
+          userAddress: evmAddress
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (data.error === 'Insufficient SHIT balance') {
+          alert(`余额不足！需要 ${data.required} SHIT，当前余额：${data.current} SHIT`);
+        } else {
+          alert(data.error || '分析失败');
+        }
+        return;
+      }
+
+      setAiAnalysis(data);
+      setShowAnalysis(true);
+    } catch (error) {
+      console.error('AI analysis error:', error);
+      alert('AI分析服务暂时不可用');
+    } finally {
+      setAnalyzingNFT(false);
     }
   };
 
@@ -351,8 +399,67 @@ export default function MyToiletPage() {
               </div>
               <p className="text-xs sm:text-sm mt-1">{collectedCount} / {totalCount} ({completionPercentage.toFixed(0)}%)</p>
             </div>
+            
+            {/* AI 分析按钮 */}
+            <div className="mt-4">
+              <button
+                onClick={() => handleAIAnalysis(false)}
+                disabled={analyzingNFT}
+                className="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {analyzingNFT ? (
+                  <>
+                    <span className="animate-spin">🔄</span> 分析中...
+                  </>
+                ) : (
+                  <>
+                    🤖 AI收藏分析 (100 SHIT)
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* AI 分析结果 */}
+        {aiAnalysis && (
+          <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold">🤖 AI 收藏分析</h2>
+                {aiAnalysis.cached && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    缓存数据 · {aiAnalysis.ageInHours} 小时前生成 · 
+                    <button
+                      onClick={() => handleAIAnalysis(true)}
+                      className="text-blue-400 hover:text-blue-300 ml-1"
+                      disabled={analyzingNFT}
+                    >
+                      刷新分析 (100 SHIT)
+                    </button>
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => setShowAnalysis(!showAnalysis)}
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                {showAnalysis ? '收起' : '展开'}
+              </button>
+            </div>
+            
+            {showAnalysis && (
+              <div className="prose prose-invert prose-sm max-w-none">
+                <div className="bg-gray-700/50 rounded-lg p-4 whitespace-pre-wrap text-gray-300 leading-relaxed text-sm">
+                  {aiAnalysis.analysis}
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  更新时间：{new Date(aiAnalysis.updateTime).toLocaleString('zh-CN')}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 账户管理 */}
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 text-white">

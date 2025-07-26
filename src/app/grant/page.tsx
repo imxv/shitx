@@ -49,6 +49,15 @@ interface RewardStats {
   level3Rewards: number;
 }
 
+interface AIAnalysis {
+  type: 'grant' | 'nft';
+  analysis: string;
+  updateTime: string;
+  cached?: boolean;
+  ageInHours?: number;
+  nextUpdateCost: number;
+}
+
 export default function GrantPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -60,6 +69,9 @@ export default function GrantPage() {
   const [rewardHistory, setRewardHistory] = useState<RewardRecord[]>([]);
   const [rewardStats, setRewardStats] = useState<RewardStats | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [analyzingGrant, setAnalyzingGrant] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   useEffect(() => {
     loadGrantInfo();
@@ -120,6 +132,52 @@ export default function GrantPage() {
     return num.toFixed(2);
   };
 
+  const handleAIAnalysis = async (forceRefresh = false) => {
+    try {
+      setAnalyzingGrant(true);
+      
+      // 获取当前用户地址
+      const identity = getUserIdentity();
+      const address = generateEVMAddress(identity.fingerprint);
+      
+      const response = await fetch('/api/v1/ai-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'grant',
+          forceRefresh,
+          userAddress: address
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (data.error === 'Insufficient SHIT balance') {
+          alert(`余额不足！需要 ${data.required} SHIT，当前余额：${data.current} SHIT`);
+        } else {
+          alert(data.error || '分析失败');
+        }
+        return;
+      }
+
+      setAiAnalysis(data);
+      setShowAnalysis(true);
+      
+      // 如果消耗了SHIT，更新余额
+      if (!data.cached && data.newBalance !== undefined) {
+        setUserGrant(prev => prev ? { ...prev, balance: data.newBalance.toString() } : null);
+      }
+    } catch (error) {
+      console.error('AI analysis error:', error);
+      alert('AI分析服务暂时不可用');
+    } finally {
+      setAnalyzingGrant(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
@@ -143,12 +201,29 @@ export default function GrantPage() {
         <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-6 mb-6 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
             <h1 className="text-3xl font-bold mb-2 sm:mb-0">💰 SHITX Grant 查询</h1>
-            <button
-              onClick={() => router.push('/referral-tree')}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm font-medium"
-            >
-              🌳 查看分级推荐树
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleAIAnalysis(false)}
+                disabled={analyzingGrant}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-2"
+              >
+                {analyzingGrant ? (
+                  <>
+                    <span className="animate-spin">🔄</span> 分析中...
+                  </>
+                ) : (
+                  <>
+                    🤖 AI分析 (100 SHIT)
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => router.push('/referral-tree')}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm font-medium"
+              >
+                🌳 查看分级推荐树
+              </button>
+            </div>
           </div>
           
           {/* 你的 Grant 信息 */}
@@ -284,6 +359,46 @@ export default function GrantPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* AI 分析结果 */}
+          {aiAnalysis && (
+            <div className="bg-gray-700/50 rounded-xl p-4 mb-6">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h2 className="text-xl font-semibold">🤖 AI 数据分析</h2>
+                  {aiAnalysis.cached && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      缓存数据 · {aiAnalysis.ageInHours} 小时前生成 · 
+                      <button
+                        onClick={() => handleAIAnalysis(true)}
+                        className="text-blue-400 hover:text-blue-300 ml-1"
+                        disabled={analyzingGrant}
+                      >
+                        刷新分析 (100 SHIT)
+                      </button>
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowAnalysis(!showAnalysis)}
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                >
+                  {showAnalysis ? '收起' : '展开'}
+                </button>
+              </div>
+              
+              {showAnalysis && (
+                <div className="prose prose-invert prose-sm max-w-none">
+                  <div className="bg-gray-800/50 rounded-lg p-4 whitespace-pre-wrap text-gray-300 leading-relaxed">
+                    {aiAnalysis.analysis}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    更新时间：{new Date(aiAnalysis.updateTime).toLocaleString('zh-CN')}
+                  </div>
                 </div>
               )}
             </div>

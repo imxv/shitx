@@ -11,10 +11,13 @@ export async function GET(
     const evmAddress = address.toLowerCase();
     
     // 获取收益历史记录
-    const history = await nftRedis.getRewardHistory(evmAddress, 100);
+    const rewardHistory = await nftRedis.getRewardHistory(evmAddress, 100);
     
-    // 处理历史记录，添加更多信息
-    const enrichedHistory = await Promise.all(history.map(async (record) => {
+    // 获取支出历史记录
+    const expenseHistory = await nftRedis.getExpenseHistory(evmAddress, 100);
+    
+    // 处理收益历史记录，添加更多信息
+    const enrichedRewards = await Promise.all(rewardHistory.map(async (record) => {
       let sourceInfo = null;
       let partnerInfo = null;
       
@@ -55,34 +58,60 @@ export async function GET(
         formattedTime: new Date(record.timestamp).toLocaleString('zh-CN'),
         typeDisplay: record.type === 'referral_reward' 
           ? `${record.level}级推荐奖励` 
-          : '直接领取补贴'
+          : '直接领取补贴',
+        category: 'income'
       };
     }));
     
-    // 计算统计信息
+    // 处理支出历史记录
+    const enrichedExpenses = expenseHistory.map((record) => {
+      let typeDisplay = '其他支出';
+      if (record.type === 'ai_analysis') {
+        typeDisplay = 'AI 分析';
+      } else if (record.type === 'series_creation') {
+        typeDisplay = '创建系列';
+      }
+      
+      return {
+        ...record,
+        formattedTime: new Date(record.timestamp).toLocaleString('zh-CN'),
+        typeDisplay,
+        category: 'expense'
+      };
+    });
+    
+    // 合并并按时间排序所有记录
+    const allHistory = [...enrichedRewards, ...enrichedExpenses]
+      .sort((a, b) => b.timestamp - a.timestamp);
+    
+    // 获取完整的财务摘要
+    const financialSummary = await nftRedis.getFinancialSummary(evmAddress);
+    
+    // 计算详细统计信息
     const stats = {
-      totalRecords: enrichedHistory.length,
-      totalDirectSubsidy: enrichedHistory
-        .filter(r => r.type === 'direct_subsidy')
-        .reduce((sum, r) => sum + r.amount, 0),
-      totalReferralRewards: enrichedHistory
-        .filter(r => r.type === 'referral_reward')
-        .reduce((sum, r) => sum + r.amount, 0),
-      level1Rewards: enrichedHistory
+      totalRecords: allHistory.length,
+      totalIncome: financialSummary.totalIncome,
+      totalExpense: financialSummary.totalExpense,
+      netBalance: financialSummary.netBalance,
+      totalDirectSubsidy: financialSummary.incomeBreakdown.directSubsidy,
+      totalReferralRewards: financialSummary.incomeBreakdown.referralRewards,
+      level1Rewards: enrichedRewards
         .filter(r => r.type === 'referral_reward' && r.level === 1)
         .reduce((sum, r) => sum + r.amount, 0),
-      level2Rewards: enrichedHistory
+      level2Rewards: enrichedRewards
         .filter(r => r.type === 'referral_reward' && r.level === 2)
         .reduce((sum, r) => sum + r.amount, 0),
-      level3Rewards: enrichedHistory
+      level3Rewards: enrichedRewards
         .filter(r => r.type === 'referral_reward' && r.level === 3)
         .reduce((sum, r) => sum + r.amount, 0),
+      expenseBreakdown: financialSummary.expenseBreakdown
     };
     
     return NextResponse.json({
       address: evmAddress,
-      history: enrichedHistory,
-      stats
+      history: allHistory,
+      stats,
+      financialSummary
     });
   } catch (error) {
     console.error('Error getting grant history:', error);

@@ -443,5 +443,112 @@ export const nftRedis = {
     }
     
     return codes;
+  },
+
+  // ========== 支出记录相关 ==========
+  
+  // 记录支出
+  async recordExpense(
+    userAddress: string,
+    amount: number,
+    expenseType: 'ai_analysis' | 'series_creation' | 'other',
+    description?: string,
+    metadata?: any
+  ): Promise<void> {
+    if (!redis) return;
+    
+    const expenseData = {
+      amount,
+      type: expenseType,
+      description,
+      metadata,
+      timestamp: Date.now()
+    };
+    
+    // 记录到支出历史
+    await redis.lpush(
+      `expense_history:${userAddress}`,
+      JSON.stringify(expenseData)
+    );
+    
+    // 增加总支出计数
+    await redis.incrby(`expense_total:${userAddress}`, amount);
+    
+    // 按类型记录支出
+    await redis.incrby(`expense_by_type:${userAddress}:${expenseType}`, amount);
+  },
+  
+  // 获取支出历史
+  async getExpenseHistory(userAddress: string, limit: number = 50): Promise<any[]> {
+    if (!redis) return [];
+    
+    const history = await redis.lrange(`expense_history:${userAddress}`, 0, limit - 1);
+    return history.map(item => JSON.parse(item));
+  },
+  
+  // 获取总支出
+  async getExpenseTotal(userAddress: string): Promise<number> {
+    if (!redis) return 0;
+    const total = await redis.get(`expense_total:${userAddress}`);
+    return parseInt(total || '0', 10);
+  },
+  
+  // 获取按类型的支出统计
+  async getExpenseByType(userAddress: string): Promise<Record<string, number>> {
+    if (!redis) return {};
+    
+    const types = ['ai_analysis', 'series_creation', 'other'];
+    const stats: Record<string, number> = {};
+    
+    for (const type of types) {
+      const amount = await redis.get(`expense_by_type:${userAddress}:${type}`);
+      stats[type] = parseInt(amount || '0', 10);
+    }
+    
+    return stats;
+  },
+  
+  // 获取完整的财务摘要（收入和支出）
+  async getFinancialSummary(userAddress: string): Promise<{
+    totalIncome: number;
+    totalExpense: number;
+    netBalance: number;
+    incomeBreakdown: {
+      directSubsidy: number;
+      referralRewards: number;
+    };
+    expenseBreakdown: Record<string, number>;
+  }> {
+    if (!redis) return {
+      totalIncome: 0,
+      totalExpense: 0,
+      netBalance: 0,
+      incomeBreakdown: { directSubsidy: 0, referralRewards: 0 },
+      expenseBreakdown: {}
+    };
+    
+    // 获取收入
+    const referralRewards = await this.getReferralRewardsTotal(userAddress);
+    const rewardHistory = await this.getRewardHistory(userAddress, 1000);
+    const directSubsidy = rewardHistory
+      .filter(r => r.type === 'direct_subsidy')
+      .reduce((sum, r) => sum + r.amount, 0);
+    
+    const totalIncome = directSubsidy + referralRewards;
+    
+    // 获取支出
+    const totalExpense = await this.getExpenseTotal(userAddress);
+    const expenseBreakdown = await this.getExpenseByType(userAddress);
+    
+    return {
+      totalIncome,
+      totalExpense,
+      netBalance: totalIncome - totalExpense,
+      incomeBreakdown: {
+        directSubsidy,
+        referralRewards
+      },
+      expenseBreakdown
+    };
   }
 };

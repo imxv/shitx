@@ -11,6 +11,9 @@ interface GrantInfo {
   subsidyAmount?: string;
   referralRewardsTotal?: number;
   directSubsidyTotal?: number;
+  expenseTotal?: number;
+  expenseBreakdown?: Record<string, number>;
+  netBalance?: number;
 }
 
 export function GrantStatusCard() {
@@ -34,29 +37,26 @@ export function GrantStatusCard() {
       const referralResponse = await fetch(`/api/v1/referral-stats/${address}`);
       const referralData = await referralResponse.json();
       
-      // 获取收益历史以计算真实的直接补贴总额
+      // 获取收益历史以计算真实的收支情况
       const historyResponse = await fetch(`/api/v1/grant/history/${address}`);
       const historyData = await historyResponse.json();
       
-      // 计算真实的直接补贴总额
-      const referralRewardsTotal = historyData.stats?.totalReferralRewards || 0;
-      
-      // 如果历史记录中没有直接补贴，但用户已经领取过，使用余额减去推荐奖励来计算
-      let directSubsidyTotal = historyData.stats?.totalDirectSubsidy || 0;
-      
-      // 如果用户已经领取补贴但历史记录为0，说明是早期用户，使用余额计算
-      if (data.hasClaimedSubsidy && directSubsidyTotal === 0) {
-        // 余额 - 推荐奖励 = 直接补贴
-        const balance = parseFloat(data.balance || '0');
-        directSubsidyTotal = Math.max(0, balance - referralRewardsTotal);
-      }
+      // 从财务摘要获取准确的数据
+      const financialSummary = historyData.financialSummary || {};
+      const referralRewardsTotal = financialSummary.incomeBreakdown?.referralRewards || 0;
+      const directSubsidyTotal = financialSummary.incomeBreakdown?.directSubsidy || 0;
+      const expenseTotal = financialSummary.totalExpense || 0;
+      const netBalance = financialSummary.netBalance || parseFloat(data.balance || '0');
       
       setGrantInfo({
         balance: data.balance || '0',
         hasClaimedSubsidy: data.hasClaimedSubsidy || false,
         subsidyAmount: data.subsidyAmount,
         referralRewardsTotal: referralRewardsTotal,
-        directSubsidyTotal: directSubsidyTotal
+        directSubsidyTotal: directSubsidyTotal,
+        expenseTotal: expenseTotal,
+        expenseBreakdown: financialSummary.expenseBreakdown || {},
+        netBalance: netBalance
       });
     } catch (error) {
       console.error('Error fetching grant info:', error);
@@ -87,7 +87,7 @@ export function GrantStatusCard() {
             <p className="text-2xl font-bold text-yellow-400">
               {parseFloat(grantInfo.balance).toLocaleString()} SHIT
             </p>
-            <p className="text-xs text-gray-500">当前余额</p>
+            <p className="text-xs text-gray-500">账户余额</p>
           </div>
           
           {/* 收益明细 */}
@@ -106,12 +106,50 @@ export function GrantStatusCard() {
               </span>
             </div>
             
+            {/* 支出 */}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">总支出:</span>
+              <span className={`font-medium ${grantInfo.expenseTotal && grantInfo.expenseTotal > 0 ? 'text-red-400' : 'text-gray-500'}`}>
+                -{grantInfo.expenseTotal || 0} SHIT
+              </span>
+            </div>
+            
+            {/* 支出明细 */}
+            {grantInfo.expenseBreakdown && Object.keys(grantInfo.expenseBreakdown).length > 0 && (
+              <div className="ml-4 text-xs space-y-0.5">
+                {grantInfo.expenseBreakdown.ai_analysis > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">AI分析:</span>
+                    <span className="text-gray-400">-{grantInfo.expenseBreakdown.ai_analysis}</span>
+                  </div>
+                )}
+                {grantInfo.expenseBreakdown.series_creation > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">创建系列:</span>
+                    <span className="text-gray-400">-{grantInfo.expenseBreakdown.series_creation}</span>
+                  </div>
+                )}
+                {grantInfo.expenseBreakdown.other > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-500">其他:</span>
+                    <span className="text-gray-400">-{grantInfo.expenseBreakdown.other}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
             {/* 总计 */}
             <div className="pt-1 mt-1 border-t border-gray-700">
               <div className="flex items-center justify-between">
                 <span className="text-gray-400">总收益:</span>
-                <span className="text-yellow-400 font-bold">
-                  {((grantInfo.directSubsidyTotal || 0) + (grantInfo.referralRewardsTotal || 0)).toLocaleString()} SHIT
+                <span className="text-green-400 font-bold">
+                  +{((grantInfo.directSubsidyTotal || 0) + (grantInfo.referralRewardsTotal || 0)).toLocaleString()} SHIT
+                </span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-gray-400">净收益:</span>
+                <span className="text-yellow-400 font-bold text-lg">
+                  {(((grantInfo.directSubsidyTotal || 0) + (grantInfo.referralRewardsTotal || 0)) - (grantInfo.expenseTotal || 0)).toLocaleString()} SHIT
                 </span>
               </div>
             </div>
