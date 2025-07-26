@@ -72,7 +72,7 @@ export default function CommunityPage() {
                   <div className="flex items-start gap-4">
                     {partner.logo && (
                       <img 
-                        src={getPartnerLogoUrl(partner)}
+                        src={getPartnerLogoUrl(partner.logo)}
                         alt={partner.displayName}
                         className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                       />

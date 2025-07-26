@@ -3,7 +3,7 @@
  * Handles both local files and Vercel Blob URLs
  */
 export function getPartnerLogoUrl(logo?: string): string {
-  if (!logo) {
+  if (!logo || typeof logo !== 'string') {
     return '/shitx.png'; // Default logo
   }
   

@@ -166,25 +166,9 @@ function HomeContent() {
               <span className="text-yellow-400 neon-glow">Shit</span>
               <span className="text-green-400 neon-glow">X</span>
             </h1>
-            {/* <p className="text-xl text-gray-400 font-light tracking-wider">
-              创造失眠，在那个有味道的夏天
-            </p> */}
+
           </div>
-{/* 
-          <div className="max-w-3xl mx-auto space-y-4">
-            <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 shadow-xl">
-              <h2 className="text-2xl font-bold text-yellow-400 mb-3">黑客松有史以来最大的💩</h2>
-              <p className="text-gray-300 leading-relaxed">
-                在那个难忘的夏天，当所有人都在追求创造的时候，
-                我们选择了更优雅的道路——变废为宝
-              </p>
-              <div className="mt-4 pt-4 border-t border-gray-700">
-                <p className="text-sm text-gray-400 italic">
-                  其实创新不需要 X，只需要 Shit
-                </p>
-              </div>
-            </div>
-          </div> */}
+
         </div>
 
 
