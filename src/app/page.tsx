@@ -30,7 +30,7 @@ export default function Home() {
             <div className="relative">
               <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center neon-glow">ShitX 宣言</h2>
               <div className="space-y-3 text-center">
-                <p className="text-xl text-green-400 italic font-light">"中国有史以来最大的厕所革命，就在这个难忘的夏天"</p>
+                <p className="text-xl text-green-400 italic font-light">&ldquo;中国有史以来最大的厕所革命，就在这个难忘的夏天&rdquo;</p>
                 <div className="h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent my-4"></div>
                 <p className="text-sm text-gray-300 leading-relaxed">
                   当其他人还在探索星辰大海的冒险时，我们已经深入马桶内部的宇宙。

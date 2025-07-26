@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import QRCode from 'qrcode';
 import { useRouter } from 'next/navigation';
 import '../hackathon.css';
@@ -18,7 +18,7 @@ export default function ToiletPage() {
   };
 
   // Generate QR code
-  const generateQRCode = async () => {
+  const generateQRCode = useCallback(async () => {
     try {
       const url = generateUrl();
       const qrUrl = await QRCode.toDataURL(url, {
@@ -33,7 +33,7 @@ export default function ToiletPage() {
     } catch (err) {
       console.error('Failed to generate QR code:', err);
     }
-  };
+  }, []);
 
   // Update QR code every 5 seconds
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function ToiletPage() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [generateQRCode]);
 
   return (
     <main className="min-h-screen cyber-gradient p-4 relative overflow-hidden">

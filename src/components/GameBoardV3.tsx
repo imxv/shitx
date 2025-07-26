@@ -4,7 +4,7 @@ import { useGameV3 } from '@/hooks/useGameV3';
 import { PlayerCardV3 } from './PlayerCardV3';
 import { ROLE_CONFIGS, PlayerRole } from '@/types/game';
 import { useState, useEffect } from 'react';
-import { getRoleDistribution, roleEmojis, roleNames } from '@/utils/gameUtilsV3';
+import { getRoleDistribution, roleEmojis } from '@/utils/gameUtilsV3';
 
 interface GameBoardV3Props {
   onReturnHome?: () => void;
