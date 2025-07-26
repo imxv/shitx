@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
-import { partners } from '@/config/partners';
+import { usePartners } from '@/hooks/usePartners';
 import Link from 'next/link';
 
 interface CollectionStatus {
@@ -20,10 +20,13 @@ interface CollectionStatus {
 export function NFTCollectionCard() {
   const [status, setStatus] = useState<CollectionStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const { partners } = usePartners();
   
   useEffect(() => {
-    fetchCollectionStatus();
-  }, []);
+    if (partners && partners.length > 0) {
+      fetchCollectionStatus();
+    }
+  }, [partners]);
   
   const fetchCollectionStatus = async () => {
     try {

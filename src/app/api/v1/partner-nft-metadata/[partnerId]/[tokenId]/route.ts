@@ -9,7 +9,7 @@ export async function GET(
     const { partnerId, tokenId } = await params;
     
     // 获取合作方 NFT 元数据
-    const metadata = getPartnerNFTMetadata(partnerId, tokenId);
+    const metadata = await getPartnerNFTMetadata(partnerId, tokenId);
     
     return NextResponse.json(metadata, {
       headers: {

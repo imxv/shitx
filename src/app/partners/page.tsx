@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { TopBar } from '@/components/TopBar';
-import { partners } from '@/config/partners';
+import { usePartners } from '@/hooks/usePartners';
 import '../hackathon.css';
 
 export default function PartnersPage() {
   const [hoveredPartner, setHoveredPartner] = useState<string | null>(null);
   const router = useRouter();
+  const { partners } = usePartners();
 
   return (
     <main className="min-h-screen cyber-gradient pt-20 p-6 relative overflow-hidden">

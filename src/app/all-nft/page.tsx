@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
-import { partners } from '@/config/partners';
+import { usePartners } from '@/hooks/usePartners';
 import Link from 'next/link';
 
 interface NFTCollection {
@@ -28,6 +28,7 @@ export default function AllNFTPage() {
   const [loading, setLoading] = useState(true);
   const [evmAddress, setEvmAddress] = useState<string>('');
   const [selectedNFT, setSelectedNFT] = useState<string | null>(null);
+  const { partners } = usePartners();
 
   useEffect(() => {
     const identity = getUserIdentity();
@@ -35,10 +36,13 @@ export default function AllNFTPage() {
     setEvmAddress(address);
     
     // 获取所有 NFT 信息和用户收藏状态
-    fetchAllNFTs(address);
-  }, []);
+    if (partners && partners.length > 0) {
+      fetchAllNFTs(address);
+    }
+  }, [partners]);
 
   const fetchAllNFTs = async (address: string) => {
+    if (!partners) return;
     try {
       const collectionList: NFTCollection[] = [];
       

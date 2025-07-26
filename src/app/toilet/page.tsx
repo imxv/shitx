@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 import { useRouter } from 'next/navigation';
 import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
-import { partners } from '@/config/partners';
+import { usePartners } from '@/hooks/usePartners';
 import '../hackathon.css';
 
 interface OwnedNFT {
@@ -24,9 +24,12 @@ export default function ToiletPage() {
   const [ownedNFTs, setOwnedNFTs] = useState<OwnedNFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBackpack, setShowBackpack] = useState(false);
+  const { partners } = usePartners();
   
   // 获取用户拥有的 NFT
   useEffect(() => {
+    if (!partners || partners.length === 0) return;
+    
     const fetchOwnedNFTs = async () => {
       const identity = getUserIdentity();
       const evmAddress = generateEVMAddress(identity.fingerprint);
@@ -77,7 +80,7 @@ export default function ToiletPage() {
     };
     
     fetchOwnedNFTs();
-  }, []);
+  }, [partners]);
   
   // Generate QR code
   const generateQRCode = useCallback(async () => {

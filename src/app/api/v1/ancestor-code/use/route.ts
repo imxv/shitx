@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nftRedis } from '@/lib/redis';
 import { generateEVMAddress } from '@/utils/web3Utils';
-import { partners } from '@/config/partners';
+import { getPartnerById } from '@/lib/partnersService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const nftType = ancestorData.nftType;
     
     // 获取NFT类型信息 - 只处理合作方NFT
-    const partner = partners.find(p => p.id === nftType);
+    const partner = await getPartnerById(nftType);
     if (!partner) {
       return NextResponse.json(
         { error: `无效的NFT类型: ${nftType}` },
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
     const nftType = ancestorData.nftType;
     
     // 获取NFT类型信息 - 只处理合作方NFT
-    const partner = partners.find(p => p.id === nftType);
+    const partner = await getPartnerById(nftType);
     if (!partner) {
       return NextResponse.json(
         { error: `无效的NFT类型: ${nftType}` },

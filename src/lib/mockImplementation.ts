@@ -1,5 +1,5 @@
 import { nftRedis } from './redis';
-import { getPartnerById } from '@/config/partners';
+import { getPartnerById } from '@/lib/partnersService';
 
 // 导出 nftRedis 以便其他模块使用
 export { nftRedis };
@@ -132,8 +132,8 @@ export function getNFTMetadata(tokenId: string): any {
   };
 }
 
-export function getPartnerNFTMetadata(partnerId: string, tokenId: string): any {
-  const partner = getPartnerById(partnerId);
+export async function getPartnerNFTMetadata(partnerId: string, tokenId: string): Promise<any> {
+  const partner = await getPartnerById(partnerId);
   if (!partner) {
     return getNFTMetadata(tokenId); // 回退到默认元数据
   }

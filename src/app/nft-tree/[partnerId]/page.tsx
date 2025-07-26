@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateEVMAddress } from '@/utils/web3Utils';
 import { getUserIdentity } from '@/utils/userIdentity';
-import { partners } from '@/config/partners';
+import { usePartnerById } from '@/hooks/usePartners';
 
 interface TreeNode {
   address: string;
@@ -38,6 +38,7 @@ export default function NFTTreePage({ params }: { params: Promise<{ partnerId: s
   const [stats, setStats] = useState<TreeStats | null>(null);
   const [searchAddress, setSearchAddress] = useState('');
   const [userAddress, setUserAddress] = useState('');
+  const { partner } = usePartnerById(resolvedParams.partnerId);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [nftInfo, setNftInfo] = useState<NFTInfo | null>(null);
   const [error, setError] = useState<string>('');
@@ -58,7 +59,6 @@ export default function NFTTreePage({ params }: { params: Promise<{ partnerId: s
         description: 'ShitX 平台原生 NFT'
       });
     } else {
-      const partner = partners.find(p => p.id === partnerId);
       if (partner) {
         setNftInfo({
           partnerId: partner.id,
@@ -75,7 +75,7 @@ export default function NFTTreePage({ params }: { params: Promise<{ partnerId: s
     
     // 加载分发树
     loadDistributionTree(partnerId);
-  }, [resolvedParams]);
+  }, [resolvedParams, partner]);
 
   const loadDistributionTree = async (partnerId: string, address?: string) => {
     try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nftRedis } from '@/lib/redis';
-import { getPartnerById } from '@/config/partners';
+import { getPartnerById } from '@/lib/partnersService';
 
 interface TreeNode {
   address: string;
@@ -37,7 +37,7 @@ export async function GET(
       rootAddress = await nftRedis.getAncestorHolder('default');
     } else {
       // 合作方NFT的根地址
-      const partner = getPartnerById(partnerId);
+      const partner = await getPartnerById(partnerId);
       if (!partner) {
         return NextResponse.json(
           { error: 'Partner not found' },

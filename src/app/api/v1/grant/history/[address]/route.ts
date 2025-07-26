@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nftRedis } from '@/lib/redis';
-import { getPartnerById } from '@/config/partners';
+import { getPartnerById } from '@/lib/partnersService';
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +20,7 @@ export async function GET(
       
       // 获取合作方信息
       if (record.partnerId && record.partnerId !== 'default') {
-        const partner = getPartnerById(record.partnerId);
+        const partner = await getPartnerById(record.partnerId);
         partnerInfo = partner ? {
           id: partner.id,
           name: partner.displayName,

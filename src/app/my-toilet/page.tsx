@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserIdentity, importAccount, UserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
-import { partners } from '@/config/partners';
+import { usePartners } from '@/hooks/usePartners';
 
 interface NFTCollection {
   partnerId: string;
@@ -28,6 +28,7 @@ export default function MyToiletPage() {
   const [showTransferCode, setShowTransferCode] = useState(false);
   const [importTransferCode, setImportTransferCode] = useState<string>('');
   const [importing, setImporting] = useState(false);
+  const { partners } = usePartners();
   const [importError, setImportError] = useState<string>('');
   const [generateLoading, setGenerateLoading] = useState(false);
   const [ancestorCode, setAncestorCode] = useState<string>('');
@@ -42,11 +43,13 @@ export default function MyToiletPage() {
     setEvmAddress(address);
     
     // 获取用户的 NFT 收藏状态
-    fetchUserNFTs(address);
+    if (partners && partners.length > 0) {
+      fetchUserNFTs(address);
+    }
     
     // 获取现有的转移码
     fetchTransferCode(identity);
-  }, []);
+  }, [partners]);
 
   const fetchUserNFTs = async (address: string) => {
     try {

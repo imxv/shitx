@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nftRedis } from '@/lib/redis';
-import { getPartnerById } from '@/config/partners';
+import { getPartnerById } from '@/lib/partnersService';
 import crypto from 'crypto';
 
 // QR Code 有效期（5分钟）
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     
     // 如果有partnerId，验证分享者是否拥有对应的NFT
     if (partnerId && partnerId !== 'default') {
-      const partner = getPartnerById(partnerId);
+      const partner = await getPartnerById(partnerId);
       if (!partner) {
         return NextResponse.json(
           { error: 'Invalid partner' },

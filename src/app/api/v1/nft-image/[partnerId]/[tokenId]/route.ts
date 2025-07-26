@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPartnerById } from '@/config/partners';
+import { getPartnerById } from '@/lib/partnersService';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -12,7 +12,7 @@ export async function GET(
     
     // 如果是合作方 NFT，尝试返回合作方的 logo
     if (partnerId !== 'default') {
-      const partner = getPartnerById(partnerId);
+      const partner = await getPartnerById(partnerId);
       if (partner && partner.logo) {
         const logoPath = path.join(process.cwd(), 'public', 'partner', partner.logo);
         

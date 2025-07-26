@@ -9,6 +9,8 @@ interface GrantInfo {
   balance: string;
   hasClaimedSubsidy: boolean;
   subsidyAmount?: string;
+  referralRewardsTotal?: number;
+  directSubsidyTotal?: number;
 }
 
 export function GrantStatusCard() {
@@ -24,13 +26,28 @@ export function GrantStatusCard() {
       const identity = getUserIdentity();
       const address = generateEVMAddress(identity.fingerprint);
       
+      // 获取 grant 信息
       const response = await fetch(`/api/v1/grant/${address}`);
       const data = await response.json();
+      
+      // 获取推荐奖励统计
+      const referralResponse = await fetch(`/api/v1/referral-stats/${address}`);
+      const referralData = await referralResponse.json();
+      
+      // 获取收益历史以计算真实的直接补贴总额
+      const historyResponse = await fetch(`/api/v1/grant/history/${address}`);
+      const historyData = await historyResponse.json();
+      
+      // 计算真实的直接补贴总额
+      const directSubsidyTotal = historyData.stats?.totalDirectSubsidy || 0;
+      const referralRewardsTotal = historyData.stats?.totalReferralRewards || 0;
       
       setGrantInfo({
         balance: data.balance || '0',
         hasClaimedSubsidy: data.hasClaimedSubsidy || false,
-        subsidyAmount: data.subsidyAmount
+        subsidyAmount: data.subsidyAmount,
+        referralRewardsTotal: referralRewardsTotal,
+        directSubsidyTotal: directSubsidyTotal
       });
     } catch (error) {
       console.error('Error fetching grant info:', error);
@@ -54,30 +71,55 @@ export function GrantStatusCard() {
     <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-yellow-500/30 shadow-lg">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-sm text-gray-400 mb-1">SHITX Grant 状态</h3>
-          {grantInfo.hasClaimedSubsidy ? (
-            <div>
-              <p className="text-2xl font-bold text-yellow-400">
-                {parseFloat(grantInfo.balance).toLocaleString()} SHIT
-              </p>
-              <p className="text-sm text-green-400 mt-1">
-                ✅ 已领取 {grantInfo.subsidyAmount} SHIT 补贴
-              </p>
+          <h3 className="text-sm text-gray-400 mb-2">SHITX Grant 状态</h3>
+          
+          {/* 总余额 */}
+          <div className="mb-3">
+            <p className="text-2xl font-bold text-yellow-400">
+              {parseFloat(grantInfo.balance).toLocaleString()} SHIT
+            </p>
+            <p className="text-xs text-gray-500">当前余额</p>
+          </div>
+          
+          {/* 收益明细 */}
+          <div className="space-y-1 text-sm">
+            {grantInfo.hasClaimedSubsidy ? (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">直接补贴:</span>
+                <span className="text-green-400 font-medium">
+                  +{grantInfo.subsidyAmount} SHIT
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">直接补贴:</span>
+                <span className="text-gray-500 text-xs">领取NFT时发放</span>
+              </div>
+            )}
+            
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">推荐奖励:</span>
+              <span className={`font-medium ${grantInfo.referralRewardsTotal && grantInfo.referralRewardsTotal > 0 ? 'text-orange-400' : 'text-gray-500'}`}>
+                +{grantInfo.referralRewardsTotal || 0} SHIT
+              </span>
             </div>
-          ) : (
-            <div>
-              <p className="text-lg text-gray-300">未领取补贴</p>
-              <p className="text-sm text-gray-500 mt-1">
-                领取 NFT 时自动发放
-              </p>
+            
+            {/* 总计 */}
+            <div className="pt-1 mt-1 border-t border-gray-700">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">总收益:</span>
+                <span className="text-yellow-400 font-bold">
+                  {(parseFloat(grantInfo.subsidyAmount || '0') + (grantInfo.referralRewardsTotal || 0)).toLocaleString()} SHIT
+                </span>
+              </div>
             </div>
-          )}
+          </div>
         </div>
         <Link 
           href="/grant"
-          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors ml-4"
         >
-          查看详情 →
+          详情 →
         </Link>
       </div>
     </div>

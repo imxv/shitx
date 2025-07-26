@@ -4,6 +4,7 @@ export interface Partner {
   displayName: string;
   nftName: string;
   description: string;
+  longDescription?:string;
   logo?: string; // 合作方 logo 文件名
   website?: string; // 合作方官网链接
   contractAddress: string | null;
@@ -11,8 +12,8 @@ export interface Partner {
   deployed: boolean;
 }
 
-// 合作方清单
-export const partners: Partner[] = [
+// 本地静态合作方清单
+export const localPartners: Partner[] = [
   
   {
     id: 'djteddy',
@@ -81,26 +82,42 @@ export const partners: Partner[] = [
     totalSupply: 1000,
     deployed: false,
   },
+  {
+    id: 'starsAmongUs',
+    name: 'Stars Among Us',
+    displayName: '人间星辰',
+    nftName: 'Shit X 人间星辰',
+    description: '在聆听后，你可以留下跨越时空的回应，也可以记录下此刻真实的memory。',
+    longDescription:"人生中失败多于成功，伴随的伤痛却常无处安放，更鲜有人教导我们如何面对与转化它。我们相信，当个体能通过真实分享失败经历获得深刻共鸣时，便能更快走出阴霾，重拾勇气。这并非简单的倾诉，而是通过富含情感的真人音频故事，让用户沉浸于他人真挚的叙述。在聆听后，你可以留下跨越时空的回应，也可以记录下此刻真实的memory。",
+    logo: 'starsAmongUs.png',
+    contractAddress: null,
+    totalSupply: 1000,
+    deployed: false,
+  },
+  {
+    id: 'cyberTwinTails',
+    name: 'Cyber Twin Tails',
+    displayName: '赛博双马尾',
+    nftName: 'Shit X 赛博双马尾',
+    description: '飞起来的时候感觉天都塌了',
+    logo: 'cyberTwinTails.png',
+    contractAddress: null,
+    totalSupply: 1000,
+    deployed: false,
+  },
+  
 ];
 
-// 获取已部署的合作方
-export function getDeployedPartners(): Partner[] {
-  return partners.filter(p => p.deployed && p.contractAddress);
-}
+// 云端合作方将通过 partnersService 从 Redis 获取
+// 统一的 partners 导出在使用时通过 partnersService 获取
 
-// 获取未部署的合作方
-export function getUndeployedPartners(): Partner[] {
-  return partners.filter(p => !p.deployed || !p.contractAddress);
-}
-
-// 根据 ID 获取合作方
-export function getPartnerById(id: string): Partner | undefined {
-  return partners.find(p => p.id === id);
-}
+// 这些函数已移至 partnersService.ts
+// 注意：这些函数只能在服务端使用
+// 客户端应该使用 usePartners hook
 
 // 更新合作方合约地址
 export function updatePartnerContract(id: string, contractAddress: string): void {
-  const partner = partners.find(p => p.id === id);
+  const partner = localPartners.find(p => p.id === id);
   if (partner) {
     partner.contractAddress = contractAddress;
     partner.deployed = true;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { queryNFTStatus } from '@/lib/clientNFTQuery';
-import { partners } from '@/config/partners';
+import { usePartners } from '@/hooks/usePartners';
 
 interface NFTStatus {
   name: string;
@@ -24,10 +24,13 @@ export default function BigToiletPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string>('');
+  const { partners } = usePartners();
 
   useEffect(() => {
-    loadNFTStatuses();
-  }, []);
+    if (partners && partners.length > 0) {
+      loadNFTStatuses();
+    }
+  }, [partners]);
 
   const loadNFTStatuses = async () => {
     try {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nftRedis } from '@/lib/redis';
 import * as mock from '@/lib/mockImplementation';
-import { getPartnerById } from '@/config/partners';
+import { getPartnerById } from '@/lib/partnersService';
 
 // 推荐奖励配置
 const REFERRAL_REWARDS = {
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
     
     // 验证合作方
-    const partner = getPartnerById(partnerId);
+    const partner = await getPartnerById(partnerId);
     if (!partner) {
       return NextResponse.json(
         { error: 'Invalid partner ID' },
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       tokenId,
       owner: evmAddress,
       partnerId,
-      metadata: mock.getPartnerNFTMetadata(partnerId, tokenId),
+      metadata: await mock.getPartnerNFTMetadata(partnerId, tokenId),
       claimedAt: Date.now(),
       txHash: transferResult.txHash,
       mockData: true,
