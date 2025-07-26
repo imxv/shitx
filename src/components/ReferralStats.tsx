@@ -51,16 +51,9 @@ export function ReferralStats() {
     }
   };
 
+  // 加载中时不显示任何内容，避免闪烁
   if (loading) {
-    return (
-      <div className="bg-gray-900/90 backdrop-blur-sm border border-purple-500/50 rounded-xl p-4 animate-pulse">
-        <div className="h-6 bg-gray-800 rounded w-1/2 mb-4"></div>
-        <div className="space-y-2">
-          <div className="h-4 bg-gray-800 rounded"></div>
-          <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!data || data.referralStats.totalReferrals === 0) {

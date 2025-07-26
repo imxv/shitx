@@ -30,6 +30,7 @@ export const partners: Partner[] = [
     displayName: 'SnakeMaster',
     nftName: 'Shit X Snake Master',
     description: '过去懂蛇才养蛇，现在不懂也能养，还安全',
+    logo:"snake.png",
     contractAddress: null,
     totalSupply: 1500,
     deployed: false,

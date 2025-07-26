@@ -122,13 +122,6 @@ export function NFTCollectionCard() {
                 收藏率: {status.collectionRate.toFixed(0)}%
               </p>
             </div>
-            {status.recentNFT && (
-              <p className="text-xs text-gray-500 mt-2">
-                最新: <span className={getRarityColor(status.recentNFT.rarity)}>
-                  {status.recentNFT.name}
-                </span>
-              </p>
-            )}
           </div>
         </div>
         <Link 
