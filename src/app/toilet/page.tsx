@@ -9,6 +9,7 @@ export default function ToiletPage() {
   const router = useRouter();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showAlert, setShowAlert] = useState(false);
   
   // Generate different URLs with timestamp
   const generateUrl = () => {
@@ -45,6 +46,11 @@ export default function ToiletPage() {
 
     return () => clearInterval(interval);
   }, [generateQRCode]);
+
+  const handleAddToAppleToilet = () => {
+    setShowAlert(true);
+    setTimeout(() => setShowAlert(false), 3000);
+  };
 
   return (
     <main className="min-h-screen cyber-gradient p-4 relative overflow-hidden">
@@ -86,6 +92,15 @@ export default function ToiletPage() {
             <div className="mt-4 text-sm text-gray-500">
               序号: #{currentIndex + 1}
             </div>
+            
+            {/* 添加到 Apple Toilet 按钮 */}
+            <button
+              onClick={handleAddToAppleToilet}
+              className="mt-6 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-900 transition-all flex items-center gap-2 mx-auto border border-gray-700"
+            >
+              <span className="text-xl">🍎</span>
+              <span className="font-medium">添加到 Apple Toilet</span>
+            </button>
           </div>
 
           {/* 装饰性文字 */}
@@ -95,6 +110,40 @@ export default function ToiletPage() {
           </div>
         </div>
       </div>
+
+      {/* 弹窗提示 */}
+      {showAlert && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-gray-900 border border-red-500 rounded-2xl p-6 shadow-2xl shadow-red-500/50 animate-bounce-in pointer-events-auto">
+            <div className="flex items-center gap-3">
+              <span className="text-4xl">🚽</span>
+              <div>
+                <h3 className="text-xl font-bold text-red-400">添加失败</h3>
+                <p className="text-gray-400">Toilet 还没有清理干净，请稍后再试</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes bounce-in {
+          0% {
+            transform: scale(0.8);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.05);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        .animate-bounce-in {
+          animation: bounce-in 0.5s ease-out;
+        }
+      `}</style>
     </main>
   );
 }
