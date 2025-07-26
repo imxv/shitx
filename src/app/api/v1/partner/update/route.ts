@@ -2,63 +2,64 @@ import { NextRequest, NextResponse } from 'next/server';
 import { put, del } from '@vercel/blob';
 import { savePartnerToRedis, RedisPartner, getPartnerFromRedis } from '@/lib/redisPartners';
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     
     // Extract partner data
-    const id = formData.get('id') as string;
-    const name = formData.get('name') as string;
+    const partnerId = formData.get('partnerId') as string;
     const displayName = formData.get('displayName') as string;
-    const nftName = formData.get('nftName') as string;
     const description = formData.get('description') as string;
     const longDescription = formData.get('longDescription') as string | null;
     const website = formData.get('website') as string | null;
-    const totalSupply = parseInt(formData.get('totalSupply') as string || '1000');
     const logo = formData.get('logo') as File | null;
-    const existingLogoUrl = formData.get('existingLogoUrl') as string | null;
     
     // Validate required fields
-    if (!id || !name || !displayName || !nftName || !description) {
+    if (!partnerId || !displayName || !description) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
     
-    let logoUrl: string | undefined = existingLogoUrl || undefined;
+    // Get existing partner data
+    const existingPartner = await getPartnerFromRedis(partnerId);
+    if (!existingPartner) {
+      return NextResponse.json(
+        { error: 'Partner not found' },
+        { status: 404 }
+      );
+    }
+    
+    let logoUrl: string | undefined = existingPartner.logoUrl;
     
     // If a new logo is provided, upload it and delete the old one
     if (logo) {
       // Delete old logo if it exists and is a Vercel Blob URL
-      if (existingLogoUrl && existingLogoUrl.startsWith('https://')) {
+      if (existingPartner.logoUrl && existingPartner.logoUrl.startsWith('https://')) {
         try {
-          await del(existingLogoUrl);
+          await del(existingPartner.logoUrl);
         } catch (error) {
           console.error('Error deleting old logo:', error);
         }
       }
       
       // Upload new logo
-      const blob = await put(`partners/${id}/${logo.name}`, logo, {
+      const blob = await put(`partners/${partnerId}/${logo.name}`, logo, {
         access: 'public',
+        addRandomSuffix: false,
       });
       logoUrl = blob.url;
     }
     
-    // Create partner object
+    // Create updated partner object, preserving unchanged fields
     const partner: RedisPartner = {
-      id,
-      name,
+      ...existingPartner,
       displayName,
-      nftName,
       description,
       longDescription: longDescription || undefined,
       logoUrl,
       website: website || undefined,
-      contractAddress: null,
-      totalSupply,
-      deployed: false,
     };
     
     // Save to Redis
@@ -75,4 +76,9 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Keep PUT method for backward compatibility
+export async function PUT(request: NextRequest) {
+  return POST(request);
 }

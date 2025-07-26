@@ -510,16 +510,16 @@ export default function MyToiletPage() {
                       
                       <div className="mt-3 flex gap-2">
                         <button
-                          onClick={() => router.push(`/partners/${series.id}`)}
+                          onClick={() => router.push(`/nft-tree/${series.id}`)}
                           className="px-3 py-1 bg-purple-600 rounded hover:bg-purple-700 transition-colors text-xs sm:text-sm"
                         >
-                          查看详情
+                          查看分发树
                         </button>
                         <button
-                          onClick={() => router.push(`/admin/partners?partnerId=${series.id}`)}
+                          onClick={() => router.push(`/edit-series/${series.id}`)}
                           className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition-colors text-xs sm:text-sm"
                         >
-                          管理系列
+                          编辑系列
                         </button>
                       </div>
                     </div>

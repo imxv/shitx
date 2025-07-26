@@ -26,7 +26,8 @@
     "ancestor:report-lost": "node scripts/ancestor-manager.js report-lost",
     "test:referral": "tsx scripts/test-referral-tree.ts",
     "test:referral:help": "echo '使用方法: npm run test:referral [目标地址]'",
-    "debug:referral": "tsx scripts/debug-referral.ts"
+    "debug:referral": "tsx scripts/debug-referral.ts",
+    "test:kimi": "tsx src/lib/ai-providers/test-kimi.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.23",
@@ -42,7 +43,8 @@
     "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "tsx": "^4.20.3"
+    "tsx": "^4.20.3",
+    "zod": "^4.0.10"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
