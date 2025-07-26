@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 // Injective 测试网配置
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || 'https://k8s.testnet.json-rpc.injective.network/';
-const PRIVATE_KEY = process.env.PRIVATE_KEY!;
+const PRIVATE_KEY = process.env.INJECTIVE_PRIVATE_KEY!;
 const SHITX_COIN_CONTRACT = process.env.NEXT_PUBLIC_SHITX_COIN_CONTRACT!;
 
 // ERC20 ABI
@@ -21,7 +21,14 @@ const ERC20_ABI = [
 
 // 获取合约实例
 function getContract(signer?: ethers.Signer) {
-  const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+  if (!PRIVATE_KEY) {
+    throw new Error('INJECTIVE_PRIVATE_KEY environment variable is not set');
+  }
+  if (!SHITX_COIN_CONTRACT) {
+    throw new Error('NEXT_PUBLIC_SHITX_COIN_CONTRACT environment variable is not set');
+  }
+  
+  const provider = new ethers.JsonRpcProvider(RPC_URL);
   const contractSigner = signer || new ethers.Wallet(PRIVATE_KEY, provider);
   return new ethers.Contract(SHITX_COIN_CONTRACT, ERC20_ABI, contractSigner);
 }
@@ -42,7 +49,7 @@ export async function getBalance(address: string): Promise<string> {
   try {
     const contract = getContract();
     const balance = await contract.balanceOf(address);
-    return ethers.utils.formatEther(balance);
+    return ethers.formatEther(balance);
   } catch (error) {
     console.error('Error getting balance:', error);
     return '0';
@@ -67,7 +74,7 @@ export async function distributeSubsidy(recipientAddress: string): Promise<{
     
     // 生成随机补贴金额（1-5000 SHIT）
     const randomAmount = Math.floor(Math.random() * 5000) + 1;
-    const amountWei = ethers.utils.parseEther(randomAmount.toString());
+    const amountWei = ethers.parseEther(randomAmount.toString());
     
     // 批量发放（只有一个接收者）
     const tx = await contract.batchDistributeSubsidy([recipientAddress], [amountWei]);

@@ -62,6 +62,8 @@ export async function getAvailableTokenIds(): Promise<string[]> {
 // 获取下一个可用的 tokenId
 export async function getNextAvailableTokenId(): Promise<string | null> {
   try {
+    if (!nftContract) initializeConnection();
+    
     // 先从 Redis 获取已分配的 tokenIds
     const totalClaims = await nftRedis.getTotalClaims();
     

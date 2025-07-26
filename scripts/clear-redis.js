@@ -2,6 +2,11 @@
 
 const Redis = require('ioredis');
 const readline = require('readline');
+const path = require('path');
+
+// 加载环境变量
+require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 // 从环境变量获取 Redis URL
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';

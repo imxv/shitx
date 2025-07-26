@@ -21,7 +21,8 @@ export function NFTClaim() {
   const [error, setError] = useState<string>('');
   const [claimableNFTs, setClaimableNFTs] = useState<PartnerNFT[]>([]);
   const [showAll, setShowAll] = useState(false);
-  const [subsidyInfo, setSubsidyInfo] = useState<{ amount: string; txHash: string } | null>(null);
+  const [subsidyInfo, setSubsidyInfo] = useState<{ amount: string; txHash: string; message: string } | null>(null);
+  const [copySuccess, setCopySuccess] = useState<string>('');
 
   useEffect(() => {
     initializeClaimStatus();
@@ -168,6 +169,17 @@ export function NFTClaim() {
         )}
       </div>
 
+      {/* 复制成功提示 */}
+      {copySuccess && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-green-500 text-black px-4 py-2 rounded-lg shadow-lg animate-fade-in-out">
+            <p className="text-sm font-medium">
+              ✅ 已复制{copySuccess === 'nft' ? 'NFT' : 'SHIT补贴'}交易哈希
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 成功动画 */}
       {showSuccess && successNFT && (
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
@@ -186,18 +198,66 @@ export function NFTClaim() {
                 </div>
               )}
               {successNFT.txHash && (
-                <a
-                  href={`https://testnet.explorer.injective.network/transaction/${successNFT.txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-400 hover:text-blue-300 mt-3 inline-flex items-center gap-1"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <span>查看交易</span>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
+                <div className="mt-3 space-y-2">
+                  <div className="bg-gray-800/50 rounded p-2 text-xs">
+                    <div className="text-gray-400 mb-1">NFT 交易哈希:</div>
+                    <div className="flex items-center gap-2">
+                      <code className="text-green-400 break-all flex-1">
+                        {successNFT.txHash.slice(0, 10)}...{successNFT.txHash.slice(-8)}
+                      </code>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(successNFT.txHash);
+                          setCopySuccess('nft');
+                          setTimeout(() => setCopySuccess(''), 2000);
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        title="复制完整哈希"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  {subsidyInfo && subsidyInfo.txHash && (
+                    <div className="bg-gray-800/50 rounded p-2 text-xs">
+                      <div className="text-gray-400 mb-1">SHIT 补贴交易哈希:</div>
+                      <div className="flex items-center gap-2">
+                        <code className="text-yellow-400 break-all flex-1">
+                          {subsidyInfo.txHash.slice(0, 10)}...{subsidyInfo.txHash.slice(-8)}
+                        </code>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(subsidyInfo.txHash);
+                            setCopySuccess('subsidy');
+                            setTimeout(() => setCopySuccess(''), 2000);
+                          }}
+                          className="text-gray-400 hover:text-white transition-colors"
+                          title="复制完整哈希"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <a
+                    href={`https://testnet.explorer.injective.network/transaction/${successNFT.txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-400 hover:text-blue-300 inline-flex items-center gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span>在区块链浏览器中查看</span>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
               )}
             </div>
           </div>
@@ -220,6 +280,28 @@ export function NFTClaim() {
         }
         .animate-bounce-in {
           animation: bounce-in 0.5s ease-out;
+        }
+        
+        @keyframes fade-in-out {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          20% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          80% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+        }
+        .animate-fade-in-out {
+          animation: fade-in-out 2s ease-in-out;
         }
       `}</style>
     </div>

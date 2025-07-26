@@ -6,7 +6,10 @@ import { distributeSubsidy, hasClaimedSubsidy } from '@/lib/shitxCoin';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, evmAddress, username, referrerUserId } = body;
+    const { userId, evmAddress: rawEvmAddress, username, referrerUserId } = body;
+    
+    // 统一使用小写地址
+    const evmAddress = rawEvmAddress.toLowerCase();
 
     // 检查是否已经 claim 过
     const hasClaimed = await nftRedis.hasClaimed(evmAddress);
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
     
     // 记录到 Redis（包含 referral 关系）
-    await nftRedis.recordClaim(evmAddress.toLowerCase(), nft, referrerAddress);
+    await nftRedis.recordClaim(evmAddress, nft, referrerAddress);
 
     // 尝试发放 ShitX Coin 补贴
     let subsidyInfo = null;

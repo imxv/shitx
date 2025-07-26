@@ -9,7 +9,16 @@
     "start": "next start",
     "lint": "next lint",
     "redis:clear": "node scripts/clear-redis.js",
-    "redis:manage": "node scripts/redis-manager.js"
+    "redis:manage": "node scripts/redis-manager.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:integration": "jest --testMatch='**/*.integration.test.ts'",
+    "test:tools": "node src/__tests__/tools/index.js",
+    "test:claim": "node src/__tests__/tools/index.js test-claim",
+    "test:verify": "node src/__tests__/tools/index.js verify-tx",
+    "test:balance": "node src/__tests__/tools/index.js check-balance",
+    "test:debug": "node src/__tests__/tools/index.js debug-claims",
+    "test:e2e": "jest jest/full-business-flow.test.ts --verbose --runInBand"
   },
   "dependencies": {
     "@injectivelabs/sdk-ts": "^1.15.43",
@@ -26,12 +35,21 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.4.3",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "node-fetch": "2",
     "tailwindcss": "^4",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
