@@ -166,9 +166,10 @@ export default function GrantPage() {
       setAiAnalysis(data);
       setShowAnalysis(true);
       
-      // 如果消耗了SHIT，更新余额
+      // 如果消耗了SHIT，重新加载grant信息以获取最新余额
       if (!data.cached && data.newBalance !== undefined) {
-        setUserGrant(prev => prev ? { ...prev, balance: data.newBalance.toString() } : null);
+        // 重新加载完整的grant信息，确保余额同步
+        await loadGrantInfo();
       }
     } catch (error) {
       console.error('AI analysis error:', error);
@@ -237,9 +238,33 @@ export default function GrantPage() {
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">SHIT 余额</p>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {formatBalance(userGrant.balance)} SHIT
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-2xl font-bold text-yellow-400">
+                      {formatBalance(userGrant.balance)} SHIT
+                    </p>
+                    {userGrant.balance === '0' && (
+                      <button
+                        onClick={async () => {
+                          const res = await fetch('/api/v1/init-balance', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ address: userGrant.address })
+                          });
+                          const data = await res.json();
+                          if (data.newBalance) {
+                            alert(`余额已修复: ${data.newBalance} SHIT`);
+                            await loadGrantInfo(); // 重新加载页面数据
+                          } else {
+                            alert(data.message);
+                          }
+                        }}
+                        className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+                        title="如果余额显示有误，点击修复"
+                      >
+                        修复
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">Grant 状态</p>
