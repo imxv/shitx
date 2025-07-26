@@ -175,10 +175,31 @@ export default function CreateSeriesPage() {
               {/* 临时调试信息 */}
               <details className="text-xs text-gray-400 mt-2">
                 <summary className="cursor-pointer hover:text-gray-300">查看余额调试信息</summary>
-                <div className="mt-1 p-2 bg-gray-900/50 rounded">
+                <div className="mt-1 p-2 bg-gray-900/50 rounded space-y-2">
                   <p>当前余额: {userBalance} SHIT</p>
                   <p>需要费用: {CREATION_COST} SHIT</p>
                   <p className="mt-1">如果余额显示有误，请返回首页查看ShitX Grant状态</p>
+                  <button
+                    onClick={async () => {
+                      const identity = getUserIdentity();
+                      const evmAddress = generateEVMAddress(identity.fingerprint);
+                      const res = await fetch('/api/v1/init-balance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ address: evmAddress })
+                      });
+                      const data = await res.json();
+                      if (data.newBalance) {
+                        setUserBalance(data.newBalance);
+                        alert(`余额已修复: ${data.newBalance} SHIT`);
+                      } else {
+                        alert(data.message);
+                      }
+                    }}
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+                  >
+                    尝试修复余额
+                  </button>
                 </div>
               </details>
             </div>
