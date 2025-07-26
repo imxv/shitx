@@ -94,7 +94,7 @@ export default function PartnersPage() {
                   {/* NFT 信息 */}
                   <div className="bg-gray-900/50 rounded-lg p-3">
                     <p className="text-xs text-gray-500 text-center">
-                      专属 NFT: <span className="text-yellow-400">{partner.nftName}</span>
+                      专属极速卡片: <span className="text-yellow-400">{partner.nftName}</span>
                     </p>
                     <p className="text-xs text-gray-500 text-center mt-1">
                       限量: <span className="text-green-400">{partner.totalSupply} 个</span>
@@ -132,7 +132,7 @@ export default function PartnersPage() {
             想要成为 ShitX 合作方？让我们一起创造历史！
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            合作方将获得专属 NFT 系列，共同见证厕所革命的伟大时刻
+            合作方将获得专属极速卡片系列，共同见证ShitX革命的伟大时刻
           </p>
         </div>
       </div>

@@ -55,7 +55,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
           const result = await claimShitNFT(identity, 'default');
           results.push({
             partnerId: 'default',
-            nftName: 'ShitX NFT',
+            nftName: 'ShitX 极速卡片',
             partnerName: 'ShitX',
             success: result.success,
             rarity: result.nft?.metadata?.attributes?.find((a: any) => a.trait_type === 'Rarity')?.value?.toString(),
@@ -66,7 +66,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
           // 不应该发生，因为新用户应该没有NFT
           results.push({
             partnerId: 'default',
-            nftName: 'ShitX NFT',
+            nftName: 'ShitX 极速卡片',
             partnerName: 'ShitX',
             success: false,
             alreadyClaimed: true
@@ -113,7 +113,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
           const mainResult = await claimShitNFT(identity, 'default');
           results.push({
             partnerId: 'default',
-            nftName: 'ShitX NFT',
+            nftName: 'ShitX 极速卡片',
             partnerName: 'ShitX',
             success: mainResult.success,
             rarity: mainResult.nft?.metadata?.attributes?.find((a: any) => a.trait_type === 'Rarity')?.value?.toString(),
@@ -196,7 +196,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
         <div className="text-center mb-6">
           <span className="text-4xl mb-2 block">💩</span>
           <h2 className="text-2xl font-bold text-yellow-400">
-            {isLoading ? '正在获取 NFT...' : '恭喜获得 NFT！'}
+            {isLoading ? '正在获取极速卡片...' : '恭喜获得极速卡片！'}
           </h2>
         </div>
 
@@ -205,7 +205,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
           {isLoading ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
-              <p className="text-gray-400 mt-4">正在为您铸造独一无二的 NFT...</p>
+              <p className="text-gray-400 mt-4">正在为您生成独一无二的极速卡片...</p>
             </div>
           ) : (
             <>
@@ -230,7 +230,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
                           </p>
                           {result.partnerId === 'default' && (
                             <p className="text-xs text-gray-500 mt-1">
-                              首个 ShitX NFT，欢迎加入ShitX革命！
+                              首张 ShitX 极速卡片，欢迎加入ShitX革命！
                             </p>
                           )}
                         </>
@@ -238,7 +238,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
                       
                       {result.alreadyClaimed && (
                         <p className="text-sm text-yellow-400 mt-1">
-                          您已经拥有此 NFT
+                          您已经拥有此极速卡片
                         </p>
                       )}
                       
@@ -266,7 +266,7 @@ export function NFTClaimModal({ isOpen, onClose, scenario, partnerNFT }: NFTClai
 
               {/* 提示信息 */}
               <div className="mt-6 text-center text-sm text-gray-400">
-                <p>NFT 已保存到您的钱包地址</p>
+                <p>极速卡片已保存到您的钱包地址</p>
                 <p className="mt-2">
                   <a href="/all-nft" className="text-blue-400 hover:text-blue-300">
                     查看我的收藏 →

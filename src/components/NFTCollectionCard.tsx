@@ -46,7 +46,7 @@ export function NFTCollectionCard() {
         if (mainNFTData.nft?.claimedAt && mainNFTData.nft.claimedAt > latestClaimTime) {
           latestClaimTime = mainNFTData.nft.claimedAt;
           recentNFT = {
-            name: 'ShitX NFT',
+            name: 'ShitX 极速卡片',
             rarity: mainNFTData.nft?.metadata?.attributes?.find((a: any) => a.trait_type === 'Rarity')?.value || 'Common',
             claimedAt: mainNFTData.nft.claimedAt
           };

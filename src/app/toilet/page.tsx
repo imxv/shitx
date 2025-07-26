@@ -47,7 +47,7 @@ export default function ToiletPage() {
           owned.push({
             partnerId: 'default',
             partnerName: 'ShitX',
-            nftName: 'Shit NFT',
+            nftName: 'ShitX 极速卡片',
             tokenId: mainNFTData.nft?.tokenId,
           });
         }
@@ -174,12 +174,12 @@ export default function ToiletPage() {
           
           <div className="bg-gray-900 border border-red-500 rounded-2xl p-8 shadow-2xl shadow-red-500/20 text-center">
             <h1 className="text-3xl font-bold text-red-400 mb-4">无权访问ShitX</h1>
-            <p className="text-gray-400 mb-6">你还没有任何 Shit NFT，请先去首页领取</p>
+            <p className="text-gray-400 mb-6">你还没有任何 ShitX 极速卡片，请先去首页领取</p>
             <button
               onClick={() => router.push('/')}
               className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              去领取 NFT
+              去领取极速卡片
             </button>
           </div>
         </div>

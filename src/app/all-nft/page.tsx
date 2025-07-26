@@ -54,7 +54,7 @@ export default function AllNFTPage() {
       collectionList.push({
         partnerId: 'default',
         partnerName: 'ShitX',
-        nftName: 'Shit NFT',
+        nftName: 'ShitX 极速卡片',
         owned: mainNFTData.hasClaimed || false,
         tokenId: mainNFTData.nft?.tokenId,
         claimedAt: mainNFTData.nft?.claimedAt,
@@ -62,7 +62,7 @@ export default function AllNFTPage() {
         isAncestor: mainNFTData.nft?.isAncestor || false,
         totalSupply: 10000,
         currentSupply: mainNFTData.totalMinted || 0,
-        description: 'ShitX 平台原生 NFT',
+        description: 'ShitX 平台原生极速卡片',
         partnerLogo: 'shitx.png'
       });
 

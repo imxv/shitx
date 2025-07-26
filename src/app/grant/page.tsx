@@ -267,7 +267,7 @@ export default function GrantPage() {
                           
                           {record.partnerInfo && (
                             <p className="text-xs text-gray-400">
-                              NFT: {record.partnerInfo.nftName}
+                              极速卡片: {record.partnerInfo.nftName}
                             </p>
                           )}
                           
@@ -346,7 +346,7 @@ export default function GrantPage() {
           <ul className="list-disc list-inside mt-2 space-y-1">
             <li>Grant 是 SHITX 代币的一次性补贴</li>
             <li>每个地址只能领取一次 Grant</li>
-            <li>Grant 会在首次领取 NFT 时自动发放</li>
+            <li>Grant 会在首次领取极速卡片时自动发放</li>
             <li>Grant 金额根据分发策略动态调整</li>
           </ul>
         </div>

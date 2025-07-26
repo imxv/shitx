@@ -190,12 +190,6 @@ function HomeContent() {
 
 
 
-        {/* 状态卡片组 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
-          <GrantStatusCard key={`grant-${refreshKey}`} />
-          <NFTCollectionCard key={`collection-${refreshKey}`} />
-        </div>
-
         {/* 主要功能按钮 - United Toilet */}
         <div className="mb-6 sm:mb-8">
           <Link
@@ -212,6 +206,12 @@ function HomeContent() {
             </button>
           </Link>
         </div>
+        {/* 状态卡片组 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6 sm:mb-8">
+          <GrantStatusCard key={`grant-${refreshKey}`} />
+          <NFTCollectionCard key={`collection-${refreshKey}`} />
+        </div>
+
 
 
       </div>
