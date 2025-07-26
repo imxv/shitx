@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUserIdentity, importAccount, UserIdentity } from '@/utils/userIdentity';
+import { getUserIdentity, importAccount, updateUsername, UserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
 import { usePartners } from '@/hooks/usePartners';
 
@@ -35,6 +35,8 @@ export default function MyToiletPage() {
   const [ancestorLoading, setAncestorLoading] = useState(false);
   const [ancestorError, setAncestorError] = useState<string>('');
   const [ancestorSuccess, setAncestorSuccess] = useState<string>('');
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState<string>('');
 
   useEffect(() => {
     const identity = getUserIdentity();
@@ -161,6 +163,20 @@ export default function MyToiletPage() {
     }
   };
 
+  // 保存用户名
+  const handleSaveUsername = () => {
+    if (!newUsername.trim() || !userIdentity) return;
+    
+    const success = updateUsername(newUsername.trim());
+    if (success) {
+      setUserIdentity({
+        ...userIdentity,
+        username: newUsername.trim()
+      });
+      setEditingUsername(false);
+    }
+  };
+
   // 使用始祖码
   const handleUseAncestorCode = async () => {
     if (!ancestorCode.trim() || !userIdentity) return;
@@ -252,7 +268,48 @@ export default function MyToiletPage() {
           <div className="space-y-3 sm:space-y-4">
             <div>
               <p className="text-gray-400 mb-1 text-sm sm:text-base">用户名</p>
-              <p className="text-lg sm:text-xl font-mono">{userIdentity?.username || '未知用户'}</p>
+              <div className="flex items-center gap-2">
+                {editingUsername ? (
+                  <>
+                    <input
+                      type="text"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      className="flex-1 px-3 py-1 bg-gray-700 rounded text-white text-lg sm:text-xl"
+                      maxLength={20}
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveUsername}
+                      className="px-3 py-1 bg-green-600 rounded hover:bg-green-700 transition-colors text-sm"
+                    >
+                      保存
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingUsername(false);
+                        setNewUsername(userIdentity?.username || '');
+                      }}
+                      className="px-3 py-1 bg-gray-600 rounded hover:bg-gray-700 transition-colors text-sm"
+                    >
+                      取消
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg sm:text-xl font-mono flex-1">{userIdentity?.username || '未知用户'}</p>
+                    <button
+                      onClick={() => {
+                        setEditingUsername(true);
+                        setNewUsername(userIdentity?.username || '');
+                      }}
+                      className="px-3 py-1 bg-blue-600 rounded hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      编辑
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
             
             <div>

@@ -43,23 +43,24 @@ export function generateUserFingerprint(): string {
 // 生成用户名
 export function generateUsername(fingerprint: string): string {
   const adjectives = [
-    '便秘的', '腹泻的', '畅快的', '紧张的', '放松的',
-    '忧郁的', '快乐的', '疯狂的', '理智的', '神秘的',
-    '优雅的', '粗犷的', '细腻的', '豪放的', '内敛的'
+    '快乐的', '勇敢的', '聪明的', '友好的', '活力的',
+    '幸运的', '热情的', '冷静的', '优雅的', '神秘的',
+    '创新的', '独特的', '灵活的', '坚强的', '温柔的'
   ];
   
   const nouns = [
-    '马桶', '厕纸', '马桶刷', '清洁剂', '芳香剂',
-    '排泄者', '如厕者', '冲水者', '蹲坑者', '思考者',
-    '哲学家', '艺术家', '工程师', '设计师', '革命家'
+    '探索者', '创造者', '梦想家', '开拓者', '守护者',
+    '旅行者', '思考者', '观察者', '挑战者', '建造者',
+    '收藏家', '艺术家', '工程师', '设计师', '革新者'
   ];
   
   // 使用 fingerprint 作为种子来保证同一用户总是得到同样的名字
   const seed = parseInt(fingerprint.slice(0, 8), 36);
   const adjIndex = seed % adjectives.length;
   const nounIndex = (seed >> 8) % nouns.length;
+  const number = ((seed >> 16) % 900) + 100; // 生成100-999的数字
   
-  return adjectives[adjIndex] + nouns[nounIndex];
+  return adjectives[adjIndex] + nouns[nounIndex] + number;
 }
 
 // 用户身份管理
@@ -155,7 +156,7 @@ export function getUserIdentity(referralSource?: string): UserIdentity {
   // 创建新用户
   const fingerprint = currentFingerprint;
   const identity: UserIdentity = {
-    id: 'toilet_' + fingerprint,
+    id: 'shitx_' + fingerprint,
     fingerprint,
     username: generateUsername(fingerprint),
     createdAt: Date.now(),
@@ -215,12 +216,29 @@ export async function importAccount(transferCode: string): Promise<{success: boo
   }
 }
 
+// 更新用户名
+export function updateUsername(newUsername: string): boolean {
+  try {
+    const stored = localStorage.getItem(USER_IDENTITY_KEY);
+    if (!stored) return false;
+    
+    const identity = JSON.parse(stored) as UserIdentity;
+    identity.username = newUsername;
+    localStorage.setItem(USER_IDENTITY_KEY, JSON.stringify(identity));
+    
+    return true;
+  } catch (e) {
+    console.error('Failed to update username:', e);
+    return false;
+  }
+}
+
 // 获取用户称号
 export function getUserTitle(visits: number): string {
-  if (visits >= 100) return '厕所之王';
-  if (visits >= 50) return '资深蹲友';
-  if (visits >= 20) return '常驻马桶';
-  if (visits >= 10) return '厕所常客';
-  if (visits >= 5) return '新晋蹲友';
-  return '厕所新人';
+  if (visits >= 100) return 'ShitX大师';
+  if (visits >= 50) return 'ShitX专家';
+  if (visits >= 20) return 'ShitX爱好者';
+  if (visits >= 10) return 'ShitX常客';
+  if (visits >= 5) return 'ShitX新人';
+  return 'ShitX访客';
 }
