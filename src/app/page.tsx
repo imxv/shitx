@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { UserBadge } from '@/components/UserBadge';
 import './hackathon.css';
 
 export default function Home() {
   return (
     <main className="h-screen cyber-gradient relative overflow-hidden flex items-center justify-center">
+      <UserBadge />
       <div className="scan-line absolute inset-0"></div>
       
       {/* 背景装饰 */}

@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import QRCode from 'qrcode';
 import { useRouter } from 'next/navigation';
+import { UserBadge } from '@/components/UserBadge';
+import { getUserIdentity } from '@/utils/userIdentity';
 import '../hackathon.css';
 
 export default function ToiletPage() {
@@ -15,7 +17,8 @@ export default function ToiletPage() {
   const generateUrl = () => {
     const timestamp = Date.now();
     const randomId = Math.floor(Math.random() * 1000);
-    return `https://shitx.top?t=${timestamp}&id=${randomId}`;
+    const userIdentity = getUserIdentity();
+    return `https://shitx.top?t=${timestamp}&id=${randomId}&user=${userIdentity.id}`;
   };
 
   // Generate QR code
@@ -54,6 +57,7 @@ export default function ToiletPage() {
 
   return (
     <main className="min-h-screen cyber-gradient p-4 relative overflow-hidden">
+      <UserBadge />
       <div className="scan-line absolute inset-0"></div>
       <div className="max-w-4xl mx-auto relative z-10">
         {/* 返回按钮 */}
