@@ -19,6 +19,7 @@ interface NFTCollection {
   totalSupply?: number;
   currentSupply?: number;
   description?: string;
+  partnerLogo?: string;
 }
 
 export default function AllNFTPage() {
@@ -56,7 +57,8 @@ export default function AllNFTPage() {
         isAncestor: mainNFTData.nft?.isAncestor || false,
         totalSupply: 10000,
         currentSupply: mainNFTData.totalMinted || 0,
-        description: 'ShitX 平台原生 NFT，通过扫码传播的粪便收藏品'
+        description: 'ShitX 平台原生 NFT',
+        partnerLogo: 'shitx.png'
       });
 
       // 获取所有合作方 NFT
@@ -75,7 +77,8 @@ export default function AllNFTPage() {
           isAncestor: partnerData.nft?.isAncestor || false,
           totalSupply: partner.totalSupply || 10000,
           currentSupply: partnerData.totalMinted || 0,
-          description: partner.description || `${partner.displayName} 合作款 NFT`
+          description: partner.description || `${partner.displayName} 合作款 NFT`,
+          partnerLogo: partner.logo
         });
       }
 
@@ -175,13 +178,19 @@ export default function AllNFTPage() {
                 <div className={`aspect-square rounded-xl overflow-hidden bg-gray-700 ${
                   collection.owned ? '' : 'opacity-50'
                 }`}>
-                  {collection.owned ? (
-                    <div className="w-full h-full flex items-center justify-center text-6xl">
-                      💩
+                  {collection.partnerLogo ? (
+                    // 显示logo图片
+                    <div className="w-full h-full flex items-center justify-center p-8">
+                      <img 
+                        src={collection.partnerId === 'default' ? '/shitx.png' : `/partner/${collection.partnerLogo}`} 
+                        alt={collection.partnerName}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-500 text-6xl">❓</span>
+                    // 没有logo时显示默认内容
+                    <div className="w-full h-full flex items-center justify-center text-6xl">
+                      <span className="text-gray-500">❓</span>
                     </div>
                   )}
                 </div>

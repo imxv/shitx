@@ -62,7 +62,7 @@ export const partners: Partner[] = [
     id: 'shitx',
     name: 'ShitX',
     displayName: 'ShitX 的献身',
-    nftName: 'ShitX 创世 NFT',
+    nftName: 'ShitX OG NFT',
     description: '所以到底是谁拉的',
     website: '/game',
     contractAddress: null,

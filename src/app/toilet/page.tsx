@@ -302,27 +302,46 @@ export default function ToiletPage() {
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
-                {ownedNFTs.map((nft) => (
-                  <button
-                    key={nft.partnerId}
-                    onClick={() => handleSelectNFT(nft.partnerId)}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      selectedPartner === nft.partnerId
-                        ? 'border-yellow-500 bg-yellow-500/10'
-                        : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="text-4xl mb-2">💩</div>
-                    <div className="text-sm font-medium text-white">{nft.nftName}</div>
-                    <div className="text-xs text-gray-400 mt-1">{nft.partnerName}</div>
-                    {nft.tokenId && (
-                      <div className="text-xs text-gray-500 mt-1">#{nft.tokenId}</div>
-                    )}
-                    {selectedPartner === nft.partnerId && (
-                      <div className="text-xs text-yellow-400 mt-2">当前选中</div>
-                    )}
-                  </button>
-                ))}
+                {ownedNFTs.map((nft) => {
+                  // 获取对应的合作方配置
+                  const partner = partners.find(p => p.id === nft.partnerId);
+                  const logoSrc = nft.partnerId === 'default' 
+                    ? '/shitx.png' 
+                    : partner?.logo 
+                      ? `/partner/${partner.logo}`
+                      : '/shitx.png';
+                  
+                  return (
+                    <button
+                      key={nft.partnerId}
+                      onClick={() => handleSelectNFT(nft.partnerId)}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        selectedPartner === nft.partnerId
+                          ? 'border-yellow-500 bg-yellow-500/10'
+                          : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="mb-2 flex justify-center">
+                        <img 
+                          src={logoSrc} 
+                          alt={nft.partnerName}
+                          className="w-12 h-12 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/shitx.png';
+                          }}
+                        />
+                      </div>
+                      <div className="text-sm font-medium text-white">{nft.nftName}</div>
+                      <div className="text-xs text-gray-400 mt-1">{nft.partnerName}</div>
+                      {nft.tokenId && (
+                        <div className="text-xs text-gray-500 mt-1">#{nft.tokenId}</div>
+                      )}
+                      {selectedPartner === nft.partnerId && (
+                        <div className="text-xs text-yellow-400 mt-2">当前选中</div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
