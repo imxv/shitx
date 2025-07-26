@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { TopBar } from '@/components/TopBar';
 import { usePartners } from '@/hooks/usePartners';
+import { getPartnerLogoUrl } from '@/utils/partnerUtils';
 import '../hackathon.css';
 
 export default function PartnersPage() {
@@ -72,7 +73,7 @@ export default function PartnersPage() {
                   <div className="flex items-center justify-center mb-4 h-24">
                     {partner.logo ? (
                       <img 
-                        src={`/partner/${partner.logo}`} 
+                        src={getPartnerLogoUrl(partner.logo)} 
                         alt={partner.displayName}
                         className="max-h-full max-w-full object-contain"
                       />

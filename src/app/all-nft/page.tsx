@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
 import { usePartners } from '@/hooks/usePartners';
+import { getPartnerLogoUrl } from '@/utils/partnerUtils';
 import Link from 'next/link';
 
 interface NFTCollection {
@@ -186,7 +187,7 @@ export default function AllNFTPage() {
                     // 显示logo图片
                     <div className="w-full h-full flex items-center justify-center p-8">
                       <img 
-                        src={collection.partnerId === 'default' ? '/shitx.png' : `/partner/${collection.partnerLogo}`} 
+                        src={collection.partnerId === 'default' ? '/shitx.png' : getPartnerLogoUrl(collection.partnerLogo)} 
                         alt={collection.partnerName}
                         className="w-full h-full object-contain"
                       />

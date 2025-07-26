@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
 import { usePartners } from '@/hooks/usePartners';
+import { getPartnerLogoUrl } from '@/utils/partnerUtils';
 import '../hackathon.css';
 
 interface OwnedNFT {
@@ -310,9 +311,7 @@ export default function ToiletPage() {
                   const partner = partners.find(p => p.id === nft.partnerId);
                   const logoSrc = nft.partnerId === 'default' 
                     ? '/shitx.png' 
-                    : partner?.logo 
-                      ? `/partner/${partner.logo}`
-                      : '/shitx.png';
+                    : getPartnerLogoUrl(partner?.logo);
                   
                   return (
                     <button

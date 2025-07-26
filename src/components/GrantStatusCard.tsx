@@ -83,19 +83,12 @@ export function GrantStatusCard() {
           
           {/* 收益明细 */}
           <div className="space-y-1 text-sm">
-            {grantInfo.hasClaimedSubsidy ? (
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400">直接补贴:</span>
-                <span className="text-green-400 font-medium">
-                  +{grantInfo.subsidyAmount} SHIT
-                </span>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400">直接补贴:</span>
-                <span className="text-gray-500 text-xs">领取NFT时发放</span>
-              </div>
-            )}
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">直接补贴:</span>
+              <span className={`font-medium ${grantInfo.directSubsidyTotal && grantInfo.directSubsidyTotal > 0 ? 'text-green-400' : 'text-gray-500'}`}>
+                +{grantInfo.directSubsidyTotal || 0} SHIT
+              </span>
+            </div>
             
             <div className="flex items-center justify-between">
               <span className="text-gray-400">推荐奖励:</span>
@@ -109,7 +102,7 @@ export function GrantStatusCard() {
               <div className="flex items-center justify-between">
                 <span className="text-gray-400">总收益:</span>
                 <span className="text-yellow-400 font-bold">
-                  {(parseFloat(grantInfo.subsidyAmount || '0') + (grantInfo.referralRewardsTotal || 0)).toLocaleString()} SHIT
+                  {((grantInfo.directSubsidyTotal || 0) + (grantInfo.referralRewardsTotal || 0)).toLocaleString()} SHIT
                 </span>
               </div>
             </div>

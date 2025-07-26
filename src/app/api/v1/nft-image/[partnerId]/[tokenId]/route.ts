@@ -14,26 +14,48 @@ export async function GET(
     if (partnerId !== 'default') {
       const partner = await getPartnerById(partnerId);
       if (partner && partner.logo) {
-        const logoPath = path.join(process.cwd(), 'public', 'partner', partner.logo);
-        
-        try {
-          const logoBuffer = await fs.readFile(logoPath);
+        // 检查是否是 URL (Vercel Blob)
+        if (partner.logo.startsWith('http://') || partner.logo.startsWith('https://')) {
+          try {
+            // 从远程 URL 获取图片
+            const response = await fetch(partner.logo);
+            if (response.ok) {
+              const buffer = await response.arrayBuffer();
+              const contentType = response.headers.get('content-type') || 'image/png';
+              
+              return new NextResponse(buffer, {
+                headers: {
+                  'Content-Type': contentType,
+                  'Cache-Control': 'public, max-age=31536000',
+                },
+              });
+            }
+          } catch (error) {
+            console.error(`Failed to fetch partner logo from URL: ${partner.logo}`, error);
+          }
+        } else {
+          // 本地文件
+          const logoPath = path.join(process.cwd(), 'public', 'partner', partner.logo);
           
-          // 根据文件扩展名设置正确的 Content-Type
-          const ext = path.extname(partner.logo).toLowerCase();
-          let contentType = 'image/png'; // 默认
-          if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
-          else if (ext === '.gif') contentType = 'image/gif';
-          else if (ext === '.svg') contentType = 'image/svg+xml';
-          
-          return new NextResponse(logoBuffer, {
-            headers: {
-              'Content-Type': contentType,
-              'Cache-Control': 'public, max-age=31536000',
-            },
-          });
-        } catch (error) {
-          console.error(`Failed to read partner logo: ${logoPath}`, error);
+          try {
+            const logoBuffer = await fs.readFile(logoPath);
+            
+            // 根据文件扩展名设置正确的 Content-Type
+            const ext = path.extname(partner.logo).toLowerCase();
+            let contentType = 'image/png'; // 默认
+            if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+            else if (ext === '.gif') contentType = 'image/gif';
+            else if (ext === '.svg') contentType = 'image/svg+xml';
+            
+            return new NextResponse(logoBuffer, {
+              headers: {
+                'Content-Type': contentType,
+                'Cache-Control': 'public, max-age=31536000',
+              },
+            });
+          } catch (error) {
+            console.error(`Failed to read partner logo: ${logoPath}`, error);
+          }
         }
       }
     }
