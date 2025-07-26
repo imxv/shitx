@@ -1,6 +1,9 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
 import { generateText, streamText } from 'ai';
 import { createKimiProvider, getKimiModel } from './kimi-provider';
+
+// Load .env.local file
+config({ path: '.env.local' });
 
 async function testKimiProvider() {
   const apiKey = process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY;

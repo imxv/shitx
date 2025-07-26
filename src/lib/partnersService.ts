@@ -7,7 +7,7 @@ import { getPartnersFromRedis, RedisPartner } from './redisPartners';
 function convertRedisPartnerToPartner(redisPartner: RedisPartner): Partner {
   return {
     ...redisPartner,
-    logo: redisPartner.logoUrl, // Use logoUrl as logo for compatibility
+    logo: redisPartner.logoUrl || '', // Use logoUrl as logo for compatibility, ensure it's a string
   };
 }
 
