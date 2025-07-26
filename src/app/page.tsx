@@ -18,6 +18,24 @@ function HomeContent() {
     const ref = searchParams.get('ref');
     const referrerUserId = searchParams.get('user');
     const referrerNFTId = searchParams.get('nft');
+    const sig = searchParams.get('sig');
+    const timestamp = searchParams.get('t');
+    const id = searchParams.get('id');
+    
+    // 如果有签名，说明是通过QR code扫描进入的
+    if (sig && timestamp && id && referrerUserId) {
+      // 保存QR code参数，用于后续验证
+      const qrParams = {
+        t: timestamp,
+        id: id,
+        user: referrerUserId,
+        ...(ref && { ref }),
+        ...(referrerNFTId && { nft: referrerNFTId }),
+        sig
+      };
+      sessionStorage.setItem('qrParams', JSON.stringify(qrParams));
+      sessionStorage.setItem('isQRScan', 'true');
+    }
     
     if (ref) {
       // 记录 referral 来源（合作方）

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress, claimShitNFT, checkNFTStatus, ShitNFT } from '@/utils/web3Utils';
 import { getClaimableNFTs, PartnerNFT } from '@/config/partnerNFTs';
@@ -27,6 +27,75 @@ export function NFTClaim() {
   useEffect(() => {
     initializeClaimStatus();
   }, []);
+  
+  // 处理QR code扫描后的自动领取
+  useEffect(() => {
+    const handleQRScan = async () => {
+      const isQRScan = sessionStorage.getItem('isQRScan');
+      const qrParamsStr = sessionStorage.getItem('qrParams');
+      
+      if (isQRScan === 'true' && qrParamsStr) {
+        try {
+          const qrParams = JSON.parse(qrParamsStr);
+          const identity = getUserIdentity();
+          const claimerAddress = generateEVMAddress(identity.fingerprint);
+          
+          // 验证QR code并获取可领取的NFT信息
+          const response = await fetch('/api/v1/qr-claim', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              qrParams,
+              claimerUserId: identity.id,
+              claimerUsername: identity.username,
+              claimerFingerprint: identity.fingerprint,
+              claimerAddress
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success && data.canClaim) {
+            // 找到对应的NFT并自动触发领取
+            const nftToClaimIndex = claimableNFTs.findIndex(nft => nft.partnerId === data.partnerId);
+            if (nftToClaimIndex !== -1) {
+              // 高亮显示可领取的NFT
+              const nftToClaim = claimableNFTs[nftToClaimIndex];
+              // 稍后自动领取
+              setTimeout(() => {
+                handleClaim(nftToClaim);
+              }, 1000);
+            } else if (data.partnerId && data.partnerId !== 'default') {
+              // 如果是合作方NFT但不在列表中，动态添加
+              const partnerNFT: PartnerNFT = {
+                partnerId: data.partnerId,
+                partnerName: data.partnerName,
+                nftName: data.nftName,
+                isPartnerNFT: true
+              };
+              setClaimableNFTs(prev => [...prev, partnerNFT]);
+              setTimeout(() => {
+                handleClaim(partnerNFT);
+              }, 1000);
+            }
+          }
+          
+          // 清理sessionStorage
+          sessionStorage.removeItem('isQRScan');
+          sessionStorage.removeItem('qrParams');
+        } catch (error) {
+          console.error('Error handling QR scan:', error);
+        }
+      }
+    };
+    
+    // 等待组件初始化完成后处理
+    if (claimableNFTs.length > 0 || Object.keys(claimStatus).length > 0) {
+      handleQRScan();
+    }
+  }, [claimableNFTs, claimStatus, handleClaim]);
 
   const initializeClaimStatus = async () => {
     const identity = getUserIdentity();
@@ -50,7 +119,7 @@ export function NFTClaim() {
     setClaimStatus(status);
   };
 
-  const handleClaim = async (partnerNFT: PartnerNFT) => {
+  const handleClaim = useCallback(async (partnerNFT: PartnerNFT) => {
     setIsLoading(partnerNFT.partnerId);
     setError('');
 
@@ -85,7 +154,7 @@ export function NFTClaim() {
     } finally {
       setIsLoading(null);
     }
-  };
+  }, []);
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;

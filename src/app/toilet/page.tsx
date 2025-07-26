@@ -87,20 +87,31 @@ export default function ToiletPage() {
       const userIdentity = getUserIdentity();
       const selectedNFT = ownedNFTs.find(nft => nft.partnerId === selectedPartner);
       
-      // 构建 URL 参数
-      const baseUrl = `https://shitx.top?t=${timestamp}&id=${randomId}&user=${userIdentity.id}`;
-      let url = baseUrl;
+      // 构建参数
+      const params = new URLSearchParams({
+        t: timestamp.toString(),
+        id: randomId.toString(),
+        user: userIdentity.id
+      });
       
       // 添加 referral 参数
       if (selectedPartner !== 'default') {
-        url += `&ref=${selectedPartner}`;
+        params.append('ref', selectedPartner);
         // 添加推荐人的NFT ID
         if (selectedNFT?.tokenId) {
-          url += `&nft=${selectedNFT.tokenId}`;
+          params.append('nft', selectedNFT.tokenId);
         }
       }
       
-      const qrUrl = await QRCode.toDataURL(url, {
+      // 获取签名的URL
+      const response = await fetch(`/api/v1/qr-claim?${params.toString()}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate signed URL');
+      }
+      
+      const qrUrl = await QRCode.toDataURL(data.url, {
         width: 300,
         margin: 2,
         color: {
@@ -220,7 +231,7 @@ export default function ToiletPage() {
           
             <div className="text-center">
               <p className="text-green-400 mb-2">扫描二维码进入 ShitX.top</p>
-              <p className="text-sm text-gray-400 mb-4">二维码每5秒自动刷新</p>
+              <p className="text-sm text-gray-400 mb-4">二维码有效期5分钟，每5秒自动刷新</p>
             
               {/* QR Code Display */}
               <div className="inline-block p-3 bg-black rounded-xl border-2 border-green-500 shadow-lg shadow-green-500/20">
