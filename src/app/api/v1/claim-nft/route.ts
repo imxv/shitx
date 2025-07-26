@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
           };
           
           // 分发推荐奖励
-          if (referrerAddress) {
+          if (referrerAddress && subsidyResult.amount) {
             await distributeReferralRewards(evmAddress, parseInt(subsidyResult.amount));
           }
         }

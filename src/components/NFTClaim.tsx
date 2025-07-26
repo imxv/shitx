@@ -208,14 +208,16 @@ export function NFTClaim() {
                     <div className="text-gray-400 mb-1">NFT 交易哈希:</div>
                     <div className="flex items-center gap-2">
                       <code className="text-green-400 break-all flex-1">
-                        {successNFT.txHash.slice(0, 10)}...{successNFT.txHash.slice(-8)}
+                        {successNFT.txHash ? `${successNFT.txHash.slice(0, 10)}...${successNFT.txHash.slice(-8)}` : 'N/A'}
                       </code>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigator.clipboard.writeText(successNFT.txHash);
-                          setCopySuccess('nft');
-                          setTimeout(() => setCopySuccess(''), 2000);
+                          if (successNFT.txHash) {
+                            navigator.clipboard.writeText(successNFT.txHash);
+                            setCopySuccess('nft');
+                            setTimeout(() => setCopySuccess(''), 2000);
+                          }
                         }}
                         className="text-gray-400 hover:text-white transition-colors"
                         title="复制完整哈希"

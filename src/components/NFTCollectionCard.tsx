@@ -74,7 +74,7 @@ export function NFTCollectionCard() {
         totalNFTs,
         collectedNFTs: collectedCount,
         collectionRate: (collectedCount / totalNFTs) * 100,
-        recentNFT
+        recentNFT: recentNFT || undefined
       });
     } catch (error) {
       console.error('Error fetching collection status:', error);

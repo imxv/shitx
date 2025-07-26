@@ -49,6 +49,30 @@ export const PARTNER_NFTS: Record<string, PartnerNFT> = {
         value: 'DJ Teddy'
       }
     ]
+  },
+  
+  // Snake Master 养蛇大师合作方
+  snakemaster: {
+    partnerId: 'snakemaster',
+    partnerName: '养蛇大师',
+    nftName: 'Shit X Snake Master',
+    description: '过去懂蛇才养蛇，有了这个项目，不懂也能养，还安全',
+    image: 'https://shitx.top/api/nft-image/snakemaster',
+    maxSupply: 1500,
+    attributes: [
+      {
+        trait_type: 'Collection',
+        value: 'Snake Master Collection'
+      },
+      {
+        trait_type: 'Partner',
+        value: '养蛇大师'
+      },
+      {
+        trait_type: 'Special',
+        value: '安全养蛇认证'
+      }
+    ]
   }
 };
 

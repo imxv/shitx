@@ -24,6 +24,26 @@ export const partners: Partner[] = [
     totalSupply: 2000,
     deployed: false,
   },
+  {
+    id: 'snakemaster',
+    name: 'Snake Master',
+    displayName: 'SnakeMaster',
+    nftName: 'Shit X Snake Master',
+    description: '过去懂蛇才养蛇，现在不懂也能养，还安全',
+    contractAddress: null,
+    totalSupply: 1500,
+    deployed: false,
+  },{
+    id: 'twila',
+    name: 'Twila',
+    displayName: 'Twila',
+    nftName: 'Shit X Twila',
+    description: '我的房里有很多蟑螂，我身边的舟批没有很多',
+    logo:"twila.png",
+    contractAddress: null,
+    totalSupply: 1500,
+    deployed: false,
+  },
 ];
 
 // 获取已部署的合作方

@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 暴露 setBalance 给 mock 模块使用
-export async function setBalance(address: string, amount: string): Promise<void> {
+// setBalance 助手函数（内部使用）
+async function setBalance(address: string, amount: string): Promise<void> {
   await nftRedis.set(`mock:balance:${address}`, amount);
 }
