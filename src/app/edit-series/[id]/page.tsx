@@ -6,7 +6,7 @@ import { getUserIdentity } from '@/utils/userIdentity';
 import { generateEVMAddress } from '@/utils/web3Utils';
 import { usePartners } from '@/hooks/usePartners';
 
-export default function EditSeriesPage({ params }: { params: { id: string } }) {
+export default function EditSeriesPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { partners } = usePartners();
   const [loading, setLoading] = useState(false);
@@ -19,10 +19,15 @@ export default function EditSeriesPage({ params }: { params: { id: string } }) {
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
+  const [paramsId, setParamsId] = useState<string>('');
 
   useEffect(() => {
-    if (partners) {
-      const foundSeries = partners.find(p => p.id === params.id);
+    params.then(p => setParamsId(p.id));
+  }, [params]);
+
+  useEffect(() => {
+    if (partners && paramsId) {
+      const foundSeries = partners.find(p => p.id === paramsId);
       if (foundSeries) {
         // 验证是否是创建者
         const identity = getUserIdentity();
@@ -46,7 +51,7 @@ export default function EditSeriesPage({ params }: { params: { id: string } }) {
         }
       }
     }
-  }, [partners, params.id, router]);
+  }, [partners, paramsId, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -75,7 +80,7 @@ export default function EditSeriesPage({ params }: { params: { id: string } }) {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('partnerId', params.id);
+      formDataToSend.append('partnerId', paramsId);
       
       // 添加基本信息
       Object.entries(formData).forEach(([key, value]) => {

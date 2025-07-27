@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     // Check for cached analysis
     const cacheKey = `ai-analysis:${type}:${normalizedAddress}`;
-    const cachedAnalysis = await redis.get(cacheKey);
+    const cachedAnalysis = redis ? await redis.get(cacheKey) : null;
     
     if (cachedAnalysis && !forceRefresh) {
       const analysis = JSON.parse(cachedAnalysis);
@@ -116,18 +116,22 @@ export async function POST(request: Request) {
       userAddress: normalizedAddress
     };
 
-    await redis.setex(cacheKey, CACHE_DURATION, JSON.stringify(analysisResult));
+    if (redis) {
+      await redis.setex(cacheKey, CACHE_DURATION, JSON.stringify(analysisResult));
+    }
 
     // Record analysis transaction
-    await redis.zadd(
-      `analysis-history:${normalizedAddress}`,
-      Date.now(),
-      JSON.stringify({
-        type,
-        cost: ANALYSIS_COST,
-        timestamp: new Date().toISOString()
-      })
-    );
+    if (redis) {
+      await redis.zadd(
+        `analysis-history:${normalizedAddress}`,
+        Date.now(),
+        JSON.stringify({
+          type,
+          cost: ANALYSIS_COST,
+          timestamp: new Date().toISOString()
+        })
+      );
+    }
 
     return NextResponse.json({
       ...analysisResult,
@@ -150,11 +154,11 @@ async function getGrantAnalysisData(userAddress: string) {
   const userGrant = await mock.getBalance(userAddress);
   
   // Get referral tree data
-  const referrals = await redis.smembers(`referrals:${userAddress}`);
-  const referredBy = await redis.get(`referred-by:${userAddress}`);
+  const referrals = redis ? await redis.smembers(`referrals:${userAddress}`) : [];
+  const referredBy = redis ? await redis.get(`referred-by:${userAddress}`) : null;
   
   // Get top grant holders
-  const topHolders = await redis.zrevrange('grant-leaderboard', 0, 9, 'WITHSCORES');
+  const topHolders = redis ? await redis.zrevrange('grant-leaderboard', 0, 9, 'WITHSCORES') : [];
   
   // Calculate network effects
   let totalNetworkGrant = 0;
@@ -162,13 +166,13 @@ async function getGrantAnalysisData(userAddress: string) {
   
   // First level referrals
   for (const ref of referrals) {
-    const refGrant = await redis.get(`grant:${ref}`) || '0';
+    const refGrant = redis ? await redis.get(`grant:${ref}`) || '0' : '0';
     totalNetworkGrant += parseInt(refGrant) * 0.5; // 50% bonus
     
     // Second level referrals
-    const secondLevel = await redis.smembers(`referrals:${ref}`);
+    const secondLevel = redis ? await redis.smembers(`referrals:${ref}`) : [];
     for (const ref2 of secondLevel) {
-      const ref2Grant = await redis.get(`grant:${ref2}`) || '0';
+      const ref2Grant = redis ? await redis.get(`grant:${ref2}`) || '0' : '0';
       totalNetworkGrant += parseInt(ref2Grant) * 0.1; // 10% bonus
     }
     
@@ -177,7 +181,7 @@ async function getGrantAnalysisData(userAddress: string) {
   }
 
   // Get user's rank
-  const userRank = await redis.zrevrank('grant-leaderboard', userAddress);
+  const userRank = redis ? await redis.zrevrank('grant-leaderboard', userAddress) : null;
 
   return {
     userAddress,
@@ -202,18 +206,18 @@ async function getNFTAnalysisData(userAddress: string) {
   const userNFTs: Record<string, any> = {};
   
   for (const nftType of nftTypes) {
-    const hasNFT = await redis.sismember(`nft-holders:${nftType}`, userAddress);
+    const hasNFT = redis ? await redis.sismember(`nft-holders:${nftType}`, userAddress) : false;
     if (hasNFT) {
-      const claimedAt = await redis.hget(`nft-claims:${nftType}`, userAddress);
-      const totalHolders = await redis.scard(`nft-holders:${nftType}`);
-      const distributionTree = await redis.smembers(`nft-distributed:${nftType}:${userAddress}`);
+      const claimedAt = redis ? await redis.hget(`nft-claims:${nftType}`, userAddress) : null;
+      const totalHolders = redis ? await redis.scard(`nft-holders:${nftType}`) : 0;
+      const distributionTree = redis ? await redis.smembers(`nft-distributed:${nftType}:${userAddress}`) : [];
       
       userNFTs[nftType] = {
         owned: true,
         claimedAt,
         totalHolders,
         distributedTo: distributionTree.length,
-        isAncestor: await redis.sismember(`ancestors:${nftType}`, userAddress)
+        isAncestor: redis ? await redis.sismember(`ancestors:${nftType}`, userAddress) : false
       };
     }
   }
@@ -221,7 +225,7 @@ async function getNFTAnalysisData(userAddress: string) {
   // Get NFT rarity stats
   const nftStats = [];
   for (const nftType of nftTypes) {
-    const holders = await redis.scard(`nft-holders:${nftType}`);
+    const holders = redis ? await redis.scard(`nft-holders:${nftType}`) : 0;
     nftStats.push({ type: nftType, holders });
   }
   nftStats.sort((a, b) => a.holders - b.holders);

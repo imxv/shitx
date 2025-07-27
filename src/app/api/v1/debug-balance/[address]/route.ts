@@ -4,10 +4,10 @@ import { nftRedis } from '@/lib/redis';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { address: string } }
+  { params }: { params: Promise<{ address: string }> }
 ) {
   try {
-    const { address } = params;
+    const { address } = await params;
     const normalizedAddress = address.toLowerCase();
     
     // 获取所有相关数据
@@ -15,7 +15,7 @@ export async function GET(
     const hasClaimedSubsidy = await mock.hasClaimedSubsidy(normalizedAddress);
     
     // 获取收入历史
-    const grantHistory = await nftRedis.getGrantHistory(normalizedAddress);
+    const grantHistory = await nftRedis.getRewardHistory(normalizedAddress);
     
     // 获取支出历史
     const expenseHistory = await nftRedis.getExpenseHistory(normalizedAddress);
