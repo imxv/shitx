@@ -19,12 +19,14 @@ interface OwnedNFT {
 export default function ToiletPage() {
   const router = useRouter();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [shareableUrl, setShareableUrl] = useState<string>('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<string>('default');
   const [ownedNFTs, setOwnedNFTs] = useState<OwnedNFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBackpack, setShowBackpack] = useState(false);
+  const [showCopiedToast, setShowCopiedToast] = useState(false);
   const { partners } = usePartners();
   
   // 获取用户拥有的 NFT
@@ -124,6 +126,7 @@ export default function ToiletPage() {
         }
       });
       setQrCodeUrl(qrUrl);
+      setShareableUrl(data.url);
     } catch (err) {
       console.error('Failed to generate QR code:', err);
     }
@@ -150,6 +153,18 @@ export default function ToiletPage() {
   const handleSelectNFT = (partnerId: string) => {
     setSelectedPartner(partnerId);
     setShowBackpack(false);
+  };
+
+  const handleCopyUrl = async () => {
+    if (shareableUrl) {
+      try {
+        await navigator.clipboard.writeText(shareableUrl);
+        setShowCopiedToast(true);
+        setTimeout(() => setShowCopiedToast(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy URL:', err);
+      }
+    }
   };
 
   if (loading) {
@@ -234,8 +249,6 @@ export default function ToiletPage() {
             </div>
           
             <div className="text-center">
-              <p className="text-green-400 mb-2">扫描二维码进入 ShitX.top</p>
-              <p className="text-sm text-gray-400 mb-4">二维码有效期5分钟，每5秒自动刷新</p>
             
               {/* QR Code Display */}
               <div className="inline-block p-3 bg-black rounded-xl border-2 border-green-500 shadow-lg shadow-green-500/20">
@@ -252,7 +265,26 @@ export default function ToiletPage() {
                 )}
               </div>
             
-           
+              {/* 分享链接区域 */}
+              {shareableUrl && (
+                <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
+                  <p className="text-xs text-gray-400 mb-2">或直接分享链接:</p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={shareableUrl}
+                      readOnly
+                      className="flex-1 bg-gray-900 text-green-400 px-3 py-2 rounded border border-gray-600 text-xs font-mono truncate"
+                    />
+                    <button
+                      onClick={handleCopyUrl}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors text-sm font-medium"
+                    >
+                      复制
+                    </button>
+                  </div>
+                </div>
+              )}
             
               {/* 添加到 Apple Toilet 按钮 */}
               <button
@@ -279,6 +311,15 @@ export default function ToiletPage() {
                 <p className="text-gray-400">ShitX系统正在维护中，请稍后再试</p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 复制成功提示 */}
+      {showCopiedToast && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce-in">
+            <span className="text-sm font-medium">链接已复制到剪贴板</span>
           </div>
         </div>
       )}
